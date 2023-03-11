@@ -1,0 +1,525 @@
+openapi: 3.0.3
+info:
+  title: System rezerwacji miejsc na eventy
+  description: 'Niniejsza dokumentacja stanowi opis REST API implemtowanego przez
+    serwer centralny. Endpointy '
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: XXX@pw.edu.pl
+  version: 1.0.0
+servers:
+  - url: https://pw.edu.pl/api/v3
+tags:
+  - name: Event organizer
+    description: API for web organizer portal
+  - name: Event
+    description: All about Event
+  - name: Categories
+    description: All about Categories
+  - name: Reservation
+    description: All about Reservation
+paths:
+  "/events":
+    get:
+      tags:
+        - Event
+      summary: Return list of all events
+      operationId: getEvents
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Event"
+    post:
+      tags:
+        - Event
+      summary: Add new event
+      operationId: addEvent
+      parameters:
+        - name: title
+          in: query
+          description: title of Event
+          required: true
+          schema:
+            type: string
+            example: Short description of Event
+        - name: name
+          in: query
+          description: title of Event
+          required: true
+          schema:
+            type: string
+            example: Long description of Event
+        - name: freePlace
+          in: query
+          description: No of free places
+          required: true
+          schema:
+            type: integer
+        - name: placeSchema
+          in: query
+          description: seralized place schema
+          required: false
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          description: Unix time stamp of begin of event
+          required: true
+          schema:
+            type: integer
+            example: 1683034164
+        - name: endTime
+          in: query
+          description: Unix time stamp of end of event
+          required: true
+          schema:
+            type: integer
+            example: 1683034164
+        - name: categories
+          in: query
+          description: Unix time stamp of end of event
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+      responses:
+        '201':
+          description: event created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Event"
+        '400':
+          description: event can not be created
+      security:
+        - token: []
+  "/events/{id}":
+    get:
+      tags:
+        - Event
+      summary: Find event by ID
+      description: Returns a single event
+      operationId: getEventById
+      parameters:
+        - name: id
+          in: path
+          description: ID of event to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Event"
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Event not found
+    delete:
+      tags:
+        - Event
+      summary: Cancel event
+      operationId: cancelEvent
+      parameters:
+        - name: id
+          in: path
+          description: id of Event
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '404':
+          description: id not found
+      security:
+        - token: []
+    patch:
+      tags:
+        - Event
+      summary: patch existing event
+      operationId: patchEvent
+      parameters:
+        - name: id
+          in: path
+          description: id of Event
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update an existent user in the store
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Event"
+      responses:
+        '202':
+          description: patched
+        '404':
+          description: id not found
+      security:
+        - token: []
+  "/events/getByCategory":
+    get:
+      tags:
+        - Event
+      summary: Return list of all events in category
+      operationId: getByCategory
+      parameters:
+        - name: categoryId
+          in: query
+          description: ID of category
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Event"
+        '400':
+          description: Invalid category ID supplied
+  "/categories":
+    get:
+      tags:
+        - Categories
+      summary: Return list of all categories
+      operationId: getCategories
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Category"
+    post:
+      tags:
+        - Categories
+      summary: Create new category
+      operationId: addCategories
+      parameters:
+        - name: categoryName
+          in: query
+          description: name of category
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Category"
+        '400':
+          description: category already exist
+      security:
+        - token: []
+  "/reservation":
+    post:
+      tags:
+        - Reservation
+      summary: Create new reservation
+      operationId: makeReservation
+      parameters:
+        - name: eventId
+          in: query
+          description: ID of event
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: placeID
+          in: query
+          description: ID of place
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ReservationDTO"
+        '400':
+          description: no free place
+        '404':
+          description: event not exist or done
+    delete:
+      tags:
+        - Reservation
+      summary: Create new reservation
+      operationId: deleteReservation
+      parameters:
+        - name: reservationToken
+          in: query
+          description: token of reservation
+          required: true
+          schema:
+            type: string
+            example: df0d69cbe68fb6e2b27aa88f6f94497e
+      responses:
+        '204':
+          description: deleted
+        '404':
+          description: token not found
+  "/organizer":
+    post:
+      tags:
+        - Event organizer
+      summary: Create orginizer account
+      operationId: signUp
+      parameters:
+        - name: name
+          in: query
+          description: name of Organizer
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: email of Organizer
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: password of Organizer
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Organizer"
+        '400':
+          description: organizer already exist
+  "/organizer/{id}":
+    post:
+      tags:
+        - Event organizer
+      summary: Confirm orginizer account
+      operationId: confirm
+      parameters:
+        - name: id
+          in: path
+          description: id of Organizer
+          required: true
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: code from email
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: account confirmed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Organizer"
+        '400':
+          description: code wrong
+    delete:
+      tags:
+        - Event organizer
+      summary: Confirm orginizer account
+      operationId: deleteOrganizer
+      parameters:
+        - name: id
+          in: path
+          description: id of Organizer
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '404':
+          description: id not found
+      security:
+        - token: []
+    patch:
+      tags:
+        - Event organizer
+      summary: Patch orginizer account
+      operationId: patchOrganizer
+      parameters:
+        - name: id
+          in: path
+          description: id of Organizer
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update an existent user in the store
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Organizer"
+      responses:
+        '202':
+          description: patched
+        '404':
+          description: id not found
+      security:
+        - token: []
+  "/organizer/login":
+    get:
+      tags:
+        - Event organizer
+      summary: Logs organizer into the system
+      description: ''
+      operationId: loginOrganizer
+      parameters:
+        - name: email
+          in: query
+          description: The organizer email for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: the password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionToken:
+                    type: string
+                    description: The session token.
+        '400':
+          description: Invalid email/password supplied
+components:
+  schemas:
+    Event:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        freePlace:
+          type: integer
+          format: int64
+          example: 2
+        title:
+          type: string
+          example: Short description of Event
+        startTime:
+          type: integer
+          format: int64
+          example: 1673034164
+        endTime:
+          type: integer
+          format: int64
+          example: 1683034164
+        name:
+          type: string
+          example: Long description of Event
+        placeSchema:
+          type: string
+          example: Seralized place schema
+        status:
+          "$ref": "#/components/schemas/EventStatus"
+        categories:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Category"
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Sport
+    EventStatus:
+      type: string
+      description: event status
+      enum:
+        - inFuture
+        - pending
+        - done
+        - cancelled
+      example: done
+    ReservationDTO:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          example: 1
+        placeId:
+          type: integer
+          format: int64
+          example: 12
+        reservationToken:
+          type: string
+          example: df0d69cbe68fb6e2b27aa88f6f94497e
+    Organizer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: theUser
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: '12345'
+        events:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Event"
+        status:
+          type: string
+          description: User Status
+          enum:
+            - pending
+            - confirmed
+  securitySchemes:
+    token:
+      type: apiKey
+      name: sessionToken
+      in: header
