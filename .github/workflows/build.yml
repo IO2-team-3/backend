@@ -21,4 +21,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -DDB_PORT=${{DB_PORT}} -B package --file pom.xml
+      run: mvn -DDB_PORT=${{secrets.DB_PORT}} -B package --file pom.xml
