@@ -99,6 +99,23 @@ paths:
           description: event can not be created
       security:
         - token: []
+  "/events/my":
+    get:
+      tags:
+        - Event
+      summary: Return list of events made by organizer, according to session
+      operationId: getMyEvents
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Event"
+      security:
+        - token: []
   "/events/{id}":
     get:
       tags:
