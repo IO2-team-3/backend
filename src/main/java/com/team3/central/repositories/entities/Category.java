@@ -1,14 +1,23 @@
 package com.team3.central.repositories.entities;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.util.HashSet;
+
 import java.util.Set;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "category")
 public class Category {
     @Id
@@ -18,11 +27,8 @@ public class Category {
 
     private String name;
 
-//    @ManyToMany(mappedBy = "category")
-//    private Set<Event> events = new HashSet<>();
-
-    public Category() {
-    }
+    @ManyToMany(mappedBy = "categories")
+    private Set<Event> events;
 
     public Category(String name) {
         this.name = name;

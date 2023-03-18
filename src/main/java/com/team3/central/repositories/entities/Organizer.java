@@ -1,14 +1,26 @@
 package com.team3.central.repositories.entities;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.util.HashSet;
+
 import java.util.Set;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "organizer")
 public class Organizer {
     @Id
@@ -22,10 +34,8 @@ public class Organizer {
     private String password;
 
     @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Event> events = new HashSet<>();
+    private Set<Event> events;
 
-    public Organizer() {
-    }
 
     public Organizer(String name,  String email, String password) {
         this.name = name;
