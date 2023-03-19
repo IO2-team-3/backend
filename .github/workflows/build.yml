@@ -21,4 +21,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -DDB_URL=${{secrets.DB_URL}} -DDB_PORT=${{secrets.DB_PORT}} -DDB_NAME=${{secrets.DB_NAME}} -DDB_USERNAME=${{secrets.DB_USERNAME}} -DDB_PASSWORD=${{secrets.DB_PASSWORD}} -B package --file pom.xml
+      run: mvn -DDB_URL=${{secrets.DB_URL}} -DDB_PORT=${{secrets.DB_PORT}} -DDB_NAME=${{secrets.DB_NAME}} -DDB_USERNAME=${{secrets.DB_USERNAME}} -DDB_PASSWORD=${{secrets.DB_PASSWORD}} -DMAIL_HOST=${{secrets.MAIL_HOST}} -DMAIL_USERNAME=${{secrets.MAIL_USERNAME}} -DMAIL_PASSWORD=${{secrets.MAIL_PASSWORD}} -B package --file pom.xml
