@@ -11,7 +11,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-
+import javax.mail.internet.MimeMessage;
 @Configuration
 @ComponentScan(basePackages = {"com.team3.central.services"})
 //@PropertySource(value={"classpath:application.properties"})
