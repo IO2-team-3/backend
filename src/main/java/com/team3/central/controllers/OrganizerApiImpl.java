@@ -3,7 +3,8 @@ package com.team3.central.controllers;
 import com.team3.central.openapi.api.OrganizerApi;
 import com.team3.central.openapi.model.InlineResponse200;
 import com.team3.central.openapi.model.Organizer;
-import com.team3.central.repositories.entities.Organizer;
+import com.team3.central.openapi.model.Organizer.StatusEnum;
+import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.OrganizerService;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -34,8 +35,9 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Organizer> confirm(String id, String code) {
-    return organizerService.confirm(id, code);
-//    return OrganizerApi.super.confirm(id, code);
+    var organizerEntityResponseEntity = organizerService.confirm(id, code);
+    var organizerDto = convertToDto(organizerEntityResponseEntity.getBody());
+    return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
 
   /**
@@ -84,17 +86,33 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Organizer> signUp(String name, String email, String password) {
-    var organanizerEntity = organizerService.signUp(name, email, password);
-    com.team3.central.openapi.model.Organizer organizerModelApi = new com.team3.central.openapi.model.Organizer();
-    organizerModelApi.setEmail(organanizerEntity.getBody().getEmail());
-    organizerModelApi.setId(organanizerEntity.getBody().getId());
-    organizerModelApi.setName(organanizerEntity.getBody().getEmail());
-    organizerModelApi.setPassword(organanizerEntity.getBody().getEmail());
-    return new ResponseEntity<Organizer>(organizerModelApi, organanizerEntity.getStatusCode());
-//    return OrganizerApi.super.signUp(name, email, password);
+    var organizerEntityResponseEntity = organizerService.signUp(name, email, password);
+    var organizerDto = convertToDto(organizerEntityResponseEntity.getBody());
+
+    return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
 
-//  private Organizer convertToDto(Organizer organizer){
-//
-//  }
+  private Organizer convertToDto(OrganizerEntity organizerEntity) {
+    com.team3.central.openapi.model.Organizer organizerDto = new com.team3.central.openapi.model.Organizer();
+    organizerDto.setEmail(organizerEntity.getEmail());
+    organizerDto.setId(organizerEntity.getId());
+    organizerDto.setName(organizerEntity.getName());
+    organizerDto.setPassword(organizerEntity.getPassword());
+//    organizerDto.setEvents(organizerEntity.getEvents()); TODO: convert entity event to model event
+    organizerDto.setStatus(
+        organizerEntity.getIsAuthorised() ? StatusEnum.CONFIRMED : StatusEnum.PENDING);
+    return organizerDto;
+  }
+
+  private OrganizerEntity convertToEntity(Organizer organizerDto) {
+    OrganizerEntity organizerEntity = new OrganizerEntity();
+    organizerEntity.setEmail(organizerDto.getEmail());
+    organizerEntity.setId(organizerDto.getId());
+    organizerEntity.setName(organizerDto.getEmail());
+    organizerEntity.setPassword(organizerDto.getEmail());
+//    organizerEntity.setEvents(organizerDto.getEvents()); TODO: convert entity event to model event
+    organizerEntity.setIsAuthorised(
+        organizerDto.getStatus() == StatusEnum.CONFIRMED ? true : false);
+    return organizerEntity;
+  }
 }
