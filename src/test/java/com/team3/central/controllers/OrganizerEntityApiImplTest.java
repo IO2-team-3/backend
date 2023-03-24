@@ -1,14 +1,10 @@
 package com.team3.central.controllers;
 
-import com.team3.central.repositories.OrganizerRepository;
-import com.team3.central.repositories.entities.Organizer;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 //@SpringBootTest
 //@AllArgsConstructor
-class OrganizerApiImplTest {
+class OrganizerEntityApiImplTest {
 
 //  @Autowired
 //  OrganizerRepository organizerRepository;

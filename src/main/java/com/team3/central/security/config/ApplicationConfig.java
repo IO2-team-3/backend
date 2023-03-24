@@ -1,7 +1,6 @@
 package com.team3.central.security.config;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,9 +31,9 @@ public class ApplicationConfig {
 //    return new BCryptPasswordEncoder();
 //  } why this donst work??
 
-  @Bean
-  public ModelMapper modelMapper() {
-    return new ModelMapper();
-  }
+//  @Bean
+//  public ModelMapper modelMapper() {
+//    return new ModelMapper();
+//  }
 
 }

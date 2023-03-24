@@ -9,21 +9,19 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
 import java.util.Set;
-import org.springframework.context.annotation.Bean;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "organizer")
-public class Organizer {
+public class OrganizerEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "organizer_id")
@@ -38,7 +36,7 @@ public class Organizer {
     private Set<Event> events;
 
 
-    public Organizer(String name,  String email, String password) {
+    public OrganizerEntity(String name,  String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;

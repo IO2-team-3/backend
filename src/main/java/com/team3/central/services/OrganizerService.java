@@ -3,7 +3,7 @@ package com.team3.central.services;
 import com.team3.central.repositories.ConfirmationTokenRepository;
 import com.team3.central.repositories.OrganizerRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
-import com.team3.central.repositories.entities.Organizer;
+import com.team3.central.repositories.entities.OrganizerEntity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class OrganizerService {
 
   private final EmailService emailService;
 
-  public ResponseEntity<Organizer> signUp(String name, String email,
+  public ResponseEntity<OrganizerEntity> signUp(String name, String email,
       String password) {
     boolean userExists = organizerRepository
         .findByEmail(email)
@@ -36,14 +36,14 @@ public class OrganizerService {
 //      throw new IllegalStateException("email already taken");
     }
 
-    Organizer organizer = new Organizer(name, email, password);
-    organizer.setIsAuthorised(false);
+    OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
+    organizerEntity.setIsAuthorised(false);
     String encodedPassword = bCryptPasswordEncoder
-        .encode(organizer.getPassword());
+        .encode(organizerEntity.getPassword());
 
-    organizer.setPassword(encodedPassword);
+    organizerEntity.setPassword(encodedPassword);
 
-    var rse = organizerRepository.save(organizer);
+    var rse = organizerRepository.save(organizerEntity);
 
     String token = UUID.randomUUID().toString();
 
@@ -51,7 +51,7 @@ public class OrganizerService {
         token,
         LocalDateTime.now(),
         LocalDateTime.now().plusMinutes(15),
-        organizer
+        organizerEntity
     );
 
     confirmationTokenService.saveConfirmationToken(confirmationToken);
@@ -61,33 +61,28 @@ public class OrganizerService {
 //    organizerModelApi.setId(organizer.getId());
 //    organizerModelApi.setName(organizer.getEmail());
 //    organizerModelApi.setPassword(organizer.getEmail());
-    emailService.sendSimpleMessage(organizer.getEmail(), "Verify Your account", token);
-    return new ResponseEntity<>(organizer, HttpStatus.CREATED);
+    emailService.sendSimpleMessage(organizerEntity.getEmail(), "Verify Your account", token);
+    return new ResponseEntity<>(organizerEntity, HttpStatus.CREATED);
 
   }
 
-  public ResponseEntity<com.team3.central.openapi.model.Organizer> confirm(String id,
-      String token) {
+  public ResponseEntity<OrganizerEntity> confirm(String id, String token) {
     long organizerId = Long.parseLong(id);
-    var confirmationToken = confirmationTokenRepository
-        .findByToken(token);
+    var confirmationToken = confirmationTokenRepository.findByToken(token);
     if (confirmationToken.isPresent()
-        && confirmationToken.get().getOrganizer().getId() == organizerId) {
+        && confirmationToken.get().getOrganizerEntity().getId() == organizerId) {
+
       var organizer = organizerRepository.findById(organizerId);
-      if (organizer.isPresent() && LocalDateTime.now()
-          .isBefore(confirmationToken.get().getExpiresAt())) {
+      if (organizer.isPresent() && LocalDateTime.now().isBefore(confirmationToken.get().getExpiresAt())) {
 
         confirmationTokenRepository.updateConfirmedAt(token, LocalDateTime.now());
         organizerRepository.updateIsAuthorised(organizerId, true);
       }
 
     }
-    com.team3.central.openapi.model.Organizer organizerModelApi = new com.team3.central.openapi.model.Organizer();
-    organizerModelApi.setEmail(confirmationToken.get().getOrganizer().getEmail());
-    organizerModelApi.setId(confirmationToken.get().getOrganizer().getId());
-    organizerModelApi.setName(confirmationToken.get().getOrganizer().getEmail());
-    organizerModelApi.setPassword(confirmationToken.get().getOrganizer().getEmail());
-    return new ResponseEntity<com.team3.central.openapi.model.Organizer>(organizerModelApi,
-        HttpStatus.ACCEPTED);
+    var all =organizerRepository.findAll();
+    var organizer = organizerRepository.findById(organizerId);
+    var tes= confirmationTokenRepository.findAll();
+    return new ResponseEntity<OrganizerEntity>(organizer.get(), HttpStatus.ACCEPTED);
   }
 }

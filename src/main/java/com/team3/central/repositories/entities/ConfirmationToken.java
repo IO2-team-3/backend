@@ -49,15 +49,15 @@ public class ConfirmationToken {
       nullable = false,
       name = "app_user_id"
   )
-  private Organizer organizer;
+  private OrganizerEntity organizerEntity;
 
   public ConfirmationToken(String token,
       LocalDateTime createdAt,
       LocalDateTime expiresAt,
-      Organizer organizer) {
+      OrganizerEntity organizerEntity) {
     this.token = token;
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
-    this.organizer = organizer;
+    this.organizerEntity = organizerEntity;
   }
 }
