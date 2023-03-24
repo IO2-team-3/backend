@@ -16,6 +16,7 @@ import lombok.Setter;
 
 
 import java.util.Set;
+import org.springframework.context.annotation.Bean;
 
 @Entity
 @Getter
