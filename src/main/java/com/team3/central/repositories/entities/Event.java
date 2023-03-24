@@ -1,6 +1,7 @@
 package com.team3.central.repositories.entities;
 
 import com.team3.central.repositories.entities.enums.EventStatus;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,43 +19,42 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "event")
 public class Event {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "event_id")
-    private Long id;
 
-    private String title;
-    private Long startTime;
-    private Long endTime;
-    private Long latitude;
-    private Long longitude;
-    private String name;
-    private Long freePlace;
-    private String placeSchema;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "event_id")
+  private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
+  private String title;
+  private Long startTime;
+  private Long endTime;
+  private Long latitude;
+  private Long longitude;
+  private String name;
+  private Long freePlace;
+  private String placeSchema;
 
-    @ManyToOne
-    @JoinColumn(name = "organizer_id")
-    private OrganizerEntity organizer;
+  @Enumerated(EnumType.STRING)
+  private EventStatus status;
 
-    @OneToMany(mappedBy = "event")
-    private Set<Reservation> reservations;
+  @ManyToOne
+  @JoinColumn(name = "organizer_id")
+  private OrganizerEntity organizer;
 
-    @ManyToMany
-    @JoinTable(
-        name = "events_categories",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
+  @OneToMany(mappedBy = "event")
+  private Set<Reservation> reservations;
+
+  @ManyToMany
+  @JoinTable(
+      name = "events_categories",
+      joinColumns = @JoinColumn(name = "event_id"),
+      inverseJoinColumns = @JoinColumn(name = "category_id")
+  )
+  private Set<Category> categories;
 }

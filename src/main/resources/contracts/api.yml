@@ -98,7 +98,7 @@ paths:
         '400':
           description: event can not be created
       security:
-        - token: []
+        - token: [ ]
   "/events/my":
     get:
       tags:
@@ -115,7 +115,7 @@ paths:
                 items:
                   "$ref": "#/components/schemas/Event"
       security:
-        - token: []
+        - token: [ ]
   "/events/{id}":
     get:
       tags:
@@ -160,7 +160,7 @@ paths:
         '404':
           description: id not found
       security:
-        - token: []
+        - token: [ ]
     patch:
       tags:
         - Event
@@ -185,7 +185,7 @@ paths:
         '404':
           description: id not found
       security:
-        - token: []
+        - token: [ ]
   "/events/getByCategory":
     get:
       tags:
@@ -248,7 +248,7 @@ paths:
         '400':
           description: category already exist
       security:
-        - token: []
+        - token: [ ]
   "/reservation":
     post:
       tags:
@@ -379,7 +379,7 @@ paths:
         '404':
           description: id not found
       security:
-        - token: []
+        - token: [ ]
     patch:
       tags:
         - Event organizer
@@ -404,7 +404,7 @@ paths:
         '404':
           description: id not found
       security:
-        - token: []
+        - token: [ ]
   "/organizer/login":
     get:
       tags:
