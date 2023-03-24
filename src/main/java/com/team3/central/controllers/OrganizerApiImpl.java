@@ -36,6 +36,10 @@ public class OrganizerApiImpl implements OrganizerApi {
   @Override
   public ResponseEntity<Organizer> confirm(String id, String code) {
     var organizerEntityResponseEntity = organizerService.confirm(id, code);
+    if (!organizerEntityResponseEntity.hasBody()) {
+//      organizerEntityResponseEntity.se
+      return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
+    }
     var organizerDto = convertToDto(organizerEntityResponseEntity.getBody());
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
@@ -87,6 +91,9 @@ public class OrganizerApiImpl implements OrganizerApi {
   @Override
   public ResponseEntity<Organizer> signUp(String name, String email, String password) {
     var organizerEntityResponseEntity = organizerService.signUp(name, email, password);
+    if (!organizerEntityResponseEntity.hasBody()) {
+      return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
+    }
     var organizerDto = convertToDto(organizerEntityResponseEntity.getBody());
 
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
@@ -112,7 +119,7 @@ public class OrganizerApiImpl implements OrganizerApi {
     organizerEntity.setPassword(organizerDto.getEmail());
 //    organizerEntity.setEvents(organizerDto.getEvents()); TODO: convert entity event to model event
     organizerEntity.setIsAuthorised(
-        organizerDto.getStatus() == StatusEnum.CONFIRMED ? true : false);
+        organizerDto.getStatus() == StatusEnum.CONFIRMED);
     return organizerEntity;
   }
 }
