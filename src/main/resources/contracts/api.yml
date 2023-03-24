@@ -80,6 +80,20 @@ paths:
           schema:
             type: integer
             example: 1683034164
+        - name: latitude
+          in: query
+          description: Latitude of event
+          required: true
+          schema:
+            type: string
+            example: 40.4775315
+        - name: longitude
+          in: query
+          description: Longitude of event
+          required: true
+          schema:
+            type: string
+            example: -3.7051359
         - name: categories
           in: query
           description: Unix time stamp of end of event
@@ -464,6 +478,12 @@ components:
           type: integer
           format: int64
           example: 1683034164
+        latitude:
+          type: string
+          example: 40.4775315
+        longitude:
+          type: string
+          example: -3.7051359
         name:
           type: string
           example: Long description of Event
