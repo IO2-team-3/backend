@@ -1,10 +1,9 @@
 package com.team3.central.controllers;
 
+import com.team3.central.mappers.OrganizerMapper;
 import com.team3.central.openapi.api.OrganizerApi;
 import com.team3.central.openapi.model.InlineResponse200;
 import com.team3.central.openapi.model.Organizer;
-import com.team3.central.openapi.model.Organizer.StatusEnum;
-import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.OrganizerService;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,10 +37,9 @@ public class OrganizerApiImpl implements OrganizerApi {
   public ResponseEntity<Organizer> confirm(String id, String code) {
     var organizerEntityResponseEntity = organizerService.confirm(id, code);
     if (!organizerEntityResponseEntity.hasBody()) {
-//      organizerEntityResponseEntity.se
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
-    var organizerDto = convertToDto(
+    var organizerDto = OrganizerMapper.convertToDto(
         Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
@@ -103,33 +101,11 @@ public class OrganizerApiImpl implements OrganizerApi {
     if (!organizerEntityResponseEntity.hasBody()) {
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
-    var organizerDto = convertToDto(
+    var organizerDto = OrganizerMapper.convertToDto(
         Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
 
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
 
-  private Organizer convertToDto(OrganizerEntity organizerEntity) {
-    com.team3.central.openapi.model.Organizer organizerDto = new com.team3.central.openapi.model.Organizer();
-    organizerDto.setEmail(organizerEntity.getEmail());
-    organizerDto.setId(organizerEntity.getId());
-    organizerDto.setName(organizerEntity.getName());
-    organizerDto.setPassword(organizerEntity.getPassword());
-//    organizerDto.setEvents(organizerEntity.getEvents()); TODO: convert entity event to model event
-    organizerDto.setStatus(
-        organizerEntity.getIsAuthorised() ? StatusEnum.CONFIRMED : StatusEnum.PENDING);
-    return organizerDto;
-  }
 
-  private OrganizerEntity convertToEntity(Organizer organizerDto) {
-    OrganizerEntity organizerEntity = new OrganizerEntity();
-    organizerEntity.setEmail(organizerDto.getEmail());
-    organizerEntity.setId(organizerDto.getId());
-    organizerEntity.setName(organizerDto.getEmail());
-    organizerEntity.setPassword(organizerDto.getEmail());
-//    organizerEntity.setEvents(organizerDto.getEvents()); TODO: convert entity event to model event
-    organizerEntity.setIsAuthorised(
-        organizerDto.getStatus() == StatusEnum.CONFIRMED);
-    return organizerEntity;
-  }
 }
