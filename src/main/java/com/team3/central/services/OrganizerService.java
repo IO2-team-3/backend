@@ -95,7 +95,7 @@ public class OrganizerService {
     if (organizer.isEmpty()) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-    if (!bCryptPasswordEncoder.matches(passowrd,organizer.get().getPassword())) {
+    if (!bCryptPasswordEncoder.matches(passowrd, organizer.get().getPassword())) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
