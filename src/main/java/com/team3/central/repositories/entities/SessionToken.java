@@ -19,18 +19,18 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "confirmation_token")
-public class ConfirmationToken {
+@Table(name = "session_token")
+public class SessionToken {
 
   @SequenceGenerator(
-      name = "confirmation_token_sequence",
-      sequenceName = "confirmation_token_sequence",
+      name = "session_token_sequence",
+      sequenceName = "session_token_sequence",
       allocationSize = 1
   )
   @Id
   @GeneratedValue(
       strategy = GenerationType.SEQUENCE,
-      generator = "confirmation_token_sequence"
+      generator = "session_token_sequence"
   )
   private Long id;
 
@@ -43,8 +43,6 @@ public class ConfirmationToken {
   @Column(nullable = false)
   private LocalDateTime expiresAt;
 
-  private LocalDateTime confirmedAt;
-
   @ManyToOne
   @JoinColumn(
       nullable = false,
@@ -52,7 +50,7 @@ public class ConfirmationToken {
   )
   private OrganizerEntity organizerEntity;
 
-  public ConfirmationToken(String token,
+  public SessionToken(String token,
       LocalDateTime createdAt,
       LocalDateTime expiresAt,
       OrganizerEntity organizerEntity) {
@@ -62,10 +60,10 @@ public class ConfirmationToken {
     this.organizerEntity = organizerEntity;
   }
 
-  public ConfirmationToken(OrganizerEntity organizerEntity) {
+  public SessionToken(OrganizerEntity organizerEntity) {
     this.token = UUID.randomUUID().toString();
     this.createdAt = LocalDateTime.now();
-    this.expiresAt = LocalDateTime.now().plusMinutes(30);
+    this.expiresAt = LocalDateTime.now().plusDays(3);
     this.organizerEntity = organizerEntity;
   }
 }

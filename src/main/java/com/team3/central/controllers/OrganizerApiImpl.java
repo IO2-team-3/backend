@@ -6,6 +6,7 @@ import com.team3.central.openapi.model.Organizer;
 import com.team3.central.openapi.model.Organizer.StatusEnum;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.OrganizerService;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,8 @@ public class OrganizerApiImpl implements OrganizerApi {
 //      organizerEntityResponseEntity.se
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
-    var organizerDto = convertToDto(organizerEntityResponseEntity.getBody());
+    var organizerDto = convertToDto(
+        Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
 
@@ -65,7 +67,14 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<InlineResponse200> loginOrganizer(String email, String password) {
-    return OrganizerApi.super.loginOrganizer(email, password);
+    var res = organizerService.login(email, password);
+    if (res.hasBody()) {
+      InlineResponse200 inlineResponse200 = new InlineResponse200();
+      inlineResponse200.sessionToken(Objects.requireNonNull(res.getBody()).getToken());
+      return new ResponseEntity<InlineResponse200>(inlineResponse200, res.getStatusCode());
+    } else {
+      return new ResponseEntity<InlineResponse200>(res.getStatusCode());
+    }
   }
 
   /**
@@ -94,7 +103,8 @@ public class OrganizerApiImpl implements OrganizerApi {
     if (!organizerEntityResponseEntity.hasBody()) {
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
-    var organizerDto = convertToDto(organizerEntityResponseEntity.getBody());
+    var organizerDto = convertToDto(
+        Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
 
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }

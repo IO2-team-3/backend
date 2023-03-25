@@ -14,7 +14,7 @@ public class ConfirmationTokenService {
   private final ConfirmationTokenRepository confirmationTokenRepository;
 
   public void saveConfirmationToken(ConfirmationToken token) {
-    confirmationTokenRepository.save(token);
+    confirmationTokenRepository.saveAndFlush(token);
   }
 
   public Optional<ConfirmationToken> getToken(String token) {
@@ -24,5 +24,9 @@ public class ConfirmationTokenService {
   public int setConfirmedAt(String token) {
     return confirmationTokenRepository.updateConfirmedAt(
         token, LocalDateTime.now());
+  }
+
+  public boolean isTokenExpired(ConfirmationToken token) {
+    return LocalDateTime.now().isAfter(token.getExpiresAt());
   }
 }

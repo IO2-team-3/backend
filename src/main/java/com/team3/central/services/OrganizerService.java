@@ -1,12 +1,13 @@
 package com.team3.central.services;
 
-import com.team3.central.repositories.ConfirmationTokenRepository;
 import com.team3.central.repositories.OrganizerRepository;
+import com.team3.central.repositories.SessionTokenRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.SessionToken;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,24 +18,19 @@ import org.springframework.stereotype.Service;
 public class OrganizerService {
 
   private final OrganizerRepository organizerRepository;
-  private final ConfirmationTokenRepository confirmationTokenRepository;
+  private final SessionTokenRepository sessionTokenRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final ConfirmationTokenService confirmationTokenService;
   private final EmailService emailService;
 
-  private ConfirmationToken generateConfirmationToken(OrganizerEntity organizerEntity) {
-    String token = UUID.randomUUID().toString();
-    ConfirmationToken confirmationToken = new ConfirmationToken(
-        token,
-        LocalDateTime.now(),
-        LocalDateTime.now().plusMinutes(15),
-        organizerEntity
-    );
-
+  // Generates new confirmation token for given OrganizerEntity and saves it to database
+  private @NotNull ConfirmationToken generateConfirmationToken(OrganizerEntity organizerEntity) {
+    ConfirmationToken confirmationToken = new ConfirmationToken(organizerEntity);
     confirmationTokenService.saveConfirmationToken(confirmationToken);
     return confirmationToken;
   }
 
+  // Generates token and sends it to given OrganizerEntity
   private void sendEmailWithConfirmationToken(OrganizerEntity organizerEntity) {
     ConfirmationToken confirmationToken = generateConfirmationToken(organizerEntity);
     emailService.sendSimpleMessage(organizerEntity.getEmail(), "Verify Your account",
@@ -52,11 +48,9 @@ public class OrganizerService {
 
     if (organizerExists) {
       var organizer = organizerRepository.findByEmail(email).get();
-
-      if (!organizer.getIsAuthorised()) {
+      if (!organizer.getIsAuthorised()) { // can confirmation token expire? Nothing about it in docs
         sendEmailWithConfirmationToken(organizer);
       }
-
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
@@ -74,22 +68,39 @@ public class OrganizerService {
   // If organizer doesn't exist or has already been confirmed -> do nothing -> code = 400
   public ResponseEntity<OrganizerEntity> confirm(String id, String token) {
     long organizerId = Long.parseLong(id);
-    var confirmationToken = confirmationTokenRepository.findByToken(token);
-    if (confirmationToken.isPresent() &&
-        confirmationToken.get().getOrganizerEntity().getId() == organizerId) {
-      var organizer = organizerRepository.findById(organizerId);
-      if (organizer.isPresent()
-          && LocalDateTime.now().isBefore(confirmationToken.get().getExpiresAt()) &&
-          !organizer.get().getIsAuthorised()) {
+    var confirmationToken = confirmationTokenService.getToken(token);
 
-        organizer.get().setIsAuthorised(true);
-        confirmationToken.get().setConfirmedAt(LocalDateTime.now());
-        organizerRepository.saveAndFlush(organizer.get());
-        confirmationTokenRepository.saveAndFlush(confirmationToken.get());
-        return new ResponseEntity<OrganizerEntity>(organizer.get(), HttpStatus.ACCEPTED);
-      }
+    if (confirmationToken.isEmpty() ||
+        (confirmationToken.get().getOrganizerEntity().getId() != organizerId) ||
+        confirmationTokenService.isTokenExpired(confirmationToken.get())) {
+      return new ResponseEntity<OrganizerEntity>(HttpStatus.BAD_REQUEST);
     }
 
-    return new ResponseEntity<OrganizerEntity>(HttpStatus.BAD_REQUEST);
+    var organizer = organizerRepository.findById(organizerId);
+    if (organizer.isEmpty() || organizer.get().getIsAuthorised()) {
+      return new ResponseEntity<OrganizerEntity>(HttpStatus.BAD_REQUEST);
+    }
+
+    organizer.get().setIsAuthorised(true);
+    confirmationToken.get().setConfirmedAt(LocalDateTime.now());
+    organizerRepository.saveAndFlush(organizer.get());
+    confirmationTokenService.saveConfirmationToken(confirmationToken.get());
+    return new ResponseEntity<OrganizerEntity>(organizer.get(), HttpStatus.ACCEPTED);
+  }
+
+  // If email and password matches to existing Orgazanizer account, then return sessionToken valid for 3 days, code -> 200
+  // Otherwise return code -> 400
+  public ResponseEntity<SessionToken> login(String email, String passowrd) {
+    var organizer = organizerRepository.findByEmail(email);
+    if (organizer.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    if (!bCryptPasswordEncoder.matches(passowrd,organizer.get().getPassword())) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    SessionToken sessionToken = new SessionToken(organizer.get());
+    sessionTokenRepository.save(sessionToken);
+    return new ResponseEntity<SessionToken>(sessionToken, HttpStatus.OK);
   }
 }
