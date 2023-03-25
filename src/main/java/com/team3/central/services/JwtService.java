@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
   private static final String SECRET_KEY = "34743777217A25432A462D4A614E645267556B586E3272357538782F413F4428";
-
   public String extractUserEmail(String token) {
     return extractClaim(token, Claims::getSubject);
   }
@@ -38,7 +37,7 @@ public class JwtService {
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date((System.currentTimeMillis() + 1000 * 60 * 24)))
+        .setExpiration(new Date((System.currentTimeMillis() + 1000 * 60 *24)))
         .signWith(getSigningKey(), SignatureAlgorithm.ES256)
         .compact();
   }

@@ -28,13 +28,5 @@ public class ApplicationConfig {
   public BCryptPasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
-//  public PasswordEncoder passwordEncoder() {
-//    return new BCryptPasswordEncoder();
-//  } why this donst work??
-
-//  @Bean
-//  public ModelMapper modelMapper() {
-//    return new ModelMapper();
-//  }
 
 }

@@ -18,7 +18,7 @@ spring:
         dialect: org.hibernate.dialect.PostgresPlusDialect
     hibernate:
       ddl-auto: update
-  # Email service
+# Email service
   mail:
     host: ${MAIL_HOST}
     port: 587
