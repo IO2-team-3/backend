@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 interface OrganizerRepository extends CrudRepository<Organizer, Long> {
-    Organizer findById(long id);
+
+  Organizer findById(long id);
 }

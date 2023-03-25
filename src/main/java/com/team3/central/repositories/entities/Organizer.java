@@ -1,5 +1,6 @@
 package com.team3.central.repositories.entities;
 
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,13 +10,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-
-import java.util.Set;
 
 @Entity
 @Getter
@@ -23,24 +20,25 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "organizer")
 public class Organizer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "organizer_id")
-    private Long id;
 
-    private String name;
-    private Boolean isAuthorised;
-    private String email;
-    private String password;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "organizer_id")
+  private Long id;
 
-    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Event> events;
+  private String name;
+  private Boolean isAuthorised;
+  private String email;
+  private String password;
+
+  @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<Event> events;
 
 
-    public Organizer(String name,  String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
+  public Organizer(String name, String email, String password) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+  }
 
 }

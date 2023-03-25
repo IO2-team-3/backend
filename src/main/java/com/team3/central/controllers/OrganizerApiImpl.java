@@ -4,6 +4,6 @@ import com.team3.central.openapi.api.OrganizerApi;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class OrganizerApiImpl  implements OrganizerApi {
+public class OrganizerApiImpl implements OrganizerApi {
 
 }
