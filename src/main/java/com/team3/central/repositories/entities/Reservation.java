@@ -17,28 +17,29 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "reservation")
 public class Reservation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private Long placeOnSchema;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "event_id")
-    private Event event;
+  private Long placeOnSchema;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+  @ManyToOne
+  @JoinColumn(name = "event_id")
+  private Event event;
 
-    public Reservation(User user,Event event) {
-        this.user = user;
-        this.event = event;
-    }
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
 
-    public Reservation(User user,Event event,Long placeOnSchema) {
-        this.user = user;
-        this.event = event;
-        this.placeOnSchema = placeOnSchema;
-    }
+  public Reservation(User user, Event event) {
+    this.user = user;
+    this.event = event;
+  }
+
+  public Reservation(User user, Event event, Long placeOnSchema) {
+    this.user = user;
+    this.event = event;
+    this.placeOnSchema = placeOnSchema;
+  }
 }
