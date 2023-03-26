@@ -18,9 +18,6 @@ public class OrganizerApiImpl implements OrganizerApi {
 
   OrganizerService organizerService;
 
-  /**
-   * @return
-   */
   @Override
   public Optional<NativeWebRequest> getRequest() {
     return OrganizerApi.super.getRequest();
