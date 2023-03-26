@@ -46,7 +46,7 @@ public class Event {
 
     @ManyToOne
     @JoinColumn(name = "organizer_id")
-    private Organizer organizer;
+    private OrganizerEntity organizer;
 
     @OneToMany(mappedBy = "event")
     private Set<Reservation> reservations;
