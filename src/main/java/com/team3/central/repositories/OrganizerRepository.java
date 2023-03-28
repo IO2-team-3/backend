@@ -1,26 +1,11 @@
 package com.team3.central.repositories;
 
-import com.team3.central.repositories.entities.OrganizerEntity;
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import com.team3.central.repositories.entities.Organizer;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Transactional
-public interface OrganizerRepository extends JpaRepository<OrganizerEntity, Long> {
+interface OrganizerRepository extends CrudRepository<Organizer, Long> {
 
-  Optional<OrganizerEntity> findById(long id);
-
-  Optional<OrganizerEntity> findByEmail(String email);
-
-  @Transactional
-  @Modifying
-  @Query("UPDATE OrganizerEntity o " +
-      "SET o.isAuthorised = ?2 " +
-      "WHERE o.id = ?1")
-  int updateIsAuthorised(long id, boolean isAuthorised);
-
+  Organizer findById(long id);
 }
