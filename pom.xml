@@ -1,161 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.7.9</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+  <groupId>com.team3</groupId>
   <artifactId>central</artifactId>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>
-              <artifactId>lombok</artifactId>
-              <groupId>org.projectlombok</groupId>
-            </exclude>
-          </excludes>
-        </configuration>
-        <groupId>org.springframework.boot</groupId>
-      </plugin>
-      <plugin>
-        <artifactId>openapi-generator-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <configuration>
-              <apiPackage>com.team3.central.openapi.api</apiPackage>
-              <configOptions>
-                <interfaceOnly>true</interfaceOnly>
-              </configOptions>
-              <generatorName>spring</generatorName>
-              <inputSpec>${project.basedir}/src/main/resources/contracts/api.yml</inputSpec>
-              <modelPackage>com.team3.central.openapi.model</modelPackage>
-              <packageName>com.team3.central.openapi</packageName>
-            </configuration>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-        <groupId>org.openapitools</groupId>
-        <version>5.3.0</version>
-      </plugin>
-    </plugins>
-  </build>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>central</name>
+  <description>Spring Boot application for ticket distribution and event organization service
+  </description>
+  <properties>
+    <java.version>11</java.version>
+  </properties>
   <dependencies>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <groupId>org.springframework.boot</groupId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <groupId>org.springframework.boot</groupId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <groupId>org.springframework.boot</groupId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
-      <groupId>org.springframework.boot</groupId>
-      <optional>true</optional>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <artifactId>lombok</artifactId>
-      <groupId>org.projectlombok</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <artifactId>spring-security-test</artifactId>
       <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- postgresSQL database -->
     <dependency>
-      <artifactId>postgresql</artifactId>
       <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
 
     <!-- jwt -->
     <dependency>
+      <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
-      <groupId>io.jsonwebtoken</groupId>
       <version>0.11.5</version>
     </dependency>
     <dependency>
+      <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
-      <groupId>io.jsonwebtoken</groupId>
       <version>0.11.5</version>
     </dependency>
     <dependency>
-      <artifactId>jjwt-jackson</artifactId>
       <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
       <version>0.11.5</version>
     </dependency>
 
     <!-- generate api -->
     <dependency>
-      <artifactId>swagger-annotations</artifactId>
       <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
       <version>1.6.3</version>
     </dependency>
     <dependency>
-      <artifactId>validation-api</artifactId>
       <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
       <version>2.0.1.Final</version>
     </dependency>
     <dependency>
-      <artifactId>jackson-databind-nullable</artifactId>
       <groupId>org.openapitools</groupId>
+      <artifactId>jackson-databind-nullable</artifactId>
       <version>0.2.1</version>
     </dependency>
     <dependency>
-      <artifactId>springdoc-openapi-ui</artifactId>
       <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-ui</artifactId>
       <version>1.6.4</version>
     </dependency>
 
     <!-- email service -->
     <dependency>
-      <artifactId>spring-context-support</artifactId>
       <groupId>org.springframework</groupId>
+      <artifactId>spring-context-support</artifactId>
       <version>5.3.25</version>
     </dependency>
     <dependency>
-      <artifactId>jakarta.mail</artifactId>
       <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
       <version>1.6.7</version>
     </dependency>
     <dependency>
-      <artifactId>annotations</artifactId>
       <groupId>org.jetbrains</groupId>
-      <scope>compile</scope>
+      <artifactId>annotations</artifactId>
       <version>RELEASE</version>
+      <scope>compile</scope>
     </dependency>
 
 
   </dependencies>
-  <description>Spring Boot application for ticket distribution and event organization service
-  </description>
-  <groupId>com.team3</groupId>
-  <modelVersion>4.0.0</modelVersion>
-  <name>central</name>
-  <parent>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <groupId>org.springframework.boot</groupId>
-    <relativePath/>
-    <version>2.7.9</version> <!-- lookup parent from repository -->
-  </parent>
-  <properties>
-    <java.version>11</java.version>
-  </properties>
 
-  <version>0.0.1-SNAPSHOT</version>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>5.3.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/src/main/resources/contracts/api.yml</inputSpec>
+              <generatorName>spring</generatorName>
+              <packageName>com.team3.central.openapi</packageName>
+              <apiPackage>com.team3.central.openapi.api</apiPackage>
+              <modelPackage>com.team3.central.openapi.model</modelPackage>
+              <configOptions>
+                <interfaceOnly>true</interfaceOnly>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
