@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,6 +31,9 @@ public class EventsApiImpl implements EventsApi {
   private final OrganizerService organizerService;
 
   /**
+   *
+   * User needs to be authorized
+   *
    * POST /events : Add new event
    *
    * @param title title of Event (required)
@@ -65,6 +67,9 @@ public class EventsApiImpl implements EventsApi {
   }
 
   /**
+   *
+   * User needs to be authorized
+   *
    * DELETE /events/{id} : Cancel event
    *
    * @param id id of Event (required)
@@ -87,16 +92,7 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<List<Event>> getByCategory(
       @NotNull @ApiParam(value = "ID of category", required = true) @Valid @RequestParam(value = "categoryId", required = true) Long categoryId) {
-    getRequest().ifPresent(request -> {
-      for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
-        if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-          String exampleString = "{ \"latitude\" : \"40.4775315\", \"name\" : \"Long description of Event\", \"freePlace\" : 2, \"startTime\" : 1673034164, \"id\" : 10, \"endTime\" : 1683034164, \"categories\" : [ { \"name\" : \"Sport\", \"id\" : 1 }, { \"name\" : \"Sport\", \"id\" : 1 } ], \"title\" : \"Short description of Event\", \"longitude\" : \"-3.7051359\", \"placeSchema\" : \"Seralized place schema\", \"status\" : \"done\" }";
-          ApiUtil.setExampleResponse(request, "application/json", exampleString);
-          break;
-        }
-      }
-    });
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
   }
 
   /**
@@ -111,10 +107,13 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<Event> getEventById(
       @ApiParam(value = "ID of event to return", required = true) @PathVariable("id") Long id) {
-    // No validation someone f-ed up the session security, I won't be fixing it this sprint
-    Optional<Event> event = eventService.getById(id);
-    if(event.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    else return new ResponseEntity<>(event.get(),HttpStatus.OK);
+    try {
+      Optional<Event> event = eventService.getById(id);
+      if(event.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      else return new ResponseEntity<>(event.get(),HttpStatus.OK);
+    } catch (IndexOutOfBoundsException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**
@@ -124,38 +123,28 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<List<Event>> getEvents() {
-    getRequest().ifPresent(request -> {
-      for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
-        if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-          String exampleString = "{ \"latitude\" : \"40.4775315\", \"name\" : \"Long description of Event\", \"freePlace\" : 2, \"startTime\" : 1673034164, \"id\" : 10, \"endTime\" : 1683034164, \"categories\" : [ { \"name\" : \"Sport\", \"id\" : 1 }, { \"name\" : \"Sport\", \"id\" : 1 } ], \"title\" : \"Short description of Event\", \"longitude\" : \"-3.7051359\", \"placeSchema\" : \"Seralized place schema\", \"status\" : \"done\" }";
-          ApiUtil.setExampleResponse(request, "application/json", exampleString);
-          break;
-        }
-      }
-    });
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    return new ResponseEntity<>(eventService.getAllEvents(),HttpStatus.OK);
   }
 
   /**
+   *
+   * User needs to be authorized
+   *
    * GET /events/my : Return list of events made by organizer, according to session
    *
    * @return successful operation (status code 200)
    */
   @Override
   public ResponseEntity<List<Event>> getMyEvents() {
-    getRequest().ifPresent(request -> {
-      for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
-        if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-          String exampleString = "{ \"latitude\" : \"40.4775315\", \"name\" : \"Long description of Event\", \"freePlace\" : 2, \"startTime\" : 1673034164, \"id\" : 10, \"endTime\" : 1683034164, \"categories\" : [ { \"name\" : \"Sport\", \"id\" : 1 }, { \"name\" : \"Sport\", \"id\" : 1 } ], \"title\" : \"Short description of Event\", \"longitude\" : \"-3.7051359\", \"placeSchema\" : \"Seralized place schema\", \"status\" : \"done\" }";
-          ApiUtil.setExampleResponse(request, "application/json", exampleString);
-          break;
-        }
-      }
-    });
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    UserDetails userDetails = getUserDetails();
+    if(userDetails == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()), HttpStatus.OK);
   }
 
   /**
+   *
+   * User needs to be authorized
+   *
    * PATCH /events/{id} : patch existing event
    *
    * @param id id of Event (required)
