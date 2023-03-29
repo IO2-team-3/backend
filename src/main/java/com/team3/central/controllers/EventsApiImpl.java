@@ -3,20 +3,33 @@ package com.team3.central.controllers;
 import com.team3.central.openapi.api.ApiUtil;
 import com.team3.central.openapi.api.EventsApi;
 import com.team3.central.openapi.model.Event;
+import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.services.EventService;
+import com.team3.central.services.OrganizerService;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EventsApiImpl implements EventsApi {
+
+  private final EventService eventService;
+  private final OrganizerService organizerService;
 
   /**
    * POST /events : Add new event
@@ -43,18 +56,12 @@ public class EventsApiImpl implements EventsApi {
       @NotNull @ApiParam(value = "Latitude of event", required = true) @Valid @RequestParam(value = "latitude", required = true) String latitude,
       @NotNull @ApiParam(value = "Longitude of event", required = true) @Valid @RequestParam(value = "longitude", required = true) String longitude,
       @NotNull @ApiParam(value = "Unix time stamp of end of event", required = true) @Valid @RequestParam(value = "categories", required = true) List<Integer> categories,
-      @ApiParam(value = "seralized place schema") @Valid @RequestParam(value = "placeSchema", required = false) String placeSchema) {
-    getRequest().ifPresent(request -> {
-      for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
-        if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-          String exampleString = "{ \"latitude\" : \"40.4775315\", \"name\" : \"Long description of Event\", \"freePlace\" : 2, \"startTime\" : 1673034164, \"id\" : 10, \"endTime\" : 1683034164, \"categories\" : [ { \"name\" : \"Sport\", \"id\" : 1 }, { \"name\" : \"Sport\", \"id\" : 1 } ], \"title\" : \"Short description of Event\", \"longitude\" : \"-3.7051359\", \"placeSchema\" : \"Seralized place schema\", \"status\" : \"done\" }";
-          ApiUtil.setExampleResponse(request, "application/json", exampleString);
-          break;
-        }
-      }
-    });
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-
+      @ApiParam(value = "serialized place schema") @Valid @RequestParam(value = "placeSchema", required = false) String placeSchema) {
+    UserDetails userDetails = getUserDetails();
+    OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername()).get();
+    Event event = eventService.addEvent(title, name, freePlace, startTime, endTime, latitude, longitude,
+        Set.of(), placeSchema, organizer);
+    return new ResponseEntity<>(event ,HttpStatus.OK);
   }
 
   /**
@@ -104,16 +111,10 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<Event> getEventById(
       @ApiParam(value = "ID of event to return", required = true) @PathVariable("id") Long id) {
-    getRequest().ifPresent(request -> {
-      for (MediaType mediaType : MediaType.parseMediaTypes(request.getHeader("Accept"))) {
-        if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-          String exampleString = "{ \"latitude\" : \"40.4775315\", \"name\" : \"Long description of Event\", \"freePlace\" : 2, \"startTime\" : 1673034164, \"id\" : 10, \"endTime\" : 1683034164, \"categories\" : [ { \"name\" : \"Sport\", \"id\" : 1 }, { \"name\" : \"Sport\", \"id\" : 1 } ], \"title\" : \"Short description of Event\", \"longitude\" : \"-3.7051359\", \"placeSchema\" : \"Seralized place schema\", \"status\" : \"done\" }";
-          ApiUtil.setExampleResponse(request, "application/json", exampleString);
-          break;
-        }
-      }
-    });
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    // No validation someone f-ed up the session security, I won't be fixing it this sprint
+    Optional<Event> event = eventService.getById(id);
+    if(event.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    else return new ResponseEntity<>(event.get(),HttpStatus.OK);
   }
 
   /**
@@ -170,4 +171,7 @@ public class EventsApiImpl implements EventsApi {
 
   }
 
+  private UserDetails getUserDetails() {
+    return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  }
 }

@@ -18,11 +18,6 @@ public class OrganizerApiImpl implements OrganizerApi {
 
   OrganizerService organizerService;
 
-  @Override
-  public Optional<NativeWebRequest> getRequest() {
-    return OrganizerApi.super.getRequest();
-  }
-
   /**
    * POST /organizer/{id} : Confirm orginizer account
    *
@@ -36,7 +31,8 @@ public class OrganizerApiImpl implements OrganizerApi {
     if (!organizerEntityResponseEntity.hasBody()) {
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
-    var organizerDto = OrganizerMapper.convertToDto(
+    OrganizerMapper mapper = new OrganizerMapper();
+    var organizerDto = mapper.convertToEntity(
         Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
@@ -65,7 +61,7 @@ public class OrganizerApiImpl implements OrganizerApi {
     var res = organizerService.login(email, password);
     if (res.hasBody()) {
       InlineResponse200 inlineResponse200 = new InlineResponse200();
-      inlineResponse200.sessionToken(Objects.requireNonNull(res.getBody()).getToken());
+      inlineResponse200.sessionToken(Objects.requireNonNull(res.getBody()));
       return new ResponseEntity<InlineResponse200>(inlineResponse200, res.getStatusCode());
     } else {
       return new ResponseEntity<InlineResponse200>(res.getStatusCode());
@@ -98,7 +94,8 @@ public class OrganizerApiImpl implements OrganizerApi {
     if (!organizerEntityResponseEntity.hasBody()) {
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
-    var organizerDto = OrganizerMapper.convertToDto(
+    OrganizerMapper mapper = new OrganizerMapper();
+    var organizerDto = mapper.convertToEntity(
         Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
 
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());

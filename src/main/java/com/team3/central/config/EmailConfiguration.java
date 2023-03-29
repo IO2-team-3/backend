@@ -1,4 +1,4 @@
-package com.team3.central.configuration;
+package com.team3.central.config;
 
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Value;
