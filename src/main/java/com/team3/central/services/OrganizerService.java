@@ -24,7 +24,7 @@ public class OrganizerService {
   private final JwtService jwtService;
 
   // Generates new confirmation token for given OrganizerEntity and saves it to database
-  private @NotNull ConfirmationToken generateConfirmationToken(OrganizerEntity organizerEntity) {
+  public @NotNull ConfirmationToken generateConfirmationToken(OrganizerEntity organizerEntity) {
     ConfirmationToken confirmationToken = new ConfirmationToken(organizerEntity);
     confirmationTokenService.saveConfirmationToken(confirmationToken);
     return confirmationToken;
@@ -42,9 +42,7 @@ public class OrganizerService {
   // If organizer exists and has been authorized -> do nothing -> code = 400
   public ResponseEntity<OrganizerEntity> signUp(String name, String email,
       String password) {
-    boolean organizerExists = organizerRepository
-        .findByEmail(email)
-        .isPresent();
+    boolean organizerExists = organizerRepository.findByEmail(email).isPresent();
 
     if (organizerExists) {
       var organizer = organizerRepository.findByEmail(email).get();
