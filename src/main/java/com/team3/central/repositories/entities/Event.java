@@ -19,6 +19,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +30,8 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "event")
 public class Event {
@@ -71,19 +75,4 @@ public class Event {
     )
     private Set<Category> categories;
 
-    public Event(String title, String name, Long startTime, Long endTime, String latitude, String longitude, Long freePlace,
-        String placeSchema, EventStatus status, OrganizerEntity organizer, Set<Reservation> reservations, Set<Category> categories) {
-        this.title = title;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.name = name;
-        this.freePlace = freePlace;
-        this.placeSchema = placeSchema;
-        this.status = status;
-        this.organizer = organizer;
-        this.reservations = reservations;
-        this.categories = categories;
-    }
 }

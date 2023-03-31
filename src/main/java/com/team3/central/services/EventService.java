@@ -7,6 +7,7 @@ import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,20 +29,22 @@ public class EventService {
   public com.team3.central.openapi.model.Event addEvent(String title, String name, Integer freePlace,
       Integer startTime, Integer endTime, String latitude,
       String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer) {
-    Event event = new Event(
-        title,
-        name,
-        startTime.longValue(),
-        endTime.longValue(),
-        latitude,
-        longitude,
-        freePlace.longValue(),
-        placeSchema,
-        EventStatus.INFUTURE,
-        organizer,
-        Set.of(),
-        categories
-    );
+    Event event = Event.builder()
+        .title(title)
+        .name(name)
+        .startTime(startTime.longValue())
+        .endTime(endTime.longValue())
+        .latitude(latitude)
+        .longitude(longitude)
+        .freePlace(freePlace.longValue())
+        .placeSchema(placeSchema)
+        .status(EventStatus.INFUTURE)
+        .organizer(organizer)
+        .categories(categories)
+        .reservations(Set.of())
+        .places(new HashMap<>(freePlace))
+        .maxPlace(freePlace.longValue())
+        .build();
 
     eventRepository.save(event);
     return eventMapper.convertToModel(event);
@@ -63,7 +66,7 @@ public class EventService {
         .stream()
         .filter(event -> event.getCategories()
             .stream()
-            .map(category -> categoryId)
+            .map(Category::getId)
             .collect(Collectors.toList())
             .contains(categoryId))
         .map(eventMapper::convertToModel)
