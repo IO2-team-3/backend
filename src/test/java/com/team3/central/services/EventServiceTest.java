@@ -10,6 +10,7 @@ import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
+import com.team3.central.services.EventService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;

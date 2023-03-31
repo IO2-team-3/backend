@@ -3,6 +3,7 @@ package com.team3.central.services;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
+import com.team3.central.services.EmailService;
 import java.util.Arrays;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
