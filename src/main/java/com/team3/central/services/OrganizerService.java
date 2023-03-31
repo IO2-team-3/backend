@@ -1,11 +1,10 @@
 package com.team3.central.services;
 
 import com.team3.central.repositories.OrganizerRepository;
-import com.team3.central.repositories.SessionTokenRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.OrganizerEntity;
-import com.team3.central.repositories.entities.SessionToken;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -18,10 +17,11 @@ import org.springframework.stereotype.Service;
 public class OrganizerService {
 
   private final OrganizerRepository organizerRepository;
-  private final SessionTokenRepository sessionTokenRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
   private final ConfirmationTokenService confirmationTokenService;
   private final EmailService emailService;
+
+  private final JwtService jwtService;
 
   // Generates new confirmation token for given OrganizerEntity and saves it to database
   private @NotNull ConfirmationToken generateConfirmationToken(OrganizerEntity organizerEntity) {
@@ -88,9 +88,9 @@ public class OrganizerService {
     return new ResponseEntity<OrganizerEntity>(organizer.get(), HttpStatus.ACCEPTED);
   }
 
-  // If email and password matches to existing Orgazanizer account, then return sessionToken valid for 3 days, code -> 200
+  // If email and password matches to existing Organizer account, then return sessionToken valid for 3 days, code -> 200
   // Otherwise return code -> 400
-  public ResponseEntity<SessionToken> login(String email, String passowrd) {
+  public ResponseEntity<String> login(String email, String passowrd) {
     var organizer = organizerRepository.findByEmail(email);
     if (organizer.isEmpty()) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -99,8 +99,14 @@ public class OrganizerService {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    SessionToken sessionToken = new SessionToken(organizer.get());
-    sessionTokenRepository.save(sessionToken);
-    return new ResponseEntity<SessionToken>(sessionToken, HttpStatus.OK);
+//    SessionToken sessionToken = new SessionToken(organizer.get());
+//    sessionTokenRepository.save(sessionToken);
+    final String jwt = jwtService.generateToken(organizer.get());
+    return new ResponseEntity<String>(jwt, HttpStatus.OK);
+  }
+
+
+  public Optional<OrganizerEntity> getOrganizerFromEmail(String username) {
+    return organizerRepository.findByEmail(username);
   }
 }

@@ -6,7 +6,7 @@ import com.team3.central.repositories.entities.OrganizerEntity;
 
 public class OrganizerMapper {
 
-  public static Organizer convertToDto(OrganizerEntity organizerEntity) {
+  public Organizer convertToEntity(OrganizerEntity organizerEntity) {
     com.team3.central.openapi.model.Organizer organizerDto = new com.team3.central.openapi.model.Organizer();
     organizerDto.setEmail(organizerEntity.getEmail());
     organizerDto.setId(organizerEntity.getId());
@@ -18,7 +18,7 @@ public class OrganizerMapper {
     return organizerDto;
   }
 
-  static private OrganizerEntity convertToEntity(Organizer organizerDto) {
+  public OrganizerEntity convertToModel(Organizer organizerDto) {
     OrganizerEntity organizerEntity = new OrganizerEntity();
     organizerEntity.setEmail(organizerDto.getEmail());
     organizerEntity.setId(organizerDto.getId());
