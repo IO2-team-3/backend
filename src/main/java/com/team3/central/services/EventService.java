@@ -22,7 +22,8 @@ public class EventService {
   @Autowired
   public EventService(EventRepository eventRepository) {
     this.eventRepository = eventRepository;
-    this.eventMapper = new EventMapper();}
+    this.eventMapper = new EventMapper();
+  }
 
   public com.team3.central.openapi.model.Event addEvent(String title, String name, Integer freePlace,
       Integer startTime, Integer endTime, String latitude,

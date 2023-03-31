@@ -1,15 +1,20 @@
 package com.team3.central.repositories.entities;
 
 import com.team3.central.repositories.entities.enums.EventStatus;
+import java.util.Map;
+import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -38,7 +43,15 @@ public class Event {
     private String longitude;
     private String name;
     private Long freePlace;
+
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
     private String placeSchema;
+
+    private Long maxPlace;
+
+    @ElementCollection
+    private Map<Long, Boolean> places;
 
     @Enumerated(EnumType.STRING)
     private EventStatus status;

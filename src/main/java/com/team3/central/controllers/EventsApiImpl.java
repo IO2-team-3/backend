@@ -1,15 +1,14 @@
 package com.team3.central.controllers;
 
-import com.team3.central.openapi.api.ApiUtil;
 import com.team3.central.openapi.api.EventsApi;
 import com.team3.central.openapi.model.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.services.CategoryService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +28,13 @@ public class EventsApiImpl implements EventsApi {
 
   private final EventService eventService;
   private final OrganizerService organizerService;
+  private final CategoryService categoryService;
 
   /**
    *
    * User needs to be authorized
+   *
+   * POST /events : Add new event
    *
    * POST /events : Add new event
    *
@@ -43,7 +45,7 @@ public class EventsApiImpl implements EventsApi {
    * @param endTime Unix time stamp of end of event (required)
    * @param latitude Latitude of event (required)
    * @param longitude Longitude of event (required)
-   * @param categories Unix time stamp of end of event (required)
+   * @param categories Array of id of categories that event belong to. (required)
    * @param placeSchema seralized place schema (optional)
    * @return event created (status code 201)
    *         or event can not be created (status code 400)
@@ -62,7 +64,7 @@ public class EventsApiImpl implements EventsApi {
     UserDetails userDetails = getUserDetails();
     OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername()).get();
     Event event = eventService.addEvent(title, name, freePlace, startTime, endTime, latitude, longitude,
-        Set.of(), placeSchema, organizer);
+        categoryService.getCategoriesFromIds(categories), placeSchema, organizer);
     return new ResponseEntity<>(event ,HttpStatus.OK);
   }
 
