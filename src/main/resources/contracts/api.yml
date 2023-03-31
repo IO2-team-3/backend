@@ -1,8 +1,7 @@
 openapi: 3.0.3
 info:
   title: System rezerwacji miejsc na eventy
-  description: 'Niniejsza dokumentacja stanowi opis REST API implemtowanego przez
-    serwer centralny. Endpointy '
+  description: 'Niniejsza dokumentacja stanowi opis REST API implemtowanego przez serwer centralny. Endpointy '
   termsOfService: http://swagger.io/terms/
   contact:
     email: XXX@pw.edu.pl
@@ -19,7 +18,7 @@ tags:
   - name: Reservation
     description: All about Reservation
 paths:
-  "/events":
+  /events:
     get:
       tags:
         - Event
@@ -33,7 +32,7 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Event"
+                  $ref: '#/components/schemas/Event'
     post:
       tags:
         - Event
@@ -62,7 +61,7 @@ paths:
             type: integer
         - name: placeSchema
           in: query
-          description: seralized place schema
+          description: serialized place schema
           required: false
           schema:
             type: string
@@ -86,17 +85,17 @@ paths:
           required: true
           schema:
             type: string
-            example: 40.4775315
+            example: '40.4775315'
         - name: longitude
           in: query
           description: Longitude of event
           required: true
           schema:
             type: string
-            example: -3.7051359
+            example: '-3.7051359'
         - name: categories
           in: query
-          description: Unix time stamp of end of event
+          description: Array of id of categories that event belong to.
           required: true
           schema:
             type: array
@@ -108,12 +107,12 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Event"
+                $ref: '#/components/schemas/Event'
         '400':
           description: event can not be created
       security:
-        - token: [ ]
-  "/events/my":
+        - token: []
+  /events/my:
     get:
       tags:
         - Event
@@ -127,10 +126,10 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Event"
+                  $ref: '#/components/schemas/Event'
       security:
-        - token: [ ]
-  "/events/{id}":
+        - token: []
+  /events/{id}:
     get:
       tags:
         - Event
@@ -151,7 +150,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Event"
+                $ref: '#/components/schemas/Event'
         '400':
           description: Invalid ID supplied
         '404':
@@ -174,7 +173,7 @@ paths:
         '404':
           description: id not found
       security:
-        - token: [ ]
+        - token: []
     patch:
       tags:
         - Event
@@ -192,15 +191,15 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/Event"
+              $ref: '#/components/schemas/Event'
       responses:
         '202':
           description: patched
         '404':
           description: id not found
       security:
-        - token: [ ]
-  "/events/getByCategory":
+        - token: []
+  /events/getByCategory:
     get:
       tags:
         - Event
@@ -222,10 +221,10 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Event"
+                  $ref: '#/components/schemas/Event'
         '400':
           description: Invalid category ID supplied
-  "/categories":
+  /categories:
     get:
       tags:
         - Categories
@@ -239,7 +238,7 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Category"
+                  $ref: '#/components/schemas/Category'
     post:
       tags:
         - Categories
@@ -258,12 +257,12 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Category"
+                $ref: '#/components/schemas/Category'
         '400':
           description: category already exist
       security:
-        - token: [ ]
-  "/reservation":
+        - token: []
+  /reservation:
     post:
       tags:
         - Reservation
@@ -290,7 +289,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ReservationDTO"
+                $ref: '#/components/schemas/ReservationDTO'
         '400':
           description: no free place
         '404':
@@ -313,7 +312,7 @@ paths:
           description: deleted
         '404':
           description: token not found
-  "/organizer":
+  /organizer:
     post:
       tags:
         - Event organizer
@@ -344,10 +343,26 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Organizer"
+                $ref: '#/components/schemas/Organizer'
         '400':
           description: organizer already exist
-  "/organizer/{id}":
+    get:
+      tags:
+        - Event organizer
+      summary: Get organizer account (my account)
+      operationId: getOrganizer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organizer'
+        '400':
+          description: invalid session
+      security:
+        - token: []
+  /organizer/{id}:
     post:
       tags:
         - Event organizer
@@ -372,7 +387,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Organizer"
+                $ref: '#/components/schemas/Organizer'
         '400':
           description: code wrong
     delete:
@@ -393,7 +408,7 @@ paths:
         '404':
           description: id not found
       security:
-        - token: [ ]
+        - token: []
     patch:
       tags:
         - Event organizer
@@ -411,15 +426,15 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/Organizer"
+              $ref: '#/components/schemas/Organizer'
       responses:
         '202':
           description: patched
         '404':
           description: id not found
       security:
-        - token: [ ]
-  "/organizer/login":
+        - token: []
+  /organizer/login:
     get:
       tags:
         - Event organizer
@@ -463,10 +478,6 @@ components:
           type: integer
           format: int64
           example: 10
-        freePlace:
-          type: integer
-          format: int64
-          example: 2
         title:
           type: string
           example: Short description of Event
@@ -480,10 +491,10 @@ components:
           example: 1683034164
         latitude:
           type: string
-          example: 40.4775315
+          example: '40.4775315'
         longitude:
           type: string
-          example: -3.7051359
+          example: '-3.7051359'
         name:
           type: string
           example: Long description of Event
@@ -491,11 +502,36 @@ components:
           type: string
           example: Seralized place schema
         status:
-          "$ref": "#/components/schemas/EventStatus"
+          $ref: '#/components/schemas/EventStatus'
         categories:
           type: array
           items:
-            "$ref": "#/components/schemas/Category"
+            $ref: '#/components/schemas/Category'
+        freePlace:
+          type: integer
+          format: int64
+          example: 2
+        maxPlace:
+          type: integer
+          format: int64
+          example: 100
+        places:
+          type: array
+          items:
+            $ref: '#/components/schemas/Place'
+
+    Place:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 21
+        free:
+          type: boolean
+          example: true
+
+
     Category:
       type: object
       properties:
@@ -548,7 +584,7 @@ components:
         events:
           type: array
           items:
-            "$ref": "#/components/schemas/Event"
+            $ref: '#/components/schemas/Event'
         status:
           type: string
           description: User Status
