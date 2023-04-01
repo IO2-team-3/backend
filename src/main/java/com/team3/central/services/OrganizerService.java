@@ -97,8 +97,7 @@ public class OrganizerService {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-//    SessionToken sessionToken = new SessionToken(organizer.get());
-//    sessionTokenRepository.save(sessionToken);
+
     final String jwt = jwtService.generateToken(organizer.get());
     return new ResponseEntity<String>(jwt, HttpStatus.OK);
   }
