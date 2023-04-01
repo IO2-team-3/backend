@@ -29,11 +29,14 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
+        .csrf()
+        .disable()
         .cors(Customizer.withDefaults())
         .authorizeHttpRequests()
-          .antMatchers("/organizer/**","/swagger-ui/**","/v3/api-docs/**")
-            .permitAll()
-        .antMatchers(HttpMethod.GET ,"/events","/events/{id}","/events/getByCategory")
+        .antMatchers(HttpMethod.POST, "/organizer", "/organizer/{id}")
+          .permitAll()
+        .antMatchers(HttpMethod.GET ,"/organizer/**","/swagger-ui/**",
+            "/v3/api-docs/**", "/events","/events/{id}","/events/getByCategory")
             .permitAll()
         .anyRequest()
         .authenticated()
