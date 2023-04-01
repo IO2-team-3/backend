@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.team3.central.repositories.OrganizerRepository;
-import com.team3.central.repositories.SessionTokenRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import java.util.Optional;
@@ -27,20 +26,21 @@ class OrganizerServiceTest {
   private OrganizerService organizerService;
   @Mock
   private OrganizerRepository organizerRepository;
-  @Mock
-  private SessionTokenRepository sessionTokenRepository;
+
   @Mock
   private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Mock
   private ConfirmationTokenService confirmationTokenService;
+  @Mock
+  private JwtService jwtService;
   @Mock
   private EmailService emailService;
 
   @BeforeAll
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    organizerService = new OrganizerService(organizerRepository, sessionTokenRepository,
-        bCryptPasswordEncoder, confirmationTokenService, emailService);
+    organizerService = new OrganizerService(organizerRepository,
+        bCryptPasswordEncoder, confirmationTokenService, emailService, jwtService);
   }
 
   @Test
