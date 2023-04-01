@@ -8,22 +8,21 @@ import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.entities.Category;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class CategoriesServiceTest {
-  private CategoryRepository mockCategoryRepository;
-  private CategoriesService categoriesService;
+  private static CategoryRepository mockCategoryRepository;
+  private static CategoriesService categoriesService;
 
-  @BeforeEach
-  void setUp() {
+  @BeforeAll
+  static void setUp() {
     mockCategoryRepository = Mockito.mock(CategoryRepository.class);
     categoriesService = new CategoriesService(mockCategoryRepository);
   }
-
 
   @Test
   void addCategory() {
@@ -35,8 +34,10 @@ public class CategoriesServiceTest {
     com.team3.central.openapi.model.Category result = categoriesService.addCategory("TestCategory");
 
     // then
-    assertNotNull(result);
-    assertEquals(result.getName(), category.getName());
+    assertThat(result)
+        .isNotNull()
+        .extracting(com.team3.central.openapi.model.Category::getName)
+        .isEqualTo(category.getName());
   }
 
   @Test
@@ -51,8 +52,9 @@ public class CategoriesServiceTest {
     List<com.team3.central.openapi.model.Category> result = categoriesService.getAllCategories();
 
     // then
-    assertNotNull(result);
-    assertEquals(result.size(), categories.size());
+    assertThat(result)
+        .isNotNull()
+        .hasSize(categories.size());
   }
 
   @Test
@@ -68,7 +70,7 @@ public class CategoriesServiceTest {
     boolean result = categoriesService.existsByName(categoryName);
 
     // then
-    assertTrue(result);
+    assertThat(result).isTrue();
   }
 
   @Test
@@ -84,6 +86,6 @@ public class CategoriesServiceTest {
     boolean result = categoriesService.existsByName("SomeOtherCategory");
 
     // then
-    assertFalse(result);
+    assertThat(result).isFalse();
   }
 }
