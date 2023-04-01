@@ -2,7 +2,9 @@ package com.team3.central.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -116,6 +118,68 @@ class OrganizerServiceTest {
 
     // then
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+
+  @Test
+  void testLoginOrganizerExists() {
+    // given
+    final String name = "John";
+    final String email = "john@example.com";
+    final String password = "password";
+    final String token = "token123";
+    final OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
+    organizerEntity.setIsAuthorised(true);
+    when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizerEntity));
+    when(jwtService.generateToken(organizerEntity)).thenReturn(token);
+    when(bCryptPasswordEncoder.matches(password, organizerEntity.getPassword())).thenReturn(true);
+
+    // when
+    final ResponseEntity<String> response = organizerService.login(email, password);
+
+    // then
+    assertThat(response).isNotNull()
+        .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
+        .containsExactly(HttpStatus.OK, token);
+  }
+
+  @Test
+  void testLoginOrganizerDoesntExist() {
+    // given
+    final String name = "John";
+    final String email = "john@example.com";
+    final String password = "password";
+    final String token = "token123";
+    when(organizerRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    // when
+    final ResponseEntity<String> response = organizerService.login(email, password);
+
+    // then
+    assertThat(response).isNotNull()
+        .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
+        .containsExactly(HttpStatus.BAD_REQUEST,null);
+  }
+
+  @Test
+  void testLoginWrongPassword() {
+    // given
+    final String name = "John";
+    final String email = "john@example.com";
+    final String password = "password";
+    final String token = "token123";
+    final OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
+    organizerEntity.setIsAuthorised(true);
+    when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizerEntity));
+    when(jwtService.generateToken(organizerEntity)).thenReturn(token);
+    when(bCryptPasswordEncoder.matches(password, organizerEntity.getPassword())).thenReturn(false);
+
+    // when
+    final ResponseEntity<String> response = organizerService.login(email, password);
+
+    // then
+    assertThat(response).isNotNull()
+        .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
+        .containsExactly(HttpStatus.BAD_REQUEST,null);
   }
 }
 
