@@ -2,9 +2,12 @@ package com.team3.central.services;
 
 import com.team3.central.repositories.OrganizerRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
+import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.enums.OrganizerStatus;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -108,5 +111,25 @@ public class OrganizerService {
 
   public Optional<OrganizerEntity> getOrganizerFromEmail(String username) {
     return organizerRepository.findByEmail(username);
+  }
+
+  public void deleteOrganizer(Long id) {
+    if(!organizerRepository.existsById(id)) {
+      throw new IndexOutOfBoundsException("Id does not exist");
+    }
+    OrganizerEntity organizerToUpdate = organizerRepository.findById(id).get();
+    final String hashedEmail = bCryptPasswordEncoder.encode(organizerToUpdate.getEmail());
+
+    organizerToUpdate.setStatus(OrganizerStatus.DELETED);
+    organizerToUpdate.setEmail(hashedEmail);
+    organizerRepository.save(organizerToUpdate);
+  }
+
+  public Set<Event> getEventsOfOrganizer(Long id) {
+    if(!organizerRepository.existsById(id)) {
+      throw new IndexOutOfBoundsException("Id does not exist");
+    }
+    OrganizerEntity organizer = organizerRepository.findById(id).get();
+    return organizer.getEvents();
   }
 }

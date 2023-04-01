@@ -4,13 +4,15 @@ import com.team3.central.mappers.OrganizerMapper;
 import com.team3.central.openapi.api.OrganizerApi;
 import com.team3.central.openapi.model.InlineResponse200;
 import com.team3.central.openapi.model.Organizer;
+import com.team3.central.repositories.entities.Event;
+import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.OrganizerService;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.NativeWebRequest;
 
 @RestController
 @AllArgsConstructor
@@ -45,7 +47,25 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Void> deleteOrganizer(String id) {
-    return OrganizerApi.super.deleteOrganizer(id);
+    Set<Event> eventsOfOrganizer;
+    try {
+      eventsOfOrganizer = organizerService.getEventsOfOrganizer(Long.parseLong(id));
+    } catch(IndexOutOfBoundsException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    boolean hasUncompletedEvents = eventsOfOrganizer.stream()
+        .anyMatch(e -> e.getStatus() != EventStatus.DONE && e.getStatus() != EventStatus.CANCELLED);
+    if(hasUncompletedEvents) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      organizerService.deleteOrganizer(Long.parseLong(id));
+    } catch(IndexOutOfBoundsException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**

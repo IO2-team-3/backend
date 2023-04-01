@@ -1,11 +1,14 @@
 package com.team3.central.repositories.entities;
 
+import com.team3.central.repositories.entities.enums.OrganizerStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,6 +38,8 @@ public class OrganizerEntity implements UserDetails {
   private Boolean isAuthorised;
   private String email;
   private String password;
+  @Enumerated(EnumType.STRING)
+  private OrganizerStatus status;
 
   @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<Event> events;
