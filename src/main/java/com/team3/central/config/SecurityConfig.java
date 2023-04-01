@@ -36,7 +36,7 @@ public class SecurityConfig {
         .antMatchers(HttpMethod.POST, "/organizer", "/organizer/{id}")
           .permitAll()
         .antMatchers(HttpMethod.GET ,"/organizer/**","/swagger-ui/**",
-            "/v3/api-docs/**", "/events","/events/{id}","/events/getByCategory")
+            "/v3/api-docs/**", "/events","/events/{id}","/events/getByCategory", "/categories")
             .permitAll()
         .anyRequest()
         .authenticated()
