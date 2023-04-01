@@ -43,8 +43,10 @@ public class ConfirmationTokenServiceTest {
         LocalDateTime.now().plusMinutes(expirationOffset),
         new OrganizerEntity("John Doe", "johndoe@example.com", "password")
     );
+    // when
+    boolean isExpired = confirmationTokenService.isTokenExpired(token);
     // then
-    assertThat(confirmationTokenService.isTokenExpired(token)).isEqualTo(hasExpired);
+    assertThat(isExpired).isEqualTo(hasExpired);
   }
 
   private static Stream<Arguments> testData() {
