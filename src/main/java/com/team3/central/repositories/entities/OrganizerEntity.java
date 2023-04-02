@@ -49,6 +49,7 @@ public class OrganizerEntity implements UserDetails {
     this.email = email;
     this.password = password;
     this.isAuthorised=false;
+    this.status=OrganizerStatus.UNAUTHORIZED;
   }
 
 
