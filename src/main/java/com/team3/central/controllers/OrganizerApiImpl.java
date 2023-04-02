@@ -5,13 +5,17 @@ import com.team3.central.openapi.api.OrganizerApi;
 import com.team3.central.openapi.model.InlineResponse200;
 import com.team3.central.openapi.model.Organizer;
 import com.team3.central.repositories.entities.Event;
+import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.OrganizerService;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -121,5 +125,27 @@ public class OrganizerApiImpl implements OrganizerApi {
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
 
+  /**
+   * GET /organizer : Get organizer account (my account)
+   *
+   * @return successful operation (status code 200) or invalid session (status code 400)
+   */
+  @Override
+  public ResponseEntity<Organizer> getOrganizer() {
+    UserDetails userDetails = getUserDetails();
+    if(userDetails == null) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    Optional<OrganizerEntity> user = organizerService.getOrganizerFromEmail(userDetails.getUsername());
+    if(user.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
+    OrganizerMapper mapper = new OrganizerMapper();
+    return new ResponseEntity<>(mapper.convertToEntity(user.get()), HttpStatus.OK);
+  }
+
+  private UserDetails getUserDetails() {
+    return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  }
 }
