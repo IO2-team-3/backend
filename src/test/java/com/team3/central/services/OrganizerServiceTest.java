@@ -1,17 +1,20 @@
 package com.team3.central.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.team3.central.repositories.OrganizerRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
+import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.enums.OrganizerStatus;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -38,11 +41,35 @@ class OrganizerServiceTest {
   @Mock
   private EmailService emailService;
 
+  private static OrganizerEntity organizer;
+  private static Set<Event> events;
+
   @BeforeAll
   void setUp() {
     MockitoAnnotations.openMocks(this);
     organizerService = new OrganizerService(organizerRepository,
         bCryptPasswordEncoder, confirmationTokenService, emailService, jwtService);
+
+    organizer = new OrganizerEntity();
+    organizer.setId(1L);
+    organizer.setName("Test Organizer");
+    organizer.setEmail("test@example.com");
+    organizer.setStatus(OrganizerStatus.AUTHORIZED);
+
+    Event event1 = new Event();
+    event1.setId(1L);
+    event1.setName("Test Event 1");
+    event1.setOrganizer(organizer);
+
+    Event event2 = new Event();
+    event2.setId(2L);
+    event2.setName("Test Event 2");
+    event2.setOrganizer(organizer);
+
+    events = new HashSet<>();
+    events.add(event1);
+    events.add(event2);
+    organizer.setEvents(events);
   }
 
   @Test
@@ -180,6 +207,92 @@ class OrganizerServiceTest {
     assertThat(response).isNotNull()
         .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
         .containsExactly(HttpStatus.BAD_REQUEST,null);
+  }
+
+  @Test
+  public void deleteOrganizerWhenExists() {
+    // given
+    Long id = organizer.getId();
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(organizer));
+    when(bCryptPasswordEncoder.encode(organizer.getEmail())).thenReturn("hashedEmail");
+
+    // when
+    organizerService.deleteOrganizer(id);
+
+    // then
+    assertThat(organizer)
+        .extracting(OrganizerEntity::getStatus)
+        .isEqualTo(OrganizerStatus.DELETED);
+    assertThat(organizer)
+        .extracting(OrganizerEntity::getEmail)
+        .isEqualTo("hashedEmail");
+  }
+
+  @Test
+  public void throwWhenDeletingNonExistingOrganizer() {
+    // given
+    Long id = organizer.getId();
+    when(organizerRepository.existsById(id)).thenReturn(false);
+
+    assertThatThrownBy(() -> {
+      // when
+      organizerService.deleteOrganizer(id);
+    })
+        // then
+        .isInstanceOf(IndexOutOfBoundsException.class)
+        .hasMessage("Id does not exist");
+  }
+
+  @Test
+  public void getEventsOfOrganizerWhenOrganizerExists() {
+    // given
+    Long id = organizer.getId();
+
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(organizer));
+
+    // when
+    Set<Event> result = organizerService.getEventsOfOrganizer(id);
+
+    // then
+    assertThat(events).isEqualTo(result);
+  }
+
+  @Test
+  public void throwWhenGettingEventsOfNonExistingOrganizer() {
+    // given
+    Long id = organizer.getId();
+
+    when(organizerRepository.existsById(id)).thenReturn(false);
+
+    assertThatThrownBy(() -> {
+      // when
+      organizerService.getEventsOfOrganizer(id);
+    })
+        // then
+        .isInstanceOf(IndexOutOfBoundsException.class)
+        .hasMessage("Id does not exist");
+  }
+
+  @Test
+  public void throwWhenDeletingAlreadyDeletedOrganizer() {
+    // given
+    Long id = 100L;
+    OrganizerEntity deletedOrganizer = new OrganizerEntity();
+    deletedOrganizer.setStatus(OrganizerStatus.DELETED);
+    deletedOrganizer.setId(id);
+
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(deletedOrganizer));
+
+    assertThatThrownBy(() -> {
+      // when
+      organizerService.deleteOrganizer(id);
+    })
+    // then
+        .isInstanceOf(IndexOutOfBoundsException.class)
+        .hasMessage("Organizer already deleted");
   }
 }
 
