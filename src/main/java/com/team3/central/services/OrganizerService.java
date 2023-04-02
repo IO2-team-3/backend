@@ -57,6 +57,7 @@ public class OrganizerService {
 
     OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
     organizerEntity.setIsAuthorised(false);
+    organizerEntity.setStatus(OrganizerStatus.UNAUTHORIZED);
     String encodedPassword = bCryptPasswordEncoder.encode(organizerEntity.getPassword());
     organizerEntity.setPassword(encodedPassword);
     organizerRepository.save(organizerEntity);
@@ -83,6 +84,7 @@ public class OrganizerService {
     }
 
     organizer.get().setIsAuthorised(true);
+    organizer.get().setStatus(OrganizerStatus.AUTHORIZED);
     confirmationToken.get().setConfirmedAt(LocalDateTime.now());
     organizerRepository.saveAndFlush(organizer.get());
     confirmationTokenService.saveConfirmationToken(confirmationToken.get());
