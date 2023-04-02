@@ -274,5 +274,25 @@ class OrganizerServiceTest {
         .isInstanceOf(IndexOutOfBoundsException.class)
         .hasMessage("Id does not exist");
   }
+
+  @Test
+  public void throwWhenDeletingAlreadyDeletedOrganizer() {
+    // given
+    Long id = 100L;
+    OrganizerEntity deletedOrganizer = new OrganizerEntity();
+    deletedOrganizer.setStatus(OrganizerStatus.DELETED);
+    deletedOrganizer.setId(id);
+
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(deletedOrganizer));
+
+    assertThatThrownBy(() -> {
+      // when
+      organizerService.deleteOrganizer(id);
+    })
+    // then
+        .isInstanceOf(IndexOutOfBoundsException.class)
+        .hasMessage("Organizer already deleted");
+  }
 }
 

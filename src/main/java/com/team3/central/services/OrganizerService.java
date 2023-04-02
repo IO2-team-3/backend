@@ -115,6 +115,9 @@ public class OrganizerService {
       throw new IndexOutOfBoundsException("Id does not exist");
     }
     OrganizerEntity organizerToUpdate = organizerRepository.findById(id).get();
+    if(organizerToUpdate.getStatus() == OrganizerStatus.DELETED) {
+      throw new IndexOutOfBoundsException("Organizer already deleted");
+    }
     final String hashedEmail = bCryptPasswordEncoder.encode(organizerToUpdate.getEmail());
 
     organizerToUpdate.setStatus(OrganizerStatus.DELETED);
