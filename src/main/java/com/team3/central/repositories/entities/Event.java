@@ -48,8 +48,7 @@ public class Event {
     private String name;
     private Long freePlace;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition="TEXT")
     private String placeSchema;
 
     private Long maxPlace;
