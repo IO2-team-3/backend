@@ -91,13 +91,13 @@ public class OrganizerService {
   // Otherwise return code -> 400
   public ResponseEntity<String> login(String email, String passowrd) {
     var organizer = organizerRepository.findByEmail(email);
-    if (organizer.isEmpty()) {
+    if (organizer.isEmpty() ) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+    else if (!organizer.get().isAuthorized())  return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     if (!bCryptPasswordEncoder.matches(passowrd, organizer.get().getPassword())) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-
 
     final String jwt = jwtService.generateToken(organizer.get());
     return new ResponseEntity<String>(jwt, HttpStatus.OK);
