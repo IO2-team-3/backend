@@ -4,18 +4,22 @@ import com.team3.central.mappers.OrganizerMapper;
 import com.team3.central.openapi.api.OrganizerApi;
 import com.team3.central.openapi.model.InlineResponse200;
 import com.team3.central.openapi.model.Organizer;
+import com.team3.central.openapi.model.OrganizerForm;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.OrganizerService;
+import io.swagger.annotations.ApiParam;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,15 +36,15 @@ public class OrganizerApiImpl implements OrganizerApi {
    * @return account confirmed (status code 201) or code wrong (status code 400)
    */
   @Override
-  public ResponseEntity<Organizer> confirm(String id, String code) {
+  public ResponseEntity<Void> confirm(String id, String code) {
     var organizerEntityResponseEntity = organizerService.confirm(id, code);
     if (!organizerEntityResponseEntity.hasBody()) {
-      return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
+      return new ResponseEntity<>(organizerEntityResponseEntity.getStatusCode());
     }
     OrganizerMapper mapper = new OrganizerMapper();
     var organizerDto = mapper.convertToEntity(
         Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
-    return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
+    return new ResponseEntity<>(organizerEntityResponseEntity.getStatusCode());
   }
 
   /**
@@ -92,29 +96,18 @@ public class OrganizerApiImpl implements OrganizerApi {
     }
   }
 
-  /**
-   * PATCH /organizer/{id} : Patch orginizer account
-   *
-   * @param id        id of Organizer (required)
-   * @param organizer Update an existent user in the store (optional)
-   * @return patched (status code 202) or id not found (status code 404)
-   */
-  @Override
-  public ResponseEntity<Void> patchOrganizer(String id, Organizer organizer) {
-    return OrganizerApi.super.patchOrganizer(id, organizer);
-  }
 
   /**
    * POST /organizer : Create orginizer account
    *
-   * @param name     name of Organizer (required)
-   * @param email    email of Organizer (required)
-   * @param password password of Organizer (required)
-   * @return successful operation (status code 201) or organizer already exist (status code 400)
+   * @param organizerForm Add event (optional)
+   * @return successful operation (status code 201)
+   *         or email already in use (status code 400)
    */
   @Override
-  public ResponseEntity<Organizer> signUp(String name, String email, String password) {
-    var organizerEntityResponseEntity = organizerService.signUp(name, email, password);
+  public ResponseEntity<Organizer> signUp(OrganizerForm organizerForm) {
+    var organizerEntityResponseEntity = organizerService.signUp(organizerForm.getName(),
+        organizerForm.getEmail(), organizerForm.getPassword());
     if (!organizerEntityResponseEntity.hasBody()) {
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }

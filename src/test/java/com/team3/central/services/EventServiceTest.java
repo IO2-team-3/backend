@@ -36,9 +36,9 @@ class EventServiceTest {
     // given
     String title = "test title";
     String name = "test name";
-    Integer freePlace = 10;
-    Integer startTime = 100;
-    Integer endTime = 2000;
+    Long freePlace = 10L;
+    Long startTime = 100L;
+    Long endTime = 2000L;
     String latitude = "12";
     String longitude = "23";
     Set< Category > categories = Set.of();
@@ -61,8 +61,8 @@ class EventServiceTest {
     // then
     assertThat(result).extracting("title", "name", "freePlace", "startTime", "endTime", "latitude",
             "longitude", "categories", "placeSchema")
-        .containsExactly(title, name, freePlace.longValue(), startTime.longValue(),
-            endTime.longValue(), latitude, longitude, List.of(), placeSchema);
+        .containsExactly(title, name, freePlace, startTime,
+            endTime, latitude, longitude, List.of(), placeSchema);
   }
 
   @Test

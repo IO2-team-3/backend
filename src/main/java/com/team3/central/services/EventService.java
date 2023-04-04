@@ -26,24 +26,24 @@ public class EventService {
     this.eventMapper = new EventMapper();
   }
 
-  public com.team3.central.openapi.model.Event addEvent(String title, String name, Integer freePlace,
-      Integer startTime, Integer endTime, String latitude,
+  public com.team3.central.openapi.model.Event addEvent(String title, String name, Long freePlace,
+      Long startTime, Long endTime, String latitude,
       String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer) {
     Event event = Event.builder()
         .title(title)
         .name(name)
-        .startTime(startTime.longValue())
-        .endTime(endTime.longValue())
+        .startTime(startTime)
+        .endTime(endTime)
         .latitude(latitude)
         .longitude(longitude)
-        .freePlace(freePlace.longValue())
+        .freePlace(freePlace)
         .placeSchema(placeSchema)
         .status(EventStatus.INFUTURE)
         .organizer(organizer)
         .categories(categories)
         .reservations(Set.of())
-        .places(new HashMap<>(freePlace))
-        .maxPlace(freePlace.longValue())
+        .places(new HashMap<>(freePlace.intValue()))
+        .maxPlace(freePlace)
         .build();
 
     eventRepository.save(event);
