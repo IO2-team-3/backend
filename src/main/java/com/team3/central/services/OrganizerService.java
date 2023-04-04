@@ -49,17 +49,14 @@ public class OrganizerService {
 
     if (organizerExists) {
       var organizer = organizerRepository.findByEmail(email).get();
-      if (!organizer.getIsAuthorised()) { // can confirmation token expire? Nothing about it in docs
+      if (!organizer.isAuthorized()) { // can confirmation token expire? Nothing about it in docs
         sendEmailWithConfirmationToken(organizer);
       }
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
-    organizerEntity.setIsAuthorised(false);
-    organizerEntity.setStatus(OrganizerStatus.UNAUTHORIZED);
-    String encodedPassword = bCryptPasswordEncoder.encode(organizerEntity.getPassword());
-    organizerEntity.setPassword(encodedPassword);
+    String encodedPassword = bCryptPasswordEncoder.encode(password);
+    OrganizerEntity organizerEntity = new OrganizerEntity(name, email, encodedPassword);
     organizerRepository.save(organizerEntity);
     sendEmailWithConfirmationToken(organizerEntity);
 
@@ -79,11 +76,10 @@ public class OrganizerService {
     }
 
     var organizer = organizerRepository.findById(organizerId);
-    if (organizer.isEmpty() || organizer.get().getIsAuthorised()) {
+    if (organizer.isEmpty() || organizer.get().isAuthorized()) {
       return new ResponseEntity<OrganizerEntity>(HttpStatus.BAD_REQUEST);
     }
 
-    organizer.get().setIsAuthorised(true);
     organizer.get().setStatus(OrganizerStatus.AUTHORIZED);
     confirmationToken.get().setConfirmedAt(LocalDateTime.now());
     organizerRepository.saveAndFlush(organizer.get());

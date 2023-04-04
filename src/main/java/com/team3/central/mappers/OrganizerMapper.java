@@ -3,6 +3,7 @@ package com.team3.central.mappers;
 import com.team3.central.openapi.model.Organizer;
 import com.team3.central.openapi.model.Organizer.StatusEnum;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.enums.OrganizerStatus;
 
 public class OrganizerMapper {
 
@@ -14,7 +15,7 @@ public class OrganizerMapper {
     organizerDto.setPassword(organizerEntity.getPassword());
 //    organizerDto.setEvents(organizerEntity.getEvents()); TODO: convert entity event to model event
     organizerDto.setStatus(
-        organizerEntity.getIsAuthorised() ? StatusEnum.CONFIRMED : StatusEnum.PENDING);
+        organizerEntity.isAuthorized() ? StatusEnum.CONFIRMED : StatusEnum.PENDING);
     return organizerDto;
   }
 
@@ -25,8 +26,8 @@ public class OrganizerMapper {
     organizerEntity.setName(organizerDto.getEmail());
     organizerEntity.setPassword(organizerDto.getEmail());
 //    organizerEntity.setEvents(organizerDto.getEvents()); TODO: convert entity event to model event
-    organizerEntity.setIsAuthorised(
-        organizerDto.getStatus() == StatusEnum.CONFIRMED);
+    organizerEntity.setStatus(
+        organizerDto.getStatus() == StatusEnum.CONFIRMED ? OrganizerStatus.AUTHORIZED : OrganizerStatus.UNAUTHORIZED);
     return organizerEntity;
   }
 }

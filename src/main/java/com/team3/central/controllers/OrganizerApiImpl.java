@@ -44,7 +44,7 @@ public class OrganizerApiImpl implements OrganizerApi {
   }
 
   /**
-   * DELETE /organizer/{id} : Confirm orginizer account
+   * DELETE /organizer/{id} : Delete orginizer account
    *
    * @param id id of Organizer (required)
    * @return deleted (status code 204) or id not found (status code 404)

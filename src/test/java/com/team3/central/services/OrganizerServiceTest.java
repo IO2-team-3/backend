@@ -99,7 +99,7 @@ class OrganizerServiceTest {
     final String email = "john@example.com";
     final String password = "password";
     final OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
-    organizerEntity.setIsAuthorised(false);
+    organizerEntity.setStatus(OrganizerStatus.UNAUTHORIZED);
     final ConfirmationToken confirmationToken = new ConfirmationToken(organizerEntity);
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizerEntity));
 
@@ -121,7 +121,7 @@ class OrganizerServiceTest {
 
     final OrganizerEntity organizer = new OrganizerEntity(name, email, password);
     organizer.setId(1L);
-    organizer.setIsAuthorised(true);
+    organizer.setStatus(OrganizerStatus.AUTHORIZED);
 
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizer));
 
@@ -155,7 +155,7 @@ class OrganizerServiceTest {
     final String password = "password";
     final String token = "token123";
     final OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
-    organizerEntity.setIsAuthorised(true);
+    organizerEntity.setStatus(OrganizerStatus.AUTHORIZED);
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizerEntity));
     when(jwtService.generateToken(organizerEntity)).thenReturn(token);
     when(bCryptPasswordEncoder.matches(password, organizerEntity.getPassword())).thenReturn(true);
@@ -195,7 +195,7 @@ class OrganizerServiceTest {
     final String password = "password";
     final String token = "token123";
     final OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
-    organizerEntity.setIsAuthorised(true);
+    organizerEntity.setStatus(OrganizerStatus.AUTHORIZED);
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizerEntity));
     when(jwtService.generateToken(organizerEntity)).thenReturn(token);
     when(bCryptPasswordEncoder.matches(password, organizerEntity.getPassword())).thenReturn(false);
