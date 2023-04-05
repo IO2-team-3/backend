@@ -393,6 +393,7 @@ class EventServiceTest {
         .maxPlace(100L)
         .categories(new HashSet<>())
         .organizer(organizer)
+        .status(EventStatus.INFUTURE)
         .build();
 
     Optional<Event> optionalEvent = Optional.of(event);
@@ -458,6 +459,7 @@ class EventServiceTest {
     Event event = Event.builder()
         .id(eventId)
         .organizer(organizer)
+        .status(EventStatus.INFUTURE)
         .build();
 
     Optional<Event> optionalEvent = Optional.of(event);
