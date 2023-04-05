@@ -44,6 +44,14 @@ class EventServiceTest {
     eventService = new EventService(eventRepository, categoryRepository);
   }
 
+  private static Stream<Arguments> testData() {
+    return Stream.of(
+        Arguments.of(EventStatus.CANCELLED),
+        Arguments.of(EventStatus.PENDING),
+        Arguments.of(EventStatus.DONE)
+    );
+  }
+
   @Test
   void addEvent() {
     // given
@@ -459,6 +467,51 @@ class EventServiceTest {
     // when & then
     assertThatThrownBy(() -> eventService.patchEvent(eventId, organizerEmail, eventPatch))
         .isInstanceOf(NullPointerException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("testData")
+  public void patchEventEventNotInFuture(EventStatus status) throws NotFoundException {
+    // given
+    Long eventId = 1L;
+    String organizerEmail = "organizer@example.com";
+    EventPatch eventPatch = new EventPatch()
+        .title("New Event Title")
+        .name("New Event Name")
+        .startTime(1700000000L)
+        .endTime(1710000000L)
+        .latitude("40.1234")
+        .longitude("-73.5678")
+        .placeSchema("Serialized Place Schema")
+        .maxPlace(50L)
+        .addCategoriesIdsItem(1)
+        .addCategoriesIdsItem(2);
+
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(organizerEmail);
+
+    Event event = Event.builder()
+        .id(eventId)
+        .title("Old Event Title")
+        .name("Old Event Name")
+        .startTime(1600000000L)
+        .endTime(1610000000L)
+        .latitude("40.5678")
+        .longitude("-73.1234")
+        .placeSchema("Old Serialized Place Schema")
+        .maxPlace(100L)
+        .categories(new HashSet<>())
+        .organizer(organizer).status(status)
+        .build();
+
+    Optional<Event> optionalEvent = Optional.of(event);
+
+    when(eventRepository.findById(eventId)).thenReturn(optionalEvent);
+
+    // when & then
+    assertThatThrownBy(() -> eventService.patchEvent(eventId, organizerEmail, eventPatch))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessage("Event is not in future");
   }
 
 }

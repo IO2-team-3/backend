@@ -117,6 +117,9 @@ public class EventService {
     if (!event.get().getOrganizer().getEmail().equals(email)) {
       throw new NotFoundException("You are not organizer of this event");
     }
+    if (event.get().getStatus() != EventStatus.INFUTURE) {
+      throw new NotFoundException("Event is not in future");
+    }
 
     if (eventPatch.getMaxPlace() != null) {
       event.get().setMaxPlace(eventPatch.getMaxPlace());
