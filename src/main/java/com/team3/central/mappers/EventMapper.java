@@ -37,7 +37,7 @@ public class EventMapper {
             .collect(Collectors.toList())));
     eventDTO.setPlaces(event.getPlaces()
         .stream()
-        .collect(Collectors.toMap(Place::getId,Place::getFree))
+        .collect(Collectors.toMap(Place::getId, Place::getFree))
     );
 
     return eventDTO;
@@ -65,7 +65,8 @@ public class EventMapper {
   }
 
 
-  public EventWithPlaces convertToEventWithPlaces(com.team3.central.repositories.entities.Event event) {
+  public EventWithPlaces convertToEventWithPlaces(
+      com.team3.central.repositories.entities.Event event) {
     EventWithPlaces eventModel = new EventWithPlaces();
     eventModel.setId(event.getId());
     eventModel.setFreePlace(event.getFreePlace());

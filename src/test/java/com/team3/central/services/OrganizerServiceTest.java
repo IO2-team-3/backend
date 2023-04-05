@@ -2,7 +2,6 @@ package com.team3.central.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,10 +30,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @TestInstance(Lifecycle.PER_CLASS)
 class OrganizerServiceTest {
 
+  private static OrganizerEntity organizer;
+  private static Set<Event> events;
   private OrganizerService organizerService;
   @Mock
   private OrganizerRepository organizerRepository;
-
   @Mock
   private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Mock
@@ -43,9 +43,6 @@ class OrganizerServiceTest {
   private JwtService jwtService;
   @Mock
   private EmailService emailService;
-
-  private static OrganizerEntity organizer;
-  private static Set<Event> events;
 
   @BeforeAll
   void setUp() {
@@ -184,7 +181,7 @@ class OrganizerServiceTest {
     // then
     assertThat(response).isNotNull()
         .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
-        .containsExactly(HttpStatus.BAD_REQUEST,null);
+        .containsExactly(HttpStatus.BAD_REQUEST, null);
   }
 
   @Test
@@ -206,7 +203,7 @@ class OrganizerServiceTest {
     // then
     assertThat(response).isNotNull()
         .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
-        .containsExactly(HttpStatus.BAD_REQUEST,null);
+        .containsExactly(HttpStatus.BAD_REQUEST, null);
   }
 
   @Test
@@ -290,7 +287,7 @@ class OrganizerServiceTest {
       // when
       organizerService.deleteOrganizer(id);
     })
-    // then
+        // then
         .isInstanceOf(IndexOutOfBoundsException.class)
         .hasMessage("Organizer already deleted");
   }

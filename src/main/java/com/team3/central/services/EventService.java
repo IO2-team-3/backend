@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EventService {
+
   private final EventRepository eventRepository;
   private final EventMapper eventMapper;
 
@@ -51,10 +52,14 @@ public class EventService {
     return eventMapper.convertToModel(event);
   }
 
-  public Optional<com.team3.central.openapi.model.EventWithPlaces> getById(Long id) throws NotFoundException {
-    if(!eventRepository.existsById(id)) throw new NotFoundException("Index does not exist");
+  public Optional<com.team3.central.openapi.model.EventWithPlaces> getById(Long id)
+      throws NotFoundException {
+    if (!eventRepository.existsById(id)) {
+      throw new NotFoundException("Index does not exist");
+    }
     return eventRepository.findById(id).map(eventMapper::convertToEventWithPlaces);
   }
+
   public List<com.team3.central.openapi.model.Event> getAllEvents() {
     return eventRepository.findAll()
         .stream()

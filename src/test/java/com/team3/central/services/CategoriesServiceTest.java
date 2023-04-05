@@ -1,6 +1,7 @@
 package com.team3.central.services;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -11,10 +12,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class CategoriesServiceTest {
+
   private static CategoryRepository mockCategoryRepository;
   private static CategoriesService categoriesService;
 

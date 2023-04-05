@@ -32,24 +32,28 @@ public class OrganizerApiImpl implements OrganizerApi {
   /**
    * POST /organizer/{id} : Confirm organizer account
    *
-   * @param id id of Organizer (required)
+   * @param id   id of Organizer (required)
    * @param code code from email (required)
-   * @return nothing to do, account already confirmed (status code 200)
-   *         or account confirmed (status code 202)
-   *         or code wrong (status code 400)
-   *         or organizer id not found (status code 404)
+   * @return nothing to do, account already confirmed (status code 200) or account confirmed (status
+   * code 202) or code wrong (status code 400) or organizer id not found (status code 404)
    */
   @Override
   public ResponseEntity<Void> confirm(String id, String code) {
     HttpStatus status = HttpStatus.ACCEPTED;
-    try{
-      organizerService.confirm(id,code);
+    try {
+      organizerService.confirm(id, code);
     } catch (Exception exception) {
-     if(exception instanceof BadIdentificationException) status = HttpStatus.BAD_REQUEST;
-     else if(exception instanceof WrongTokenException) status = HttpStatus.BAD_REQUEST;
-     else if(exception instanceof AlreadyExistsException) status = HttpStatus.OK;
-     else if(exception instanceof NotFoundException) status = HttpStatus.NOT_FOUND;
-     else status = HttpStatus.INTERNAL_SERVER_ERROR;
+      if (exception instanceof BadIdentificationException) {
+        status = HttpStatus.BAD_REQUEST;
+      } else if (exception instanceof WrongTokenException) {
+        status = HttpStatus.BAD_REQUEST;
+      } else if (exception instanceof AlreadyExistsException) {
+        status = HttpStatus.OK;
+      } else if (exception instanceof NotFoundException) {
+        status = HttpStatus.NOT_FOUND;
+      } else {
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
     }
     return new ResponseEntity<>(status);
   }
@@ -65,19 +69,19 @@ public class OrganizerApiImpl implements OrganizerApi {
     Set<Event> eventsOfOrganizer;
     try {
       eventsOfOrganizer = organizerService.getEventsOfOrganizer(Long.parseLong(id));
-    } catch(IndexOutOfBoundsException e) {
+    } catch (IndexOutOfBoundsException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     boolean hasUncompletedEvents = eventsOfOrganizer.stream()
         .anyMatch(e -> e.getStatus() != EventStatus.DONE && e.getStatus() != EventStatus.CANCELLED);
-    if(hasUncompletedEvents) {
+    if (hasUncompletedEvents) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     try {
       organizerService.deleteOrganizer(Long.parseLong(id));
-    } catch(IndexOutOfBoundsException e) {
+    } catch (IndexOutOfBoundsException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -108,8 +112,7 @@ public class OrganizerApiImpl implements OrganizerApi {
    * POST /organizer : Create orginizer account
    *
    * @param organizerForm Add event (optional)
-   * @return successful operation (status code 201)
-   *         or email already in use (status code 400)
+   * @return successful operation (status code 201) or email already in use (status code 400)
    */
   @Override
   public ResponseEntity<Organizer> signUp(OrganizerForm organizerForm) {
@@ -133,11 +136,12 @@ public class OrganizerApiImpl implements OrganizerApi {
   @Override
   public ResponseEntity<Organizer> getOrganizer() {
     UserDetails userDetails = getUserDetails();
-    if(userDetails == null) {
+    if (userDetails == null) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    Optional<OrganizerEntity> user = organizerService.getOrganizerFromEmail(userDetails.getUsername());
-    if(user.isEmpty()) {
+    Optional<OrganizerEntity> user = organizerService.getOrganizerFromEmail(
+        userDetails.getUsername());
+    if (user.isEmpty()) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 

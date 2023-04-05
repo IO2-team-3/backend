@@ -78,7 +78,8 @@ public class OrganizerService {
       if (confirmationToken.isEmpty() ||
           (confirmationToken.get().getOrganizerEntity().getId() != organizerId) ||
           confirmationTokenService.isTokenExpired(confirmationToken.get())) {
-        throw new WrongTokenException("Confirmation token doesn't exist or is expired or organizerId doesn't match");
+        throw new WrongTokenException(
+            "Confirmation token doesn't exist or is expired or organizerId doesn't match");
       }
 
       var organizer = organizerRepository.findById(organizerId);
@@ -92,8 +93,7 @@ public class OrganizerService {
       confirmationToken.get().setConfirmedAt(LocalDateTime.now());
       organizerRepository.saveAndFlush(organizer.get());
       confirmationTokenService.saveConfirmationToken(confirmationToken.get());
-    }
-    catch (NumberFormatException numberFormatException) {
+    } catch (NumberFormatException numberFormatException) {
       throw new BadIdentificationException("Id in wrong format");
     }
   }
@@ -102,10 +102,11 @@ public class OrganizerService {
   // Otherwise return code -> 400
   public ResponseEntity<String> login(String email, String passowrd) {
     var organizer = organizerRepository.findByEmail(email);
-    if (organizer.isEmpty() ) {
+    if (organizer.isEmpty()) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    } else if (!organizer.get().isAuthorized()) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
-    else if (!organizer.get().isAuthorized())  return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     if (!bCryptPasswordEncoder.matches(passowrd, organizer.get().getPassword())) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -120,11 +121,11 @@ public class OrganizerService {
   }
 
   public void deleteOrganizer(Long id) {
-    if(!organizerRepository.existsById(id)) {
+    if (!organizerRepository.existsById(id)) {
       throw new IndexOutOfBoundsException("Id does not exist");
     }
     OrganizerEntity organizerToUpdate = organizerRepository.findById(id).get();
-    if(organizerToUpdate.getStatus() == OrganizerStatus.DELETED) {
+    if (organizerToUpdate.getStatus() == OrganizerStatus.DELETED) {
       throw new IndexOutOfBoundsException("Organizer already deleted");
     }
     final String hashedEmail = bCryptPasswordEncoder.encode(organizerToUpdate.getEmail());
@@ -135,7 +136,7 @@ public class OrganizerService {
   }
 
   public Set<Event> getEventsOfOrganizer(Long id) {
-    if(!organizerRepository.existsById(id)) {
+    if (!organizerRepository.existsById(id)) {
       throw new IndexOutOfBoundsException("Id does not exist");
     }
     OrganizerEntity organizer = organizerRepository.findById(id).get();
