@@ -84,7 +84,6 @@ public class EventService {
         .collect(Collectors.toList());
   }
 
-  // TODO: Do we notify the user about cancellation?
   public boolean deleteEvent(Long id, String email) {
     Event event = eventRepository.findById(id).orElse(null);
     if (event == null) {

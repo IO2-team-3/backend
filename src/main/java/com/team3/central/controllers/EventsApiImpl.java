@@ -54,12 +54,14 @@ public class EventsApiImpl implements EventsApi {
   }
 
   /**
+   *
    * User needs to be authorized
-   * <p>
+   *
    * DELETE /events/{id} : Cancel event
    *
    * @param id id of Event (required)
-   * @return deleted (status code 204) or id not found (status code 404)
+   * @return deleted (status code 204)
+   *         or id not found (status code 404)
    */
   @Override
   public ResponseEntity<Void> cancelEvent(
@@ -80,8 +82,8 @@ public class EventsApiImpl implements EventsApi {
    * GET /events/getByCategory : Return list of all events in category
    *
    * @param categoryId ID of category (required)
-   * @return successful operation (status code 200) or Invalid category ID supplied (status code
-   * 400)
+   * @return successful operation (status code 200)
+   *         or Invalid category ID supplied (status code 400)
    */
   @Override
   public ResponseEntity<List<Event>> getByCategory(
@@ -90,11 +92,13 @@ public class EventsApiImpl implements EventsApi {
   }
 
   /**
-   * GET /events/{id} : Find event by ID Returns a single event
+   * GET /events/{id} : Find event by ID
+   * Returns a single event
    *
    * @param id ID of event to return (required)
-   * @return successful operation (status code 200) or Invalid ID supplied (status code 400) or
-   * Event not found (status code 404)
+   * @return successful operation (status code 200)
+   *         or Invalid ID supplied (status code 400)
+   *         or Event not found (status code 404)
    */
   @Override
   public ResponseEntity<EventWithPlaces> getEventById(
@@ -115,12 +119,13 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<List<Event>> getEvents() {
-    return new ResponseEntity<>(eventService.getAllEvents(), HttpStatus.OK);
+    return new ResponseEntity<>(eventService.getAllEvents(),HttpStatus.OK);
   }
 
   /**
+   *
    * User needs to be authorized
-   * <p>
+   *
    * GET /events/my : Return list of events made by organizer, according to session
    *
    * @return successful operation (status code 200)
@@ -128,9 +133,7 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<List<Event>> getMyEvents() {
     UserDetails userDetails = getUserDetails();
-    if (userDetails == null) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    if(userDetails == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()), HttpStatus.OK);
   }
 

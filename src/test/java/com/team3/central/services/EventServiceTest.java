@@ -265,7 +265,7 @@ class EventServiceTest {
   }
 
   @Test
-  public void deleteEvent_shouldReturnFalse_whenEventNotFound() {
+  public void deleteEventEventNotFound() {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = 1L;
@@ -279,7 +279,7 @@ class EventServiceTest {
   }
 
   @Test
-  public void deleteEvent_shouldReturnFalse_whenOrganizerEmailMismatch() {
+  public void deleteEventOrganizerEmailMismatch() {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = 1L;
@@ -298,7 +298,7 @@ class EventServiceTest {
 
   @ParameterizedTest
   @MethodSource("testData")
-  public void deleteEvent_shouldReturnFalse_whenEventAlreadyCancelled(EventStatus status) {
+  public void deleteEventEventAlreadyCancelled(EventStatus status) {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = 1L;
@@ -317,7 +317,7 @@ class EventServiceTest {
   }
 
   @Test
-  public void deleteEvent_shouldCancelEvent_whenValidRequest() {
+  public void deleteEventValidRequest() {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = 1L;
@@ -338,7 +338,7 @@ class EventServiceTest {
   }
 
   @Test
-  public void deleteEvent_shouldReturnFalse_whenInvlalidId() {
+  public void deleteEventInvlalidId() {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = -1L;
@@ -354,7 +354,6 @@ class EventServiceTest {
     boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
 
     // then
-    assertTrue(result);
-    assertEquals(EventStatus.CANCELLED, event.getStatus());
+    assertFalse(result);
   }
 }
