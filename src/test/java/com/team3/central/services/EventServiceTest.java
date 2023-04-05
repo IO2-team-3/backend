@@ -62,23 +62,23 @@ class EventServiceTest {
     Long endTime = 2000L;
     String latitude = "12";
     String longitude = "23";
-    Set<Category> categories = Set.of();
+    Set< Category > categories = Set.of();
     String placeSchema = "some place schema in base 64";
     OrganizerEntity organizer = new OrganizerEntity("name", "mail@email.com", "password");
     when(eventRepository.save(any())).thenReturn(new Event());
     // when
     com.team3.central.openapi.model.Event result = eventService.addEvent(
-        title,
-        name,
-        freePlace,
-        startTime,
-        endTime,
-        latitude,
-        longitude,
-        categories,
-        placeSchema,
-        organizer
-    );
+          title,
+          name,
+          freePlace,
+          startTime,
+          endTime,
+          latitude,
+          longitude,
+          categories,
+          placeSchema,
+          organizer
+      );
     // then
     assertThat(result).extracting("title", "name", "freePlace", "startTime", "endTime", "latitude",
             "longitude", "categories", "placeSchema")
@@ -94,7 +94,7 @@ class EventServiceTest {
     final Long maxPlaces = 12L;
     final String title = "test title";
     final String name = "test name";
-    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
     final String placeSchema = "test place schema";
     final String latitude = "12";
     final String longitude = "-12";
@@ -155,7 +155,7 @@ class EventServiceTest {
     final Long maxPlaces = 12L;
     final String title = "test title";
     final String name = "test name";
-    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
     final String placeSchema = "test place schema";
     final String latitude = "12";
     final String longitude = "-12";
@@ -193,7 +193,7 @@ class EventServiceTest {
     final Long maxPlaces = 12L;
     final String title = "test title";
     final String name = "test name";
-    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
     final String placeSchema = "test place schema";
     final String latitude = "12";
     final String longitude = "-12";
@@ -235,7 +235,7 @@ class EventServiceTest {
     final String title = "test title";
     final String name = "test name";
     final Long organizerId = 21L;
-    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
     organizer.setId(organizerId);
     final String placeSchema = "test place schema";
     final String latitude = "12";

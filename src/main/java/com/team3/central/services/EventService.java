@@ -67,22 +67,27 @@ public class EventService {
   }
 
   public List<com.team3.central.openapi.model.Event> getAllEvents() {
-    return eventRepository.findAll()
-        .stream()
-        .map(eventMapper::convertToModel)
-        .collect(Collectors.toList());
+    List<com.team3.central.openapi.model.Event> list = new ArrayList<>();
+    for (Event event : eventRepository.findAll()) {
+      com.team3.central.openapi.model.Event convertToModel = eventMapper.convertToModel(event);
+      list.add(convertToModel);
+    }
+    return list;
   }
 
   public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId) {
-    return eventRepository.findAll()
-        .stream()
-        .filter(event -> event.getCategories()
-            .stream()
-            .map(Category::getId)
-            .collect(Collectors.toList())
-            .contains(categoryId))
-        .map(eventMapper::convertToModel)
-        .collect(Collectors.toList());
+    List<com.team3.central.openapi.model.Event> list = new ArrayList<>();
+    for (Event event : eventRepository.findAll()) {
+      if (event.getCategories()
+          .stream()
+          .map(Category::getId)
+          .collect(Collectors.toList())
+          .contains(categoryId)) {
+        com.team3.central.openapi.model.Event convertToModel = eventMapper.convertToModel(event);
+        list.add(convertToModel);
+      }
+    }
+    return list;
   }
 
   public List<com.team3.central.openapi.model.Event> getForUser(String email) {
@@ -151,15 +156,6 @@ public class EventService {
       event.get().setCategories(set);
     }
     eventRepository.save(event.get());
-  }
-    List<com.team3.central.openapi.model.Event> list = new ArrayList<>();
-    for (Event event : eventRepository.findAll()) {
-      if (event.getOrganizer().getEmail().equals(email)) {
-        com.team3.central.openapi.model.Event convertToModel = eventMapper.convertToModel(event);
-        list.add(convertToModel);
-      }
-    }
-    return list;
   }
 
 }
