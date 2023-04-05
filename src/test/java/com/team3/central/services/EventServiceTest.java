@@ -10,11 +10,12 @@ import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
-import com.team3.central.services.EventService;
+import com.team3.central.services.exceptions.NotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,9 +37,9 @@ class EventServiceTest {
     // given
     String title = "test title";
     String name = "test name";
-    Integer freePlace = 10;
-    Integer startTime = 100;
-    Integer endTime = 2000;
+    Long freePlace = 10L;
+    Long startTime = 100L;
+    Long endTime = 2000L;
     String latitude = "12";
     String longitude = "23";
     Set< Category > categories = Set.of();
@@ -61,10 +62,11 @@ class EventServiceTest {
     // then
     assertThat(result).extracting("title", "name", "freePlace", "startTime", "endTime", "latitude",
             "longitude", "categories", "placeSchema")
-        .containsExactly(title, name, freePlace.longValue(), startTime.longValue(),
-            endTime.longValue(), latitude, longitude, List.of(), placeSchema);
+        .containsExactly(title, name, freePlace, startTime,
+            endTime, latitude, longitude, List.of(), placeSchema);
   }
 
+  @SneakyThrows
   @Test
   void getByExistingId() {
     // given
@@ -100,7 +102,7 @@ class EventServiceTest {
     when(eventRepository.findById(id)).thenReturn(Optional.of(event));
 
     // when
-    Optional<com.team3.central.openapi.model.Event> result = eventService.getById(id);
+    Optional<com.team3.central.openapi.model.EventWithPlaces> result = eventService.getById(id);
 
     // then
     assertThat(result).isPresent().hasValueSatisfying(
@@ -122,7 +124,7 @@ class EventServiceTest {
       eventService.getById(id);
     })
         // then
-        .isInstanceOf(IndexOutOfBoundsException.class)
+        .isInstanceOf(NotFoundException.class)
         .hasMessage("Index does not exist");
   }
 

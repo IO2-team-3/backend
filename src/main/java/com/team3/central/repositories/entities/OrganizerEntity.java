@@ -35,9 +35,9 @@ public class OrganizerEntity implements UserDetails {
   private Long id;
 
   private String name;
-  private Boolean isAuthorised;
   private String email;
   private String password;
+
   @Enumerated(EnumType.STRING)
   private OrganizerStatus status;
 
@@ -48,10 +48,8 @@ public class OrganizerEntity implements UserDetails {
     this.name = name;
     this.email = email;
     this.password = password;
-    this.isAuthorised=false;
-    this.status=OrganizerStatus.UNAUTHORIZED;
+    this.status = OrganizerStatus.UNAUTHORIZED;
   }
-
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -81,5 +79,9 @@ public class OrganizerEntity implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
+  }
+
+  public boolean isAuthorized() {
+    return this.status == OrganizerStatus.AUTHORIZED;
   }
 }

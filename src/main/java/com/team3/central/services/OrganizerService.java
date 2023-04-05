@@ -5,6 +5,10 @@ import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.OrganizerStatus;
+import com.team3.central.services.exceptions.AlreadyExistsException;
+import com.team3.central.services.exceptions.BadIdentificationException;
+import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.services.exceptions.WrongTokenException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -49,17 +53,14 @@ public class OrganizerService {
 
     if (organizerExists) {
       var organizer = organizerRepository.findByEmail(email).get();
-      if (!organizer.getIsAuthorised()) { // can confirmation token expire? Nothing about it in docs
+      if (!organizer.isAuthorized()) { // can confirmation token expire? Nothing about it in docs
         sendEmailWithConfirmationToken(organizer);
       }
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
-    organizerEntity.setIsAuthorised(false);
-    organizerEntity.setStatus(OrganizerStatus.UNAUTHORIZED);
-    String encodedPassword = bCryptPasswordEncoder.encode(organizerEntity.getPassword());
-    organizerEntity.setPassword(encodedPassword);
+    String encodedPassword = bCryptPasswordEncoder.encode(password);
+    OrganizerEntity organizerEntity = new OrganizerEntity(name, email, encodedPassword);
     organizerRepository.save(organizerEntity);
     sendEmailWithConfirmationToken(organizerEntity);
 
@@ -68,40 +69,46 @@ public class OrganizerService {
 
   // If organizer exists and hasn't been authorized and token is valid -> authorize organizer -> code = 202
   // If organizer doesn't exist or has already been confirmed -> do nothing -> code = 400
-  public ResponseEntity<OrganizerEntity> confirm(String id, String token) {
-    long organizerId = Long.parseLong(id);
-    var confirmationToken = confirmationTokenService.getToken(token);
+  public void confirm(String id, String token) throws Exception {
+    try {
+      long organizerId = Long.parseLong(id);
 
-    if (confirmationToken.isEmpty() ||
-        (confirmationToken.get().getOrganizerEntity().getId() != organizerId) ||
-        confirmationTokenService.isTokenExpired(confirmationToken.get())) {
-      return new ResponseEntity<OrganizerEntity>(HttpStatus.BAD_REQUEST);
+      var confirmationToken = confirmationTokenService.getToken(token);
+
+      if (confirmationToken.isEmpty() ||
+          (confirmationToken.get().getOrganizerEntity().getId() != organizerId) ||
+          confirmationTokenService.isTokenExpired(confirmationToken.get())) {
+        throw new WrongTokenException("Confirmation token doesn't exist or is expired or organizerId doesn't match");
+      }
+
+      var organizer = organizerRepository.findById(organizerId);
+      if (organizer.isEmpty()) {
+        throw new NotFoundException("Organizer for id was not found");
+      } else if (organizer.get().isAuthorized()) {
+        throw new AlreadyExistsException("Organizer is already confirmed");
+      }
+
+      organizer.get().setStatus(OrganizerStatus.AUTHORIZED);
+      confirmationToken.get().setConfirmedAt(LocalDateTime.now());
+      organizerRepository.saveAndFlush(organizer.get());
+      confirmationTokenService.saveConfirmationToken(confirmationToken.get());
     }
-
-    var organizer = organizerRepository.findById(organizerId);
-    if (organizer.isEmpty() || organizer.get().getIsAuthorised()) {
-      return new ResponseEntity<OrganizerEntity>(HttpStatus.BAD_REQUEST);
+    catch (NumberFormatException numberFormatException) {
+      throw new BadIdentificationException("Id in wrong format");
     }
-
-    organizer.get().setIsAuthorised(true);
-    organizer.get().setStatus(OrganizerStatus.AUTHORIZED);
-    confirmationToken.get().setConfirmedAt(LocalDateTime.now());
-    organizerRepository.saveAndFlush(organizer.get());
-    confirmationTokenService.saveConfirmationToken(confirmationToken.get());
-    return new ResponseEntity<OrganizerEntity>(organizer.get(), HttpStatus.ACCEPTED);
   }
 
   // If email and password matches to existing Organizer account, then return sessionToken valid for 3 days, code -> 200
   // Otherwise return code -> 400
   public ResponseEntity<String> login(String email, String passowrd) {
     var organizer = organizerRepository.findByEmail(email);
-    if (organizer.isEmpty()) {
+    if (organizer.isEmpty() ) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+    else if (!organizer.get().isAuthorized())  return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     if (!bCryptPasswordEncoder.matches(passowrd, organizer.get().getPassword())) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-
 
     final String jwt = jwtService.generateToken(organizer.get());
     return new ResponseEntity<String>(jwt, HttpStatus.OK);

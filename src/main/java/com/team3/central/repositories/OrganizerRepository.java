@@ -1,6 +1,7 @@
 package com.team3.central.repositories;
 
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.enums.OrganizerStatus;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,8 +20,8 @@ public interface OrganizerRepository extends JpaRepository<OrganizerEntity, Long
   @Transactional
   @Modifying
   @Query("UPDATE OrganizerEntity o " +
-      "SET o.isAuthorised = ?2 " +
+      "SET o.status = ?2 " +
       "WHERE o.id = ?1")
-  int updateIsAuthorised(long id, boolean isAuthorised);
+  int updateIsAuthorised(long id, OrganizerStatus status);
 
 }
