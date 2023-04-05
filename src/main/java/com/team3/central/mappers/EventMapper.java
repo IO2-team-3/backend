@@ -45,7 +45,7 @@ public class EventMapper {
 
   public Event convertToModel(com.team3.central.repositories.entities.Event event) {
     Event eventModel = new Event();
-    eventModel.setId(eventModel.getId());
+    eventModel.setId(event.getId());
     eventModel.setCategories(event.getCategories()
         .stream()
         .map(categoryMapper::convertToModel)
