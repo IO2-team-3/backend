@@ -336,4 +336,25 @@ class EventServiceTest {
     assertTrue(result);
     assertEquals(EventStatus.CANCELLED, event.getStatus());
   }
+
+  @Test
+  public void deleteEvent_shouldReturnFalse_whenInvlalidId() {
+    // given
+    final String ORGANIZER_EMAIL = "organizer@example.com";
+    final Long EVENT_ID = -1L;
+    Event event = new Event();
+    event.setStatus(EventStatus.INFUTURE);
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(ORGANIZER_EMAIL);
+    event.setOrganizer(organizer);
+    when(eventRepository.findById(anyLong())).thenReturn(Optional.empty());
+    when(eventRepository.save(any(Event.class))).thenReturn(event);
+
+    // when
+    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+
+    // then
+    assertTrue(result);
+    assertEquals(EventStatus.CANCELLED, event.getStatus());
+  }
 }
