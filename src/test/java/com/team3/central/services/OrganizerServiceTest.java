@@ -2,8 +2,10 @@ package com.team3.central.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +14,7 @@ import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.OrganizerStatus;
+import com.team3.central.services.exceptions.WrongTokenException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -141,10 +144,7 @@ class OrganizerServiceTest {
     when(confirmationTokenService.getToken(token)).thenReturn(Optional.empty());
 
     // when
-    final ResponseEntity<OrganizerEntity> response = organizerService.confirm(id, token);
-
-    // then
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertThrows(WrongTokenException.class, () -> organizerService.confirm(id, token));
   }
 
   @Test

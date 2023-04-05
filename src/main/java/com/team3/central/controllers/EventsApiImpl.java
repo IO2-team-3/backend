@@ -8,6 +8,7 @@ import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.CategoryService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
+import com.team3.central.services.exceptions.NotFoundException;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
@@ -82,20 +83,22 @@ public class EventsApiImpl implements EventsApi {
   }
 
   /**
-   * GET /events/{id} : Find event by ID Returns a single event
+   * GET /events/{id} : Find event by ID
+   * Returns a single event
    *
    * @param id ID of event to return (required)
-   * @return successful operation (status code 200) or Invalid ID supplied (status code 400) or
-   * Event not found (status code 404)
+   * @return successful operation (status code 200)
+   *         or Invalid ID supplied (status code 400)
+   *         or Event not found (status code 404)
    */
   @Override
   public ResponseEntity<EventWithPlaces> getEventById(
       @ApiParam(value = "ID of event to return", required = true) @PathVariable("id") Long id) {
     try {
-      Optional<Event> event = eventService.getById(id);
+      Optional<EventWithPlaces> event = eventService.getById(id);
       if(event.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       else return new ResponseEntity<>(event.get(),HttpStatus.OK);
-    } catch (IndexOutOfBoundsException exception) {
+    } catch (NotFoundException exception) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }

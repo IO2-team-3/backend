@@ -10,11 +10,12 @@ import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
-import com.team3.central.services.EventService;
+import com.team3.central.services.exceptions.NotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -65,6 +66,7 @@ class EventServiceTest {
             endTime, latitude, longitude, List.of(), placeSchema);
   }
 
+  @SneakyThrows
   @Test
   void getByExistingId() {
     // given
@@ -100,7 +102,7 @@ class EventServiceTest {
     when(eventRepository.findById(id)).thenReturn(Optional.of(event));
 
     // when
-    Optional<com.team3.central.openapi.model.Event> result = eventService.getById(id);
+    Optional<com.team3.central.openapi.model.EventWithPlaces> result = eventService.getById(id);
 
     // then
     assertThat(result).isPresent().hasValueSatisfying(
@@ -122,7 +124,7 @@ class EventServiceTest {
       eventService.getById(id);
     })
         // then
-        .isInstanceOf(IndexOutOfBoundsException.class)
+        .isInstanceOf(NotFoundException.class)
         .hasMessage("Index does not exist");
   }
 

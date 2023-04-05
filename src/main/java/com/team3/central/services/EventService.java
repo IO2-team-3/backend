@@ -7,6 +7,7 @@ import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
+import com.team3.central.services.exceptions.NotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -50,9 +51,9 @@ public class EventService {
     return eventMapper.convertToModel(event);
   }
 
-  public Optional<com.team3.central.openapi.model.Event> getById(Long id) throws IndexOutOfBoundsException {
-    if(!eventRepository.existsById(id)) throw new IndexOutOfBoundsException("Index does not exist");
-    return eventRepository.findById(id).map(eventMapper::convertToModel);
+  public Optional<com.team3.central.openapi.model.EventWithPlaces> getById(Long id) throws NotFoundException {
+    if(!eventRepository.existsById(id)) throw new NotFoundException("Index does not exist");
+    return eventRepository.findById(id).map(eventMapper::convertToEventWithPlaces);
   }
   public List<com.team3.central.openapi.model.Event> getAllEvents() {
     return eventRepository.findAll()

@@ -9,17 +9,18 @@ import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.OrganizerService;
-import io.swagger.annotations.ApiParam;
+import com.team3.central.services.exceptions.AlreadyExistsException;
+import com.team3.central.services.exceptions.BadIdentificationException;
+import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.services.exceptions.WrongTokenException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,22 +30,28 @@ public class OrganizerApiImpl implements OrganizerApi {
   OrganizerService organizerService;
 
   /**
-   * POST /organizer/{id} : Confirm orginizer account
+   * POST /organizer/{id} : Confirm organizer account
    *
-   * @param id   id of Organizer (required)
+   * @param id id of Organizer (required)
    * @param code code from email (required)
-   * @return account confirmed (status code 201) or code wrong (status code 400)
+   * @return nothing to do, account already confirmed (status code 200)
+   *         or account confirmed (status code 202)
+   *         or code wrong (status code 400)
+   *         or organizer id not found (status code 404)
    */
   @Override
   public ResponseEntity<Void> confirm(String id, String code) {
-    var organizerEntityResponseEntity = organizerService.confirm(id, code);
-    if (!organizerEntityResponseEntity.hasBody()) {
-      return new ResponseEntity<>(organizerEntityResponseEntity.getStatusCode());
+    HttpStatus status = HttpStatus.ACCEPTED;
+    try{
+      organizerService.confirm(id,code);
+    } catch (Exception exception) {
+     if(exception instanceof BadIdentificationException) status = HttpStatus.BAD_REQUEST;
+     else if(exception instanceof WrongTokenException) status = HttpStatus.BAD_REQUEST;
+     else if(exception instanceof AlreadyExistsException) status = HttpStatus.OK;
+     else if(exception instanceof NotFoundException) status = HttpStatus.NOT_FOUND;
+     else status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
-    OrganizerMapper mapper = new OrganizerMapper();
-    var organizerDto = mapper.convertToEntity(
-        Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
-    return new ResponseEntity<>(organizerEntityResponseEntity.getStatusCode());
+    return new ResponseEntity<>(status);
   }
 
   /**
@@ -112,7 +119,7 @@ public class OrganizerApiImpl implements OrganizerApi {
       return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
     }
     OrganizerMapper mapper = new OrganizerMapper();
-    var organizerDto = mapper.convertToEntity(
+    var organizerDto = mapper.convertToModel(
         Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
 
     return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
@@ -135,7 +142,7 @@ public class OrganizerApiImpl implements OrganizerApi {
     }
 
     OrganizerMapper mapper = new OrganizerMapper();
-    return new ResponseEntity<>(mapper.convertToEntity(user.get()), HttpStatus.OK);
+    return new ResponseEntity<>(mapper.convertToModel(user.get()), HttpStatus.OK);
   }
 
   private UserDetails getUserDetails() {
