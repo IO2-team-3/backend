@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EventService {
+
   private final EventRepository eventRepository;
   private final EventMapper eventMapper;
 
@@ -55,6 +56,7 @@ public class EventService {
     if(!eventRepository.existsById(id)) throw new NotFoundException("Index does not exist");
     return eventRepository.findById(id).map(eventMapper::convertToEventWithPlaces);
   }
+
   public List<com.team3.central.openapi.model.Event> getAllEvents() {
     return eventRepository.findAll()
         .stream()
@@ -80,5 +82,21 @@ public class EventService {
         .filter(event -> event.getOrganizer().getEmail().equals(email))
         .map(eventMapper::convertToModel)
         .collect(Collectors.toList());
+  }
+
+  public boolean deleteEvent(Long id, String email) {
+    Event event = eventRepository.findById(id).orElse(null);
+    if (event == null) {
+      return false;
+    }
+    if (!event.getOrganizer().getEmail().equals(email)) {
+      return false;
+    }
+    if (event.getStatus() != EventStatus.INFUTURE) {
+      return false;
+    }
+    event.setStatus(EventStatus.CANCELLED);
+    eventRepository.save(event);
+    return true;
   }
 }

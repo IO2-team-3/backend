@@ -2,7 +2,11 @@ package com.team3.central.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.team3.central.repositories.EventRepository;
@@ -15,9 +19,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 class EventServiceTest {
@@ -30,6 +38,14 @@ class EventServiceTest {
   static void setUp() {
     eventRepository = Mockito.mock(EventRepository.class);
     eventService = new EventService(eventRepository);
+  }
+
+  private static Stream<Arguments> testData() {
+    return Stream.of(
+        Arguments.of(EventStatus.CANCELLED),
+        Arguments.of(EventStatus.DONE),
+        Arguments.of(EventStatus.PENDING)
+    );
   }
 
   @Test
@@ -246,5 +262,98 @@ class EventServiceTest {
 
     // then
     assertThat(res).isNotEmpty();
+  }
+
+  @Test
+  public void deleteEventEventNotFound() {
+    // given
+    final String ORGANIZER_EMAIL = "organizer@example.com";
+    final Long EVENT_ID = 1L;
+    when(eventRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+    // when
+    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+
+    // then
+    assertFalse(result);
+  }
+
+  @Test
+  public void deleteEventOrganizerEmailMismatch() {
+    // given
+    final String ORGANIZER_EMAIL = "organizer@example.com";
+    final Long EVENT_ID = 1L;
+    Event event = new Event();
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail("other@example.com");
+    event.setOrganizer(organizer);
+    when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+
+    // when
+    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+
+    // then
+    assertFalse(result);
+  }
+
+  @ParameterizedTest
+  @MethodSource("testData")
+  public void deleteEventEventAlreadyCancelled(EventStatus status) {
+    // given
+    final String ORGANIZER_EMAIL = "organizer@example.com";
+    final Long EVENT_ID = 1L;
+    Event event = new Event();
+    event.setStatus(status);
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(ORGANIZER_EMAIL);
+    event.setOrganizer(organizer);
+    when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+
+    // when
+    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+
+    // then
+    assertFalse(result);
+  }
+
+  @Test
+  public void deleteEventValidRequest() {
+    // given
+    final String ORGANIZER_EMAIL = "organizer@example.com";
+    final Long EVENT_ID = 1L;
+    Event event = new Event();
+    event.setStatus(EventStatus.INFUTURE);
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(ORGANIZER_EMAIL);
+    event.setOrganizer(organizer);
+    when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class))).thenReturn(event);
+
+    // when
+    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+
+    // then
+    assertTrue(result);
+    assertEquals(EventStatus.CANCELLED, event.getStatus());
+  }
+
+  @Test
+  public void deleteEventInvlalidId() {
+    // given
+    final String ORGANIZER_EMAIL = "organizer@example.com";
+    final Long EVENT_ID = -1L;
+    Event event = new Event();
+    event.setStatus(EventStatus.INFUTURE);
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(ORGANIZER_EMAIL);
+    event.setOrganizer(organizer);
+    when(eventRepository.findById(anyLong())).thenReturn(Optional.empty());
+    when(eventRepository.save(any(Event.class))).thenReturn(event);
+
+    // when
+    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+
+    // then
+    assertFalse(result);
   }
 }

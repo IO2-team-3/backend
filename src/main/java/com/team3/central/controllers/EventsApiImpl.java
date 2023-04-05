@@ -66,7 +66,16 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<Void> cancelEvent(
       @ApiParam(value = "id of Event", required = true) @PathVariable("id") String id) {
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    UserDetails userDetails = getUserDetails();
+    if (userDetails == null) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    boolean result = eventService.deleteEvent(Long.parseLong(id), userDetails.getUsername());
+    if (result) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
 
   /**
