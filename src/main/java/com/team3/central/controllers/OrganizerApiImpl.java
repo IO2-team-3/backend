@@ -5,6 +5,7 @@ import com.team3.central.openapi.api.OrganizerApi;
 import com.team3.central.openapi.model.InlineResponse200;
 import com.team3.central.openapi.model.Organizer;
 import com.team3.central.openapi.model.OrganizerForm;
+import com.team3.central.openapi.model.OrganizerPatch;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
@@ -13,14 +14,18 @@ import com.team3.central.services.exceptions.AlreadyExistsException;
 import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.NotFoundException;
 import com.team3.central.services.exceptions.WrongTokenException;
+import io.swagger.annotations.ApiParam;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -148,4 +153,55 @@ public class OrganizerApiImpl implements OrganizerApi {
   private UserDetails getUserDetails() {
     return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
   }
+
+  /**
+   * PATCH /organizer/{id} : Patch orginizer account
+   *
+   * @param id             id of Organizer (required)
+   * @param organizerPatch Add event (optional)
+   * @return nothing to do, no field to patch (status code 200) or patched (status code 202) or
+   * invalid email or password (status code 400) or invalid session (status code 403) or id not
+   * found (status code 404)
+   */
+  @Override
+  public ResponseEntity<Void> patchOrganizer(
+      @ApiParam(value = "id of Organizer", required = true) @PathVariable("id") String id,
+      @ApiParam("Update an existent user in the store") @RequestBody(required = false) @Valid OrganizerPatch organizerPatch) {
+
+    HttpStatus status = HttpStatus.ACCEPTED;
+    try {
+      OrganizerEntity organizerEntity = getOrganizerEntity();
+      if (organizerEntity.getId() != Long.parseLong(id)) {
+        throw new NotFoundException("Wrong id");
+      }
+
+      organizerService.patchOrganizer(Long.parseLong(id), organizerPatch);
+    } catch (Exception exception) {
+      if (exception instanceof NotFoundException) {
+        status = HttpStatus.NOT_FOUND;
+      } else if (exception instanceof IndexOutOfBoundsException) {
+        status = HttpStatus.NOT_FOUND;
+      } else if (exception instanceof BadIdentificationException) {
+        status = HttpStatus.BAD_REQUEST;
+      } else {
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+    }
+    return new ResponseEntity<>(status);
+  }
+
+  private OrganizerEntity getOrganizerEntity()
+      throws NotFoundException, BadIdentificationException {
+    UserDetails userDetails = getUserDetails();
+    if (userDetails == null) {
+      throw new BadIdentificationException("User not found");
+    }
+    Optional<OrganizerEntity> organizer = organizerService.getOrganizerFromEmail(
+        userDetails.getUsername());
+    if (organizer.isEmpty()) {
+      throw new NotFoundException("User with given mail not found");
+    }
+    return organizer.get();
+  }
+
 }

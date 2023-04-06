@@ -1,5 +1,6 @@
 package com.team3.central.services;
 
+import com.team3.central.openapi.model.OrganizerPatch;
 import com.team3.central.repositories.OrganizerRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.Event;
@@ -140,5 +141,23 @@ public class OrganizerService {
     }
     OrganizerEntity organizer = organizerRepository.findById(id).get();
     return organizer.getEvents();
+  }
+
+  public void patchOrganizer(Long id, OrganizerPatch organizerPatch)
+      throws IndexOutOfBoundsException {
+    if (!organizerRepository.existsById(id)) {
+      throw new IndexOutOfBoundsException("Id does not exist");
+    }
+    OrganizerEntity organizerToUpdate = organizerRepository.findById(id).get();
+    if (organizerToUpdate.getStatus() == OrganizerStatus.DELETED) {
+      throw new IndexOutOfBoundsException("Organizer already deleted");
+    }
+    if (organizerPatch.getName() != null) {
+      organizerToUpdate.setName(organizerPatch.getName());
+    }
+    if (organizerPatch.getPassword() != null) {
+      organizerToUpdate.setPassword(bCryptPasswordEncoder.encode(organizerPatch.getPassword()));
+    }
+    organizerRepository.save(organizerToUpdate);
   }
 }
