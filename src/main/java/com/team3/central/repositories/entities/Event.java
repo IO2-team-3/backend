@@ -50,9 +50,6 @@ public class Event {
 
     private Long maxPlace;
 
-    @ElementCollection
-    private Map<Long, Boolean> places;
-
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 

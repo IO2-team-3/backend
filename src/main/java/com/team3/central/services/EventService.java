@@ -61,7 +61,8 @@ public class EventService {
     eventRepository.save(event);
     HashSet<Reservation> reservations = new HashSet<Reservation>(Math.toIntExact(maxPlaces));
     for (int placeId = 0; placeId < maxPlaces; placeId++) {
-      Reservation reservation = Reservation.builder().event(event).reservationToken(null)
+      Reservation reservation = Reservation.builder().event(event)
+          .reservationToken(null) // null indicates that place is free/not reserved
           .placeOnSchema((long) placeId)
           .build();
       reservationRepository.save(reservation);
