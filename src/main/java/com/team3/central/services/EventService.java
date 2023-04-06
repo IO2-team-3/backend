@@ -5,9 +5,11 @@ import com.team3.central.mappers.EventMapper;
 import com.team3.central.openapi.model.EventPatch;
 import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.EventRepository;
+import com.team3.central.repositories.ReservationRepository;
 import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.Reservation;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.exceptions.NotFoundException;
 import java.util.ArrayList;
@@ -26,15 +28,19 @@ public class EventService {
   private final EventRepository eventRepository;
   private final CategoryRepository categoryRepository;
   private final EventMapper eventMapper;
+  private final ReservationRepository reservationRepository;
 
   @Autowired
-  public EventService(EventRepository eventRepository, CategoryRepository categoryRepository) {
+  public EventService(EventRepository eventRepository,
+      ReservationRepository reservationRepository,
+      CategoryRepository categoryRepository) {
     this.eventRepository = eventRepository;
     this.eventMapper = new EventMapper();
+    this.reservationRepository = reservationRepository;
     this.categoryRepository = categoryRepository;
   }
 
-  public com.team3.central.openapi.model.Event addEvent(String title, String name, Long freePlace,
+  public com.team3.central.openapi.model.Event addEvent(String title, String name, Long maxPlaces,
       Long startTime, Long endTime, String latitude,
       String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer) {
     Event event = Event.builder()
@@ -44,17 +50,25 @@ public class EventService {
         .endTime(endTime)
         .latitude(latitude)
         .longitude(longitude)
-        .freePlace(freePlace)
+        .freePlace(maxPlaces)
         .placeSchema(placeSchema)
         .status(EventStatus.INFUTURE)
         .organizer(organizer)
         .categories(categories)
         .reservations(Set.of())
-        .places(new HashMap<>(freePlace.intValue()))
-        .maxPlace(freePlace)
+        .maxPlace(maxPlaces)
         .build();
-
     eventRepository.save(event);
+    HashSet<Reservation> reservations = new HashSet<Reservation>(Math.toIntExact(maxPlaces));
+    for (int placeId = 0; placeId < maxPlaces; placeId++) {
+      Reservation reservation = Reservation.builder().event(event).reservationToken(null)
+          .placeOnSchema((long) placeId)
+          .build();
+      reservationRepository.save(reservation);
+      reservations.add(reservation);
+    }
+    event.setReservations(reservations);
+
     return eventMapper.convertToModel(event);
   }
 
