@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.team3.central.openapi.model.OrganizerPatch;
 import com.team3.central.repositories.OrganizerRepository;
 import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.Event;
@@ -294,5 +295,79 @@ class OrganizerServiceTest {
         .isInstanceOf(IndexOutOfBoundsException.class)
         .hasMessage("Organizer already deleted");
   }
+
+  @Test
+  void testPatchOrganizerWithName() {
+    // given
+    Long id = 1L;
+    String newName = "newName";
+    OrganizerPatch patch = new OrganizerPatch();
+    patch.setName(newName);
+    OrganizerEntity organizerEntity = new OrganizerEntity();
+    organizerEntity.setId(id);
+    organizerEntity.setName("oldName");
+    organizerEntity.setStatus(OrganizerStatus.AUTHORIZED);
+
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(organizerEntity));
+
+    // when
+    organizerService.patchOrganizer(id, patch);
+
+    // then
+    assertEquals(newName, organizerEntity.getName());
+  }
+
+  @Test
+  void testPatchOrganizerWithPassword() {
+    // given
+    Long id = 1L;
+    String newPassword = "newPassword";
+    OrganizerPatch patch = new OrganizerPatch();
+    patch.setPassword(newPassword);
+    OrganizerEntity organizerEntity = new OrganizerEntity();
+    organizerEntity.setId(id);
+    organizerEntity.setPassword("oldPassword");
+    organizerEntity.setStatus(OrganizerStatus.AUTHORIZED);
+
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(organizerEntity));
+    when(bCryptPasswordEncoder.encode(newPassword)).thenReturn("encodedPassword");
+
+    // when
+    organizerService.patchOrganizer(id, patch);
+
+    // then
+    assertEquals("encodedPassword", organizerEntity.getPassword());
+  }
+
+  @Test
+  void testPatchOrganizerWithNonExistingId() {
+    // given
+    Long id = 1L;
+    OrganizerPatch patch = new OrganizerPatch();
+
+    when(organizerRepository.existsById(id)).thenReturn(false);
+
+    // then & then
+    assertThrows(IndexOutOfBoundsException.class, () -> organizerService.patchOrganizer(id, patch));
+  }
+
+  @Test
+  void testPatchOrganizerWithDeletedOrganizer() {
+    // given
+    Long id = 1L;
+    OrganizerPatch patch = new OrganizerPatch();
+    OrganizerEntity organizerEntity = new OrganizerEntity();
+    organizerEntity.setId(id);
+    organizerEntity.setStatus(OrganizerStatus.DELETED);
+
+    when(organizerRepository.existsById(id)).thenReturn(true);
+    when(organizerRepository.findById(id)).thenReturn(Optional.of(organizerEntity));
+
+    // then & then
+    assertThrows(IndexOutOfBoundsException.class, () -> organizerService.patchOrganizer(id, patch));
+  }
+
 }
 
