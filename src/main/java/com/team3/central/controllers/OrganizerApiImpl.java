@@ -181,6 +181,8 @@ public class OrganizerApiImpl implements OrganizerApi {
         status = HttpStatus.NOT_FOUND;
       } else if (exception instanceof IndexOutOfBoundsException) {
         status = HttpStatus.NOT_FOUND;
+      } else if (exception instanceof BadIdentificationException) {
+        status = HttpStatus.BAD_REQUEST;
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
@@ -188,10 +190,11 @@ public class OrganizerApiImpl implements OrganizerApi {
     return new ResponseEntity<>(status);
   }
 
-  private OrganizerEntity getOrganizerEntity() throws NotFoundException {
+  private OrganizerEntity getOrganizerEntity()
+      throws NotFoundException, BadIdentificationException {
     UserDetails userDetails = getUserDetails();
     if (userDetails == null) {
-      throw new NotFoundException("User not found");
+      throw new BadIdentificationException("User not found");
     }
     Optional<OrganizerEntity> organizer = organizerService.getOrganizerFromEmail(
         userDetails.getUsername());
