@@ -17,32 +17,6 @@ public class EventMapper {
     this.categoryMapper = new CategoryMapper();
   }
 
-  public com.team3.central.repositories.entities.Event convertToEntity(EventWithPlaces event) {
-    com.team3.central.repositories.entities.Event eventDTO = new com.team3.central.repositories.entities.Event();
-    eventDTO.setId(event.getId());
-    eventDTO.setFreePlace(event.getFreePlace());
-    eventDTO.setMaxPlace(eventDTO.getMaxPlace());
-    eventDTO.setTitle(event.getTitle());
-    eventDTO.setStartTime(event.getStartTime());
-    eventDTO.setEndTime(event.getEndTime());
-    eventDTO.setLongitude(event.getLongitude());
-    eventDTO.setLatitude(event.getLatitude());
-    eventDTO.setName(event.getName());
-    eventDTO.setPlaceSchema(event.getPlaceSchema());
-    eventDTO.setStatus(eventStatusMapper.convertToEntity(event.getStatus()));
-    eventDTO.setCategories(Set.copyOf(
-        event.getCategories()
-            .stream()
-            .map(categoryMapper::convertToEntity)
-            .collect(Collectors.toList())));
-    eventDTO.setPlaces(event.getPlaces()
-        .stream()
-        .collect(Collectors.toMap(Place::getId,Place::getFree))
-    );
-
-    return eventDTO;
-  }
-
   public Event convertToModel(com.team3.central.repositories.entities.Event event) {
     Event eventModel = new Event();
     eventModel.setId(event.getId());
@@ -60,12 +34,12 @@ public class EventMapper {
     eventModel.setPlaceSchema(event.getPlaceSchema());
     eventModel.setStatus(eventStatusMapper.convertToModel(event.getStatus()));
     eventModel.setTitle(event.getTitle());
-
     return eventModel;
   }
 
 
-  public EventWithPlaces convertToEventWithPlaces(com.team3.central.repositories.entities.Event event) {
+  public EventWithPlaces convertToEventWithPlaces(
+      com.team3.central.repositories.entities.Event event) {
     EventWithPlaces eventModel = new EventWithPlaces();
     eventModel.setId(event.getId());
     eventModel.setFreePlace(event.getFreePlace());
@@ -82,11 +56,14 @@ public class EventMapper {
         .stream()
         .map(categoryMapper::convertToModel)
         .collect(Collectors.toList()));
-    eventModel.setPlaces(event.getPlaces()
-        .entrySet()
-        .stream()
-        .map(this::createPlaceFromEntry)
-        .collect(Collectors.toList()));
+    eventModel.setPlaces(event.getReservations().stream().map(reservation -> {
+      Place place = new Place();
+      place.setId(reservation.getPlaceOnSchema());
+      place.setFree(reservation.getReservationToken()
+          .isEmpty()); // If reservation token is empty, place is free
+      return place;
+    }).collect(Collectors.toList()));
+
     return eventModel;
   }
 

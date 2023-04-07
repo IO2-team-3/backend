@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,32 +16,25 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "reservation")
 public class Reservation {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
   private Long placeOnSchema;
+  private String reservationToken;
 
   @ManyToOne
   @JoinColumn(name = "event_id")
   private Event event;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
-
-  public Reservation(User user, Event event) {
-    this.user = user;
-    this.event = event;
-  }
-
-  public Reservation(User user, Event event, Long placeOnSchema) {
-    this.user = user;
+  public Reservation(Event event, Long placeOnSchema, String reservationToken) {
     this.event = event;
     this.placeOnSchema = placeOnSchema;
+    this.reservationToken = reservationToken;
   }
 }

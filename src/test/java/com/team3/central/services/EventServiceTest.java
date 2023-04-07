@@ -12,12 +12,13 @@ import static org.mockito.Mockito.when;
 import com.team3.central.openapi.model.EventPatch;
 import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.EventRepository;
+import com.team3.central.repositories.ReservationRepository;
 import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.repositories.entities.Reservation;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.exceptions.NotFoundException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ import org.mockito.Mockito;
 class EventServiceTest {
 
   private static EventRepository eventRepository;
+  private static ReservationRepository reservationRepository;
   private static CategoryRepository categoryRepository;
   private static EventService eventService;
 
@@ -41,7 +43,8 @@ class EventServiceTest {
   static void setUp() {
     eventRepository = Mockito.mock(EventRepository.class);
     categoryRepository = Mockito.mock(CategoryRepository.class);
-    eventService = new EventService(eventRepository, categoryRepository);
+    reservationRepository = Mockito.mock(ReservationRepository.class);
+    eventService = new EventService(eventRepository, reservationRepository, categoryRepository);
   }
 
   private static Stream<Arguments> testData() {
@@ -62,23 +65,24 @@ class EventServiceTest {
     Long endTime = 2000L;
     String latitude = "12";
     String longitude = "23";
-    Set< Category > categories = Set.of();
+    Set<Category> categories = Set.of();
     String placeSchema = "some place schema in base 64";
     OrganizerEntity organizer = new OrganizerEntity("name", "mail@email.com", "password");
     when(eventRepository.save(any())).thenReturn(new Event());
+    when(reservationRepository.save(any())).thenReturn(new Reservation());
     // when
     com.team3.central.openapi.model.Event result = eventService.addEvent(
-          title,
-          name,
-          freePlace,
-          startTime,
-          endTime,
-          latitude,
-          longitude,
-          categories,
-          placeSchema,
-          organizer
-      );
+        title,
+        name,
+        freePlace,
+        startTime,
+        endTime,
+        latitude,
+        longitude,
+        categories,
+        placeSchema,
+        organizer
+    );
     // then
     assertThat(result).extracting("title", "name", "freePlace", "startTime", "endTime", "latitude",
             "longitude", "categories", "placeSchema")
@@ -94,7 +98,7 @@ class EventServiceTest {
     final Long maxPlaces = 12L;
     final String title = "test title";
     final String name = "test name";
-    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
     final String placeSchema = "test place schema";
     final String latitude = "12";
     final String longitude = "-12";
@@ -104,7 +108,6 @@ class EventServiceTest {
         .id(id)
         .title(title)
         .name(name)
-        .places(new HashMap<>(maxPlaces.intValue()))
         .maxPlace(maxPlaces)
         .reservations(Set.of())
         .categories(Set.of())
@@ -155,7 +158,7 @@ class EventServiceTest {
     final Long maxPlaces = 12L;
     final String title = "test title";
     final String name = "test name";
-    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
     final String placeSchema = "test place schema";
     final String latitude = "12";
     final String longitude = "-12";
@@ -165,7 +168,6 @@ class EventServiceTest {
         .id(id)
         .title(title)
         .name(name)
-        .places(new HashMap<>(maxPlaces.intValue()))
         .maxPlace(maxPlaces)
         .reservations(Set.of())
         .categories(Set.of())
@@ -193,7 +195,7 @@ class EventServiceTest {
     final Long maxPlaces = 12L;
     final String title = "test title";
     final String name = "test name";
-    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
     final String placeSchema = "test place schema";
     final String latitude = "12";
     final String longitude = "-12";
@@ -206,7 +208,6 @@ class EventServiceTest {
         .id(id)
         .title(title)
         .name(name)
-        .places(new HashMap<>(maxPlaces.intValue()))
         .maxPlace(maxPlaces)
         .reservations(Set.of())
         .categories(Set.of(category))
@@ -235,7 +236,7 @@ class EventServiceTest {
     final String title = "test title";
     final String name = "test name";
     final Long organizerId = 21L;
-    final OrganizerEntity organizer = new OrganizerEntity("someName","some@mail.com","password");
+    final OrganizerEntity organizer = new OrganizerEntity("someName", "some@mail.com", "password");
     organizer.setId(organizerId);
     final String placeSchema = "test place schema";
     final String latitude = "12";
@@ -246,7 +247,6 @@ class EventServiceTest {
         .id(id)
         .title(title)
         .name(name)
-        .places(new HashMap<>(maxPlaces.intValue()))
         .maxPlace(maxPlaces)
         .reservations(Set.of())
         .categories(Set.of())
