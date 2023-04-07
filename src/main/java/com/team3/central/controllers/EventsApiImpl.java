@@ -114,10 +114,9 @@ public class EventsApiImpl implements EventsApi {
       @ApiParam(value = "ID of event to return", required = true) @PathVariable("id") Long id) {
     try {
       Optional<EventWithPlaces> event = eventService.getById(id);
-      if(event.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-      else return new ResponseEntity<>(event.get(),HttpStatus.OK);
+      return new ResponseEntity<>(event.get(),HttpStatus.OK);
     } catch (NotFoundException exception) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 
