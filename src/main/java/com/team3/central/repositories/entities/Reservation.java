@@ -28,7 +28,6 @@ public class Reservation {
   private Long placeOnSchema;
   private String reservationToken;
 
-  private String reservationToken;
   @ManyToOne
   @JoinColumn(name = "event_id")
   private Event event;

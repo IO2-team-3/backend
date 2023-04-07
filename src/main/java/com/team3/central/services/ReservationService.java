@@ -29,27 +29,23 @@ public class ReservationService {
 
   public Reservation makeReservation(Long eventId, Long placeId)
       throws NotFoundException, NoFreePlaceException {
-    var exists = eventRepository.findById(eventId).isPresent();
-    if (!exists) {
-      throw new NotFoundException("Event not exist");
-    }
-    var event = eventRepository.findById(eventId).get();
-    if (event.getStatus() == EventStatus.DONE) {
+
+    Reservation reservation = reservationRepository.findAll().stream()
+        .filter(reservation1 -> reservation1.getEvent().getId().equals(eventId)
+            && reservation1.getPlaceOnSchema().equals(placeId))
+        .findFirst()
+        .orElseThrow(() -> new NotFoundException("No such place in event or such event"));
+
+    if (reservation.getEvent().getStatus() == EventStatus.DONE) {
       throw new NotFoundException("Event is done");
     }
-    if (event.getMaxPlace() - event.getFreePlace() <= 0) {
-      throw new NoFreePlaceException("No free places");
+    if (reservation.getReservationToken() != null) {
+      throw new NoFreePlaceException("Place is already reserved");
     }
-    if (event.getPlaces().get(placeId)) {
-      throw new NoFreePlaceException("Place is taken");
-    }
-    event.getPlaces().replace(placeId, true);
-    eventRepository.save(event);
 
-    Reservation reservation = new Reservation(event, placeId, UUID.randomUUID().toString());
+    reservation.setReservationToken(UUID.randomUUID().toString());
     reservationRepository.save(reservation);
     return reservation;
   }
-
 
 }
