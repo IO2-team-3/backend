@@ -3,6 +3,7 @@ package com.team3.central.controllers;
 import com.team3.central.openapi.api.EventsApi;
 import com.team3.central.openapi.model.Event;
 import com.team3.central.openapi.model.EventForm;
+import com.team3.central.openapi.model.EventPatch;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.CategoryService;
@@ -135,6 +136,22 @@ public class EventsApiImpl implements EventsApi {
     UserDetails userDetails = getUserDetails();
     if(userDetails == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> patchEvent(
+      @ApiParam(value = "id of Event", required = true) @PathVariable("id") String id,
+      @ApiParam(value = "Update an existent user in the store") @Valid @RequestBody(required = false) EventPatch eventPatch) {
+    UserDetails userDetails = getUserDetails();
+    if (userDetails == null) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    try {
+      eventService.patchEvent(Long.valueOf(id), userDetails.getUsername(), eventPatch);
+    } catch (NotFoundException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   private UserDetails getUserDetails() {

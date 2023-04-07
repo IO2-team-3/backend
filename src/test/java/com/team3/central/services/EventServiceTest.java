@@ -9,6 +9,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import com.team3.central.openapi.model.EventPatch;
+import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.EventRepository;
 import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
@@ -16,6 +18,7 @@ import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.exceptions.NotFoundException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,20 +34,21 @@ import org.mockito.Mockito;
 class EventServiceTest {
 
   private static EventRepository eventRepository;
-
+  private static CategoryRepository categoryRepository;
   private static EventService eventService;
 
   @BeforeAll
   static void setUp() {
     eventRepository = Mockito.mock(EventRepository.class);
-    eventService = new EventService(eventRepository);
+    categoryRepository = Mockito.mock(CategoryRepository.class);
+    eventService = new EventService(eventRepository, categoryRepository);
   }
 
   private static Stream<Arguments> testData() {
     return Stream.of(
         Arguments.of(EventStatus.CANCELLED),
-        Arguments.of(EventStatus.DONE),
-        Arguments.of(EventStatus.PENDING)
+        Arguments.of(EventStatus.PENDING),
+        Arguments.of(EventStatus.DONE)
     );
   }
 
@@ -356,4 +360,160 @@ class EventServiceTest {
     // then
     assertFalse(result);
   }
+
+  @Test
+  public void patchEventValid() throws NotFoundException {
+    // given
+    Long eventId = 1L;
+    String organizerEmail = "organizer@example.com";
+    EventPatch eventPatch = new EventPatch()
+        .title("New Event Title")
+        .name("New Event Name")
+        .startTime(1700000000L)
+        .endTime(1710000000L)
+        .latitude("40.1234")
+        .longitude("-73.5678")
+        .placeSchema("Serialized Place Schema")
+        .maxPlace(50L)
+        .addCategoriesIdsItem(1)
+        .addCategoriesIdsItem(2);
+
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(organizerEmail);
+
+    Event event = Event.builder()
+        .id(eventId)
+        .title("Old Event Title")
+        .name("Old Event Name")
+        .startTime(1600000000L)
+        .endTime(1610000000L)
+        .latitude("40.5678")
+        .longitude("-73.1234")
+        .placeSchema("Old Serialized Place Schema")
+        .maxPlace(100L)
+        .categories(new HashSet<>())
+        .organizer(organizer)
+        .status(EventStatus.INFUTURE)
+        .build();
+
+    Optional<Event> optionalEvent = Optional.of(event);
+    when(eventRepository.findById(eventId)).thenReturn(optionalEvent);
+    when(categoryRepository.findById(1L)).thenReturn(new Category());
+    when(categoryRepository.findById(2L)).thenReturn(new Category());
+
+    // when
+    eventService.patchEvent(eventId, organizerEmail, eventPatch);
+  }
+
+  @Test
+  public void patchEventWithInvalidEventId() {
+    // given
+    Long eventId = 1L;
+    String organizerEmail = "organizer@example.com";
+    EventPatch eventPatch = new EventPatch();
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+    // when & then
+    assertThatThrownBy(() -> eventService.patchEvent(eventId, organizerEmail, eventPatch))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessage("Event does not exist");
+  }
+
+  @Test
+  public void patchEventWithInvalidOrganizerEmail() {
+    // given
+    Long eventId = 1L;
+    String organizerEmail = "organizer@example.com";
+    String otherOrganizerEmail = "other.organizer@example.com";
+    EventPatch eventPatch = new EventPatch();
+
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(otherOrganizerEmail);
+
+    Event event = Event.builder()
+        .id(eventId)
+        .organizer(organizer)
+        .build();
+
+    Optional<Event> optionalEvent = Optional.of(event);
+
+    when(eventRepository.findById(eventId)).thenReturn(optionalEvent);
+
+    // when & then
+    assertThatThrownBy(() -> eventService.patchEvent(eventId, organizerEmail, eventPatch))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessage("You are not organizer of this event");
+  }
+
+  @Test
+  public void patchEventWithNullEventPatch() {
+    // given
+    Long eventId = 1L;
+    String organizerEmail = "organizer@example.com";
+    EventPatch eventPatch = null;
+
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(organizerEmail);
+
+    Event event = Event.builder()
+        .id(eventId)
+        .organizer(organizer)
+        .status(EventStatus.INFUTURE)
+        .build();
+
+    Optional<Event> optionalEvent = Optional.of(event);
+
+    when(eventRepository.findById(eventId)).thenReturn(optionalEvent);
+
+    // when & then
+    assertThatThrownBy(() -> eventService.patchEvent(eventId, organizerEmail, eventPatch))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("testData")
+  public void patchEventEventNotInFuture(EventStatus status) throws NotFoundException {
+    // given
+    Long eventId = 1L;
+    String organizerEmail = "organizer@example.com";
+    EventPatch eventPatch = new EventPatch()
+        .title("New Event Title")
+        .name("New Event Name")
+        .startTime(1700000000L)
+        .endTime(1710000000L)
+        .latitude("40.1234")
+        .longitude("-73.5678")
+        .placeSchema("Serialized Place Schema")
+        .maxPlace(50L)
+        .addCategoriesIdsItem(1)
+        .addCategoriesIdsItem(2);
+
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setEmail(organizerEmail);
+
+    Event event = Event.builder()
+        .id(eventId)
+        .title("Old Event Title")
+        .name("Old Event Name")
+        .startTime(1600000000L)
+        .endTime(1610000000L)
+        .latitude("40.5678")
+        .longitude("-73.1234")
+        .placeSchema("Old Serialized Place Schema")
+        .maxPlace(100L)
+        .categories(new HashSet<>())
+        .organizer(organizer).status(status)
+        .build();
+
+    Optional<Event> optionalEvent = Optional.of(event);
+
+    when(eventRepository.findById(eventId)).thenReturn(optionalEvent);
+
+    // when & then
+    assertThatThrownBy(() -> eventService.patchEvent(eventId, organizerEmail, eventPatch))
+        .isInstanceOf(NotFoundException.class)
+        .hasMessage("Event is not in future");
+  }
+
 }

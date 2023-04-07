@@ -2,13 +2,17 @@ package com.team3.central.services;
 
 
 import com.team3.central.mappers.EventMapper;
+import com.team3.central.openapi.model.EventPatch;
+import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.EventRepository;
 import com.team3.central.repositories.entities.Category;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.exceptions.NotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,12 +24,14 @@ import org.springframework.stereotype.Service;
 public class EventService {
 
   private final EventRepository eventRepository;
+  private final CategoryRepository categoryRepository;
   private final EventMapper eventMapper;
 
   @Autowired
-  public EventService(EventRepository eventRepository) {
+  public EventService(EventRepository eventRepository, CategoryRepository categoryRepository) {
     this.eventRepository = eventRepository;
     this.eventMapper = new EventMapper();
+    this.categoryRepository = categoryRepository;
   }
 
   public com.team3.central.openapi.model.Event addEvent(String title, String name, Long freePlace,
@@ -52,8 +58,11 @@ public class EventService {
     return eventMapper.convertToModel(event);
   }
 
-  public Optional<com.team3.central.openapi.model.EventWithPlaces> getById(Long id) throws NotFoundException {
-    if(!eventRepository.existsById(id)) throw new NotFoundException("Index does not exist");
+  public Optional<com.team3.central.openapi.model.EventWithPlaces> getById(Long id)
+      throws NotFoundException {
+    if (!eventRepository.existsById(id)) {
+      throw new NotFoundException("Index does not exist");
+    }
     return eventRepository.findById(id).map(eventMapper::convertToEventWithPlaces);
   }
 
@@ -99,4 +108,49 @@ public class EventService {
     eventRepository.save(event);
     return true;
   }
+
+  public void patchEvent(Long id, String email, EventPatch eventPatch) throws NotFoundException {
+    var event = eventRepository.findById(id);
+    if (event.isEmpty()) {
+      throw new NotFoundException("Event does not exist");
+    }
+    if (!event.get().getOrganizer().getEmail().equals(email)) {
+      throw new NotFoundException("You are not organizer of this event");
+    }
+    if (event.get().getStatus() != EventStatus.INFUTURE) {
+      throw new NotFoundException("Event is not in future");
+    }
+
+    if (eventPatch.getMaxPlace() != null) {
+      event.get().setMaxPlace(eventPatch.getMaxPlace());
+    }
+    if (eventPatch.getStartTime() != null) {
+      event.get().setStartTime(eventPatch.getStartTime());
+    }
+    if (eventPatch.getTitle() != null) {
+      event.get().setTitle(eventPatch.getTitle());
+    }
+    if (eventPatch.getName() != null) {
+      event.get().setName(eventPatch.getName());
+    }
+    if (eventPatch.getEndTime() != null) {
+      event.get().setEndTime(eventPatch.getEndTime());
+    }
+    if (eventPatch.getPlaceSchema() != null) {
+      event.get().setPlaceSchema(eventPatch.getPlaceSchema());
+    }
+    if (eventPatch.getCategoriesIds() != null) {
+      Set<Category> set = new HashSet<>();
+      for (Integer integer : eventPatch.getCategoriesIds()) {
+        Category category = categoryRepository.findById(integer.longValue());
+        if (category == null) {
+          throw new NotFoundException("Category does not exist");
+        }
+        set.add(category);
+      }
+      event.get().setCategories(set);
+    }
+    eventRepository.save(event.get());
+  }
+
 }
