@@ -12,8 +12,6 @@ import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.Reservation;
 import com.team3.central.repositories.entities.enums.EventStatus;
 import com.team3.central.services.exceptions.NotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
