@@ -49,9 +49,16 @@ public class EventsApiImpl implements EventsApi {
   public ResponseEntity<Event> addEvent(@ApiParam(value = "Add event") @Valid @RequestBody(required = false) EventForm eventForm) {
     UserDetails userDetails = getUserDetails();
     OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername()).get();
+    // ?TODO/BUG?: even though eventFrom has some categories, they are not added to the event.
+    // I'm not sure if its logically possible and correct to add categories since, categories are per whole app,
+    // not per event/organizer
+    // SHOULD BE INVESTIGATED!
+
+    // BUG: if token is invalid/expired, it returns 500, not 403
+    // BUG: there is no validation for eventFrom params, so it is possible to create event with empty title, name, etc.
     Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(), eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(), eventForm.getLatitude(), eventForm.getLongitude(),
         categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()), eventForm.getPlaceSchema(), organizer);
-    return new ResponseEntity<>(event ,HttpStatus.OK);
+    return new ResponseEntity<>(event ,HttpStatus.CREATED);
   }
 
   /**
@@ -89,6 +96,7 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<List<Event>> getByCategory(
       @NotNull @ApiParam(value = "ID of category", required = true) @Valid @RequestParam(value = "categoryId", required = true) Long categoryId) {
+    // BUG: shoudl return 400, when invalid categoru id is supplied, but reuthrs 200
     return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
   }
 

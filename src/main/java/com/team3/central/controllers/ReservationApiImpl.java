@@ -28,8 +28,12 @@ public class ReservationApiImpl implements ReservationApi {
   @Override
   public ResponseEntity<Void> deleteReservation(
       @RequestHeader(value = "reservationToken", required = true) String reservationToken) {
-
-    return null;
+    try {
+      reservationService.deleteReservation(reservationToken);
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**

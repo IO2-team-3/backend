@@ -23,8 +23,13 @@ public class ReservationService {
     this.eventRepository = eventRepository;
   }
 
-  public void deleteReservation(String reservationToken) {
-//    reservationRepository.deleteByToken(reservationToken);
+  public void deleteReservation(String reservationToken) throws NotFoundException {
+    Reservation reservation = reservationRepository.findByreservationToken(reservationToken);
+    if(reservation == null) {
+      throw new NotFoundException("No such reservation");
+    }
+    reservation.setReservationToken(null);
+    reservationRepository.save(reservation);
   }
 
   public Reservation makeReservation(Long eventId, Long placeId)
@@ -36,8 +41,9 @@ public class ReservationService {
         .findFirst()
         .orElseThrow(() -> new NotFoundException("No such place in event or such event"));
 
-    if (reservation.getEvent().getStatus() == EventStatus.DONE) {
-      throw new NotFoundException("Event is done");
+    if (reservation.getEvent().getStatus() == EventStatus.DONE
+        || reservation.getEvent().getStatus() == EventStatus.CANCELLED) {
+      throw new NotFoundException("Event is done or deleted");
     }
     if (reservation.getReservationToken() != null) {
       throw new NoFreePlaceException("Place is already reserved");
