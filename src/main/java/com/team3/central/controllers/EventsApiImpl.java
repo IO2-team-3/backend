@@ -52,7 +52,6 @@ public class EventsApiImpl implements EventsApi {
     OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
         .get();
 
-    // BUG: if token is invalid/expired, it returns 500, not 403
     try {
       Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(),
           eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(),
@@ -94,14 +93,18 @@ public class EventsApiImpl implements EventsApi {
    * GET /events/getByCategory : Return list of all events in category
    *
    * @param categoryId ID of category (required)
-   * @return successful operation (status code 200)
-   *         or Invalid category ID supplied (status code 400)
+   * @return successful operation (status code 200) or Invalid category ID supplied (status code
+   * 400)
    */
   @Override
   public ResponseEntity<List<Event>> getByCategory(
       @NotNull @ApiParam(value = "ID of category", required = true) @Valid @RequestParam(value = "categoryId", required = true) Long categoryId) {
-    // It's assumed, that valid category ID is any integer
-    return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
+    try {
+      return new ResponseEntity<>(
+          eventService.getEventsByCategory(categoryId), HttpStatus.OK);
+    } catch (IllegalArgumentException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**

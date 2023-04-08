@@ -90,7 +90,11 @@ public class EventService {
         .collect(Collectors.toList());
   }
 
-  public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId) {
+  public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId)
+      throws IllegalArgumentException {
+    if (categoryId == null || categoryId < 0) {
+      throw new IllegalArgumentException("Category id cannot be null or negative");
+    }
     return eventRepository.findAll()
         .stream()
         .filter(event -> event.getCategories()
