@@ -2855,7 +2855,7 @@
 									"script": {
 										"id": "a90e93ad-5d3e-49ce-aa78-27a839421181",
 										"exec": [
-											"var baseUrl  = 'http://localhost:8080/';\r",
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
@@ -3126,8 +3126,7 @@
 									"script": {
 										"id": "43bbdca2-bd55-4c98-95f3-2f5b70b7aa50",
 										"exec": [
-											"var baseUrl  = 'http://localhost:8080/';\r",
-											"\r",
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
@@ -3598,7 +3597,7 @@
 											"script": {
 												"id": "b8c812d3-f721-4436-8463-35b5fb21fa68",
 												"exec": [
-													"var baseUrl  = 'http://localhost:8080/';\r",
+													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 													"\r",
 													"(async function() {\r",
 													"  try {\r",
@@ -3782,8 +3781,7 @@
 											"script": {
 												"id": "3c90363e-1c58-4e91-9e71-f43e19ff219e",
 												"exec": [
-													"var baseUrl  = 'http://localhost:8080/';\r",
-													"\r",
+													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 													"\r",
 													"(async function() {\r",
 													"  try {\r",
@@ -4072,8 +4070,7 @@
 											"script": {
 												"id": "4c5f627a-c8ed-4eb9-93e2-99575063a369",
 												"exec": [
-													"var baseUrl  = 'http://localhost:8080/';\r",
-													"\r",
+													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 													"\r",
 													"(async function() {\r",
 													"  try {\r",
@@ -4290,14 +4287,14 @@
 							"response": []
 						},
 						{
-							"name": "POST: Add new event",
+							"name": "POST: Add new event (fix test2)",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"id": "b25a7a7a-73fa-4d82-9372-463a6dab075a",
 										"exec": [
-											"var baseUrl  = 'http://localhost:8080/';\r",
+											"var baseUrl  =pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
@@ -4549,8 +4546,7 @@
 									"script": {
 										"id": "c2f67f54-91d6-453f-b7af-373c6f2d7aec",
 										"exec": [
-											"var baseUrl  = 'http://localhost:8080/';\r",
-											"\r",
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
@@ -4660,7 +4656,7 @@
 									"script": {
 										"id": "c137476f-88eb-450c-b495-f4bf919404b9",
 										"exec": [
-											"var baseUrl  = 'http://localhost:8080/';\r",
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
@@ -4772,7 +4768,7 @@
 							"script": {
 								"id": "6a898661-5ed2-4185-a63c-7e9e9cbcbf93",
 								"exec": [
-									"const baseUrl = 'http://localhost:8080/';\r",
+									"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 									"\r",
 									"// Test Case: Organizer login\r",
 									"function testLogin() {\r",
