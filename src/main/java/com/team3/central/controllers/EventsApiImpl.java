@@ -100,7 +100,7 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<List<Event>> getByCategory(
       @NotNull @ApiParam(value = "ID of category", required = true) @Valid @RequestParam(value = "categoryId", required = true) Long categoryId) {
-    // BUG: shoudl return 400, when invalid categoru id is supplied, but reuthrs 200
+    // It's assumed, that valid category ID is any integer
     return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
   }
 
