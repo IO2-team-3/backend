@@ -46,19 +46,23 @@ public class EventsApiImpl implements EventsApi {
    *         or invalid session (status code 403)
    */
   @Override
-  public ResponseEntity<Event> addEvent(@ApiParam(value = "Add event") @Valid @RequestBody(required = false) EventForm eventForm) {
+  public ResponseEntity<Event> addEvent(
+      @ApiParam(value = "Add event") @Valid @RequestBody(required = false) EventForm eventForm) {
     UserDetails userDetails = getUserDetails();
-    OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername()).get();
-    // ?TODO/BUG?: even though eventFrom has some categories, they are not added to the event.
-    // I'm not sure if its logically possible and correct to add categories since, categories are per whole app,
-    // not per event/organizer
-    // SHOULD BE INVESTIGATED!
+    OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
+        .get();
 
     // BUG: if token is invalid/expired, it returns 500, not 403
-    // BUG: there is no validation for eventFrom params, so it is possible to create event with empty title, name, etc.
-    Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(), eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(), eventForm.getLatitude(), eventForm.getLongitude(),
-        categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()), eventForm.getPlaceSchema(), organizer);
-    return new ResponseEntity<>(event ,HttpStatus.CREATED);
+    try {
+      Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(),
+          eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(),
+          eventForm.getLatitude(), eventForm.getLongitude(),
+          categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()),
+          eventForm.getPlaceSchema(), organizer);
+      return new ResponseEntity<>(event, HttpStatus.CREATED);
+    } catch (IllegalArgumentException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**

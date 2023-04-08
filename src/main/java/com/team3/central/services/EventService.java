@@ -40,7 +40,11 @@ public class EventService {
 
   public com.team3.central.openapi.model.Event addEvent(String title, String name, Long maxPlaces,
       Long startTime, Long endTime, String latitude,
-      String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer) {
+      String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer)
+      throws IllegalArgumentException {
+    if(title == null || name == null || maxPlaces == null || startTime == null || endTime == null || organizer == null) {
+      throw new IllegalArgumentException("Tile, name, maxPlaces, startTime, endTime and organizer cannot be null");
+    }
     Event event = Event.builder()
         .title(title)
         .name(name)
