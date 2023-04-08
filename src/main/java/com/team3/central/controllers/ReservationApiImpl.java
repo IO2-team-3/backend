@@ -1,5 +1,6 @@
 package com.team3.central.controllers;
 
+import com.team3.central.mappers.ReservationMapper;
 import com.team3.central.openapi.api.ReservationApi;
 import com.team3.central.openapi.model.ReservationDTO;
 import com.team3.central.repositories.entities.Reservation;
@@ -51,12 +52,9 @@ public class ReservationApiImpl implements ReservationApi {
 
     try {
       Reservation reservation = reservationService.makeReservation(eventId, placeID);
-      ReservationDTO reservationDTO = new ReservationDTO();
-      reservationDTO.setReservationToken(reservation.getReservationToken());
-      reservationDTO.setPlaceId(reservation.getPlaceOnSchema());
-      reservationDTO.setEventId(reservation.getEvent().getId());
-      //TODO: add mapper
-      return new ResponseEntity<>(reservationDTO, HttpStatus.CREATED);
+      ReservationMapper reservationMappper = new ReservationMapper();
+      return new ResponseEntity<>(reservationMappper.convertToModel(reservation),
+          HttpStatus.CREATED);
     } catch (Exception e) {
       if (e instanceof NotFoundException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
