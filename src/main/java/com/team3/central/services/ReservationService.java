@@ -34,13 +34,11 @@ public class ReservationService {
 
   public Reservation makeReservation(Long eventId, Long placeId)
       throws NotFoundException, NoFreePlaceException {
+    Reservation reservation = reservationRepository.findByEventIdAndPlaceOnSchema(eventId, placeId);
 
-    Reservation reservation = reservationRepository.findAll().stream()
-        .filter(reservation1 -> reservation1.getEvent().getId().equals(eventId)
-            && reservation1.getPlaceOnSchema().equals(placeId))
-        .findFirst()
-        .orElseThrow(() -> new NotFoundException("No such place in event or such event"));
-
+    if(reservation == null) {
+      throw new NotFoundException("No such place in event or such event");
+    }
     if (reservation.getEvent().getStatus() == EventStatus.DONE
         || reservation.getEvent().getStatus() == EventStatus.CANCELLED) {
       throw new NotFoundException("Event is done or deleted");
