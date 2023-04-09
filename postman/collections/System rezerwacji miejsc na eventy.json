@@ -4292,9 +4292,9 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "b25a7a7a-73fa-4d82-9372-463a6dab075a",
+										"id": "6a928333-d22a-4f8c-a143-85982f6c610a",
 										"exec": [
-											"var baseUrl  =pm.environment.get(\"baseUrl\");\r",
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
