@@ -40,7 +40,11 @@ public class EventService {
 
   public com.team3.central.openapi.model.Event addEvent(String title, String name, Long maxPlaces,
       Long startTime, Long endTime, String latitude,
-      String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer) {
+      String longitude, Set<Category> categories, String placeSchema, OrganizerEntity organizer)
+      throws IllegalArgumentException {
+    if(title == null || name == null || maxPlaces == null || startTime == null || endTime == null || organizer == null) {
+      throw new IllegalArgumentException("Tile, name, maxPlaces, startTime, endTime and organizer cannot be null");
+    }
     Event event = Event.builder()
         .title(title)
         .name(name)
@@ -86,7 +90,11 @@ public class EventService {
         .collect(Collectors.toList());
   }
 
-  public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId) {
+  public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId)
+      throws IllegalArgumentException {
+    if (categoryId == null || categoryId < 0) {
+      throw new IllegalArgumentException("Category id cannot be null or negative");
+    }
     return eventRepository.findAll()
         .stream()
         .filter(event -> event.getCategories()
@@ -134,8 +142,22 @@ public class EventService {
       throw new NotFoundException("Event is not in future");
     }
 
+    // If we change maxPlace (available place in event), then we delete all reservations and create
+    // new one. Old reservations are not valid anymore
     if (eventPatch.getMaxPlace() != null) {
       event.get().setMaxPlace(eventPatch.getMaxPlace());
+      reservationRepository.deleteAll(event.get().getReservations());
+      HashSet<Reservation> reservations = new HashSet<Reservation>(
+          Math.toIntExact(eventPatch.getMaxPlace()));
+      for (int placeId = 0; placeId < eventPatch.getMaxPlace(); placeId++) {
+        Reservation reservation = Reservation.builder().event(event.get())
+            .reservationToken(null) // null indicates that place is free/not reserved
+            .placeOnSchema((long) placeId)
+            .build();
+        reservationRepository.save(reservation);
+        reservations.add(reservation);
+      }
+      event.get().setReservations(reservations);
     }
     if (eventPatch.getStartTime() != null) {
       event.get().setStartTime(eventPatch.getStartTime());

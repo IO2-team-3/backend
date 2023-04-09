@@ -46,12 +46,22 @@ public class EventsApiImpl implements EventsApi {
    *         or invalid session (status code 403)
    */
   @Override
-  public ResponseEntity<Event> addEvent(@ApiParam(value = "Add event") @Valid @RequestBody(required = false) EventForm eventForm) {
+  public ResponseEntity<Event> addEvent(
+      @ApiParam(value = "Add event") @Valid @RequestBody(required = false) EventForm eventForm) {
     UserDetails userDetails = getUserDetails();
-    OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername()).get();
-    Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(), eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(), eventForm.getLatitude(), eventForm.getLongitude(),
-        categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()), eventForm.getPlaceSchema(), organizer);
-    return new ResponseEntity<>(event ,HttpStatus.OK);
+    OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
+        .get();
+
+    try {
+      Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(),
+          eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(),
+          eventForm.getLatitude(), eventForm.getLongitude(),
+          categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()),
+          eventForm.getPlaceSchema(), organizer);
+      return new ResponseEntity<>(event, HttpStatus.CREATED);
+    } catch (IllegalArgumentException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**
@@ -83,13 +93,18 @@ public class EventsApiImpl implements EventsApi {
    * GET /events/getByCategory : Return list of all events in category
    *
    * @param categoryId ID of category (required)
-   * @return successful operation (status code 200)
-   *         or Invalid category ID supplied (status code 400)
+   * @return successful operation (status code 200) or Invalid category ID supplied (status code
+   * 400)
    */
   @Override
   public ResponseEntity<List<Event>> getByCategory(
       @NotNull @ApiParam(value = "ID of category", required = true) @Valid @RequestParam(value = "categoryId", required = true) Long categoryId) {
-    return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
+    try {
+      return new ResponseEntity<>(
+          eventService.getEventsByCategory(categoryId), HttpStatus.OK);
+    } catch (IllegalArgumentException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
   }
 
   /**
@@ -106,10 +121,9 @@ public class EventsApiImpl implements EventsApi {
       @ApiParam(value = "ID of event to return", required = true) @PathVariable("id") Long id) {
     try {
       Optional<EventWithPlaces> event = eventService.getById(id);
-      if(event.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-      else return new ResponseEntity<>(event.get(),HttpStatus.OK);
+      return new ResponseEntity<>(event.get(),HttpStatus.OK);
     } catch (NotFoundException exception) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 

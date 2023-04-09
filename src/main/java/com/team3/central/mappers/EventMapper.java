@@ -4,7 +4,6 @@ import com.team3.central.openapi.model.Event;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.openapi.model.Place;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class EventMapper {
@@ -60,7 +59,7 @@ public class EventMapper {
       Place place = new Place();
       place.setId(reservation.getPlaceOnSchema());
       place.setFree(reservation.getReservationToken()
-          .isEmpty()); // If reservation token is empty, place is free
+          == null); // If reservation token is null, then place is free
       return place;
     }).collect(Collectors.toList()));
 

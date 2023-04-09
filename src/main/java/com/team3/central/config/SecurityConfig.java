@@ -1,11 +1,9 @@
 package com.team3.central.config;
 
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -33,11 +31,13 @@ public class SecurityConfig {
         .disable()
         .cors(Customizer.withDefaults())
         .authorizeHttpRequests()
-        .antMatchers(HttpMethod.POST, "/organizer", "/organizer/{id}")
-          .permitAll()
-        .antMatchers(HttpMethod.GET ,"/ping","/organizer/**","/swagger-ui/**",
-            "/v3/api-docs/**", "/events","/events/{id}","/events/getByCategory", "/categories")
-            .permitAll()
+        .antMatchers(HttpMethod.POST, "/organizer", "/organizer/{id}", "/reservation","/categories")
+        .permitAll()
+        .antMatchers(HttpMethod.GET, "/ping", "/organizer/**", "/swagger-ui/**",
+            "/v3/api-docs/**", "/events", "/events/{id}", "/events/getByCategory", "/categories")
+        .permitAll()
+        .antMatchers(HttpMethod.DELETE, "/reservation")
+        .permitAll()
         .anyRequest()
         .authenticated()
         .and()

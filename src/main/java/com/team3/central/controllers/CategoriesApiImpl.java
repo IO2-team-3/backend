@@ -33,7 +33,7 @@ public class CategoriesApiImpl implements CategoriesApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         Category category = categoriesService.addCategory(categoryName);
-        return new ResponseEntity<>(category, HttpStatus.OK);
+        return new ResponseEntity<>(category, HttpStatus.CREATED);
     }
 
     /**
