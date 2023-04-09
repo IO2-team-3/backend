@@ -14,10 +14,16 @@ public class CategoryService {
 
   private final CategoryRepository categoryRepository;
 
-  public Set<Category> getCategoriesFromIds(List<Integer> categoriesIds) {
-    return categoryRepository.findAll()
+  public Set<Category> getCategoriesFromIds(List<Integer> categoriesIds)
+      throws IllegalArgumentException {
+
+    Set<Category> categories = categoryRepository.findAll()
         .stream()
         .filter(category -> categoriesIds.contains(category.getId().intValue()))
         .collect(Collectors.toSet());
+    if(categories.size() != categoriesIds.size()) {
+      throw new IllegalArgumentException("Invalid categories");
+    }
+    return categories;
   }
 }
