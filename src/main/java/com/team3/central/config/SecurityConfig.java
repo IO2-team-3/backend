@@ -31,7 +31,7 @@ public class SecurityConfig {
         .disable()
         .cors(Customizer.withDefaults())
         .authorizeHttpRequests()
-        .antMatchers(HttpMethod.POST, "/organizer", "/organizer/{id}", "/reservation","/categories")
+        .antMatchers(HttpMethod.POST, "/organizer", "/organizer/{id}", "/reservation", "/categories")
         .permitAll()
         .antMatchers(HttpMethod.GET, "/ping", "/organizer/**", "/swagger-ui/**",
             "/v3/api-docs/**", "/events", "/events/{id}", "/events/getByCategory", "/categories")

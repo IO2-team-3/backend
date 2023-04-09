@@ -9,4 +9,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
   Reservation findById(long id);
   Reservation findByreservationToken(String reservationToken);
+  Reservation findByEventIdAndPlaceOnSchema(long eventId, long placeId);
 }
