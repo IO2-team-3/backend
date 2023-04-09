@@ -3,6 +3,7 @@ package com.team3.central.mappers;
 import com.team3.central.openapi.model.Event;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.openapi.model.Place;
+import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,7 @@ public class EventMapper {
       place.setFree(reservation.getReservationToken()
           == null); // If reservation token is null, then place is free
       return place;
-    }).collect(Collectors.toList()));
+    }).sorted(Comparator.comparing(Place::getId)).collect(Collectors.toList()));
 
     return eventModel;
   }
