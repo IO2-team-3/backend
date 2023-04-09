@@ -1,0 +1,2022 @@
+{
+	"info": {
+		"_postman_id": "ad0ce023-7f37-498f-bb78-ff6f2883a29e",
+		"name": "ONLY TESTS",
+		"description": "Niniejsza dokumentacja stanowi opis REST API implemtowanego przez serwer centralny. Endpointy \n\nContact Support:\n Email: XXX@pw.edu.pl",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "20887326-ad0ce023-7f37-498f-bb78-ff6f2883a29e"
+	},
+	"item": [
+		{
+			"name": "tests",
+			"item": [
+				{
+					"name": "reservation",
+					"item": [
+						{
+							"name": "POST: Create new reservation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "23dee6ad-9290-46fd-9cea-6536846cda3b",
+										"exec": [
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"(async function() {\r",
+											"  try {\r",
+											"    console.log(\"---------------------- Tests for POST: Create new reservation: BEGIN ----------------------\");\r",
+											"    const categoryId1 = await addCategories('test category'+(new Date()).getTime());\r",
+											"    eventId = await createEvent(categoryId1);\r",
+											"    // console.log(\"Event ID in main code: \" + eventId);\r",
+											"    console.log(\"test 1\");\r",
+											"    await test1();\r",
+											"    console.log(\"test 2\");\r",
+											"    await test2();\r",
+											"    console.log(\"test 3\");\r",
+											"    await test3();\r",
+											"    console.log(\"test 4\");\r",
+											"    await test4();\r",
+											"    console.log(\"test 5\");\r",
+											"    await test5();\r",
+											"    console.log(\"test 6\");\r",
+											"    await test6();\r",
+											"    console.log(\"---------------------- Tests for POST: Create new reservation: END ----------------------\");\r",
+											"\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"  }\r",
+											"})();\r",
+											"\r",
+											"function sendRequestAsync(request) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.sendRequest(request, function(err, response) {\r",
+											"      if (err) {\r",
+											"        reject(err);\r",
+											"      } else {\r",
+											"        resolve(response);\r",
+											"      }\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"function addCategories(category) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Create new category\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('name', category);\r",
+											"        pm.expect(response.json().id).to.be.a('number');\r",
+											"        resolve(response.json().id);\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"async function createEvent(category) {\r",
+											"  var request = {\r",
+											"    url: baseUrl+'events',\r",
+											"    method: 'POST',\r",
+											"    header: {\r",
+											"        'sessionToken': pm.environment.get(\"sessionToken\"),\r",
+											"        'Content-Type': 'application/json',\r",
+											"        'Accept': 'application/json'\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: 'raw',\r",
+											"        raw: JSON.stringify({\r",
+											"            title: 'TEST EVENT FEEL FREEE TO DELETE IT',\r",
+											"            name: 'Jan',\r",
+											"            startTime: 111,\r",
+											"            endTime: 222,\r",
+											"            latitude: 'sadf3',\r",
+											"            longitude: '34efs',\r",
+											"            maxPlace: 5,\r",
+											"            categoriesIds: [category],\r",
+											"            placeSchema: 'NO'\r",
+											"        })\r",
+											"    }\r",
+											"  };\r",
+											"\r",
+											"  try {\r",
+											"    var response = await sendRequestAsync(request);\r",
+											"    pm.expect(response.code).to.equal(201);\r",
+											"\r",
+											"    var responseBody = response.json();\r",
+											"    var eventId = responseBody.id;\r",
+											"\r",
+											"    return eventId; // Return the eventId here\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"    return null;\r",
+											"  }\r",
+											"}\r",
+											"\r",
+											"\r",
+											"// Test Case 1: Make reservation with valid event ID and place ID\r",
+											"function test1(){\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 1: Make reservation with valid event ID and place ID\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl+'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'eventId': eventId.toString(),\r",
+											"          'placeID': '0'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        // console.log(response)\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('reservationToken');\r",
+											"        pm.expect(response.json()).to.have.property('placeId', 0);\r",
+											"        pm.expect(response.json()).to.have.property('eventId', eventId);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 2: Make reservation with invalid event ID\r",
+											"async function test2(){\r",
+											"    return new Promise((resolve, reject) => {\r",
+											"        pm.test(\"Test Case 2: Make reservation with invalid event ID\", function () {\r",
+											"            var request = {\r",
+											"                method: 'POST',\r",
+											"                url: baseUrl+ 'reservation',\r",
+											"                header: {\r",
+											"                    'Content-Type': 'application/json',\r",
+											"                    'Accept': 'application/json',\r",
+											"                    'eventId': '-1',\r",
+											"                    'placeID': '10'\r",
+											"                }\r",
+											"            };\r",
+											"            pm.sendRequest(request, function (err, response) {\r",
+											"                if (err) {\r",
+											"                    reject(err);\r",
+											"                } else {\r",
+											"                    pm.expect(response.code).to.equal(404);\r",
+											"                    resolve();\r",
+											"                }\r",
+											"            });\r",
+											"        });\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"\r",
+											"// Test Case 3: Make reservation with no free place\r",
+											"function test3() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 3: Make reservation with no free place\", function() {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'eventId': eventId.toString(),\r",
+											"          'placeID': '0'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function(err, response) {\r",
+											"        pm.expect(response.code).to.equal(400);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 4: Make reservation with missing event ID header\r",
+											"function test4() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 4: Make reservation with missing event ID header\", function() {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'placeID': '10'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function(err, response) {\r",
+											"        pm.expect(response.code).to.equal(400);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 5: Make reservation with invalid place ID\r",
+											"function test5() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 5: Make reservation with invalid place ID\", function() {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'eventId': eventId.toString(),\r",
+											"          'placeID': '-1'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function(err, response) {\r",
+											"        pm.expect(response.code).to.equal(404);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"\r",
+											"// Test Case 6: Make reservation with missing headers\r",
+											"function test6() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 6: Make reservation with missing headers\", function () {\r",
+											"      var request = {\r",
+											"          method: 'POST',\r",
+											"          url: baseUrl + 'reservation',\r",
+											"          header: {\r",
+											"              'Content-Type': 'application/json'\r",
+											"          }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"          pm.expect(response.code).to.equal(400);\r",
+											"          resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "22f656e0-3de7-4138-a804-6852396c0796",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DEL: delete reservation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "d81e5e0b-5d83-4ca4-816b-2cff409a7564",
+										"exec": [
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"(async function() {\r",
+											"  try {\r",
+											"    console.log(\"---------------------- Tests for DEL: delete reservation: BEGIN ----------------------\");\r",
+											"    const categoryId1 = await addCategories('test category'+(new Date()).getTime());\r",
+											"    var eventIdReservationToken = await createEventAndReservation(categoryId1);\r",
+											"    // console.log(\"Event ID in main code: \" + eventIdReservationToken.eventId);\r",
+											"    // console.log(\"reservationToken in main code: \" + eventIdReservationToken.reservationToken);\r",
+											"    console.log(\"test 1\");\r",
+											"    await test1(eventIdReservationToken.reservationToken.toString());\r",
+											"    console.log(\"test 2\");\r",
+											"    await test2();\r",
+											"    console.log(\"test 3\");\r",
+											"    await test3();\r",
+											"    console.log(\"---------------------- Tests for DEL: delete reservation: END ----------------------\");\r",
+											"\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"  }\r",
+											"})();\r",
+											"\r",
+											"function addCategories(category) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Create new category\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('name', category);\r",
+											"        pm.expect(response.json().id).to.be.a('number');\r",
+											"        resolve(response.json().id);\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"function sendRequestAsync(request) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.sendRequest(request, function(err, response) {\r",
+											"      if (err) {\r",
+											"        reject(err);\r",
+											"      } else {\r",
+											"        resolve(response);\r",
+											"      }\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"async function createEvent(categoryId1) {\r",
+											"  var request = {\r",
+											"    url: baseUrl+'events',\r",
+											"    method: 'POST',\r",
+											"    header: {\r",
+											"        'sessionToken': pm.environment.get(\"sessionToken\"),\r",
+											"        'Content-Type': 'application/json',\r",
+											"        'Accept': 'application/json'\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: 'raw',\r",
+											"        raw: JSON.stringify({\r",
+											"            title: 'TEST EVENT FEEL FREEE TO DELETE IT',\r",
+											"            name: 'Jan',\r",
+											"            startTime: 111,\r",
+											"            endTime: 222,\r",
+											"            latitude: 'sadf3',\r",
+											"            longitude: '34efs',\r",
+											"            maxPlace: 5,\r",
+											"            categoriesIds: [categoryId1],\r",
+											"            placeSchema: 'NO'\r",
+											"        })\r",
+											"    }\r",
+											"  };\r",
+											"\r",
+											"  try {\r",
+											"    var response = await sendRequestAsync(request);\r",
+											"    pm.expect(response.code).to.equal(201);\r",
+											"\r",
+											"    var responseBody = response.json();\r",
+											"    var eventId = responseBody.id;\r",
+											"\r",
+											"    return eventId; // Return the eventId here\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"    return null;\r",
+											"  }\r",
+											"}\r",
+											"\r",
+											"async function createReservation(eventId, placeId) {\r",
+											"  var request = {\r",
+											"    method: 'POST',\r",
+											"    url: baseUrl + 'reservation',\r",
+											"    header: {\r",
+											"      'Content-Type': 'application/json',\r",
+											"      'Accept': 'application/json',\r",
+											"      'eventId': eventId.toString(),\r",
+											"      'placeID': placeId.toString()\r",
+											"    }\r",
+											"  };\r",
+											"\r",
+											"  try {\r",
+											"    var response = await sendRequestAsync(request);\r",
+											"    pm.expect(response.code).to.equal(201);\r",
+											"\r",
+											"    var responseBody = response.json();\r",
+											"    var reservationToken = responseBody.reservationToken;\r",
+											"\r",
+											"    return reservationToken;\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"    return null;\r",
+											"  }\r",
+											"}\r",
+											"\r",
+											"async function createEventAndReservation(categoryId1) {\r",
+											"  var eventId;\r",
+											"  var reservationToken;\r",
+											"  try {\r",
+											"    eventId = await createEvent(categoryId1);\r",
+											"    // console.log(\"Event ID : \" + eventId);\r",
+											"    reservationToken = await createReservation(eventId, 0); // Replace 0 with the place ID you want to reserve\r",
+											"    // console.log(\"Reservation token : \" + reservationToken);\r",
+											"    return {\r",
+											"      eventId: eventId,\r",
+											"      reservationToken: reservationToken\r",
+											"    };\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"    return null;\r",
+											"  }\r",
+											"}\r",
+											"\r",
+											"// Test Case 1: Delete reservation with valid reservation token\r",
+											"function test1(reservationToken) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 1: Delete reservation with valid reservation token\", function () {\r",
+											"      var request = {\r",
+											"        method: 'DELETE',\r",
+											"        url: baseUrl + 'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'reservationToken': reservationToken\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(204);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 2: Delete reservation with invalid reservation token\r",
+											"function test2() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 2: Delete reservation with invalid reservation token\", function () {\r",
+											"      var request = {\r",
+											"        method: 'DELETE',\r",
+											"        url: baseUrl + 'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'reservationToken': 'invalid_token'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(404);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 3: Delete reservation with missing reservationToken header\r",
+											"function test3() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 3: Delete reservation with missing reservationToken header\", function () {\r",
+											"      var request = {\r",
+											"        method: 'DELETE',\r",
+											"        url: baseUrl + 'reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(400);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "b564aaa4-f724-4de4-9754-6685ec7485a4",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"id": "f5ca09bd-b847-4e87-a592-9a057c897310"
+				},
+				{
+					"name": "oganizer",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "TODO: POST: Confirm orginizer account",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "15708c5d-f858-44cc-bc3f-c76bd2dadd41",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "7a6df0e0-f453-4ab1-9183-d1d97f74759d",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "TODO: DEL: Confirm orginizer account",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "fddf0c60-aae2-40bf-a68d-4276d2b4d666",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "bb308606-08a6-4426-ad3f-c47eda170c7b",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "TODO: PATCH: Patch orginizer account",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "6c88c646-06f8-4c49-ab44-7e4e07c0faf8",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "e48f2382-00eb-4abb-a1c3-96fae7e3db6b",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"id": "aa76668b-90a1-46d2-b993-35e617208c42"
+						},
+						{
+							"name": "login",
+							"item": [
+								{
+									"name": "TODO: GET: Logs organizer into the system",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "dd50ed17-db27-464a-a029-946632dadc1e",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "b3bf5280-f822-4177-849e-915e503f8f2c",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"id": "6148c107-1b71-477a-9c17-2dc9bb82627b"
+						},
+						{
+							"name": "TODO: POST: Create orginizer account",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "633ba9ff-dd32-4a65-a3a7-d0ea24eb39b9",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "73c14d81-f909-447d-9bee-0a839325122b",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "TODO: GET: Get organizer account (my account)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8cdf4d02-adb2-4cb2-bced-4ed378b7e156",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "d10c3256-0a3e-49d5-b426-a2c3db25cf0f",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"id": "cabc53b5-e656-41fd-9151-52f57ae9b38a"
+				},
+				{
+					"name": "event",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "GET: Find event by ID",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "1dabecde-e38f-4a20-b944-009e7b40a0cf",
+												"exec": [
+													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+													"\r",
+													"(async function() {\r",
+													"  try {\r",
+													"    console.log(\"---------------------- Tests for GET: Find event by ID: BEGIN ----------------------\");\r",
+													"    console.log(\"test 1\");\r",
+													"    const categoryId1 = await addCategories('test category'+(new Date()).getTime());\r",
+													"    await test1(categoryId1);\r",
+													"    console.log(\"test 2\");\r",
+													"    await test2();\r",
+													"    console.log(\"test 3\");\r",
+													"    await test3();\r",
+													"    console.log(\"---------------------- Tests for GET: Find event by ID: END ----------------------\");\r",
+													"\r",
+													"  } catch (err) {\r",
+													"    console.error(err);\r",
+													"  }\r",
+													"})();\r",
+													"\r",
+													"function sendRequestAsync(request) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.sendRequest(request, function(err, response) {\r",
+													"      if (err) {\r",
+													"        reject(err);\r",
+													"      } else {\r",
+													"        resolve(response);\r",
+													"      }\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"function addCategories(category) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Create new category\", function () {\r",
+													"      var request = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'categories?categoryName='+category,\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"        pm.expect(response.json()).to.have.property('name', category);\r",
+													"        pm.expect(response.json().id).to.be.a('number');\r",
+													"        resolve(response.json().id);\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"// Test Case 1: Get event by ID with valid ID\r",
+													"function test1(category) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 1: Get event by ID with valid ID\", function () {\r",
+													"      // Create a new event to get by ID\r",
+													"      var createRequest = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'events',\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json',\r",
+													"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+													"        },\r",
+													"        body: {\r",
+													"          mode: 'raw',\r",
+													"          raw: JSON.stringify({\r",
+													"            title: 'Test Event',\r",
+													"            name: 'John',\r",
+													"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+													"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+													"            latitude: '123.456',\r",
+													"            longitude: '78.90',\r",
+													"            maxPlace: 10,\r",
+													"            categoriesIds: [category],\r",
+													"            placeSchema: 'NO'\r",
+													"          })\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(createRequest, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"\r",
+													"        var eventId = response.json().id;\r",
+													"        // Get the event by ID\r",
+													"        var getRequest = {\r",
+													"          method: 'GET',\r",
+													"          url: baseUrl + 'events/' + eventId,\r",
+													"          header: {\r",
+													"            'Accept': 'application/json'\r",
+													"          }\r",
+													"        };\r",
+													"\r",
+													"        pm.sendRequest(getRequest, function (err, response) {\r",
+													"          pm.expect(response.code).to.equal(200);\r",
+													"          pm.expect(response.json()).to.have.property('title', 'Test Event');\r",
+													"          pm.expect(response.json()).to.have.property('name', 'John');\r",
+													"          pm.expect(response.json()).to.have.property('startTime', 1649389200);\r",
+													"          pm.expect(response.json()).to.have.property('endTime', 1649392800);\r",
+													"          pm.expect(response.json()).to.have.property('latitude', '123.456');\r",
+													"          pm.expect(response.json()).to.have.property('longitude', '78.90');\r",
+													"          pm.expect(response.json()).to.have.property('maxPlace', 10);\r",
+													"          pm.expect(response.json()).to.have.property('status', 'inFuture');\r",
+													"          // pm.expect(response.json()).to.have.property('categoriesIds').that.includes(1);\r",
+													"          // pm.expect(response.json()).to.have.property('categoriesIds').that.includes(2);\r",
+													"          pm.expect(response.json()).to.have.property('placeSchema', 'NO');\r",
+													"          resolve();\r",
+													"        });\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"// Test Case 2: Attempt to get event by invalid ID\r",
+													"function test2() {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 2: Attempt to get event by invalid ID\", function () {\r",
+													"      var request = {\r",
+													"        method: 'GET',\r",
+													"        url: baseUrl + 'events/' + 'invalid_id',\r",
+													"        header: {\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(400);\r",
+													"        resolve();\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"// Test Case 3: Attempt to get non-existent event\r",
+													"function test3() {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 3: Attempt to get non-existent event\", function () {\r",
+													"      var request = {\r",
+													"        method: 'GET',\r",
+													"        url: baseUrl + 'events/-1', // Use a non-existent event ID\r",
+													"        header: {\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(404);\r",
+													"        resolve();\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "a7dc4430-0a3d-450c-8f9f-caa3f669a3f7",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "DEL: Cancel Event",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "75101def-db90-42a0-832a-7868d5a4096a",
+												"exec": [
+													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+													"\r",
+													"(async function() {\r",
+													"  try {\r",
+													"    console.log(\"---------------------- Tests for DEL: Cancel Event: BEGIN ----------------------\");\r",
+													"    console.log(\"test 1\");\r",
+													"    const categoryId1 = await addCategories('test category'+(new Date()).getTime());\r",
+													"    await test1(categoryId1);\r",
+													"    console.log(\"test 2\");\r",
+													"    await test2();\r",
+													"    console.log(\"test 3 (invesetigate)\");\r",
+													"    // await test3(categoryId1); // similar BUG, returns 500, but what should it return idk, nothing about it in documentations\r",
+													"    console.log(\"---------------------- Tests for DEL: Cancel Event: END ----------------------\");\r",
+													"\r",
+													"  } catch (err) {\r",
+													"    console.error(err);\r",
+													"  }\r",
+													"})();\r",
+													"\r",
+													"function sendRequestAsync(request) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.sendRequest(request, function(err, response) {\r",
+													"      if (err) {\r",
+													"        reject(err);\r",
+													"      } else {\r",
+													"        resolve(response);\r",
+													"      }\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"function addCategories(category) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Create new category\", function () {\r",
+													"      var request = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'categories?categoryName='+category,\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"        pm.expect(response.json()).to.have.property('name', category);\r",
+													"        pm.expect(response.json().id).to.be.a('number');\r",
+													"        resolve(response.json().id);\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"// Test Case 1: Cancel existing event\r",
+													"function test1(category) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 1: Cancel existing event\", function () {\r",
+													"      // Create a new event to cancel\r",
+													"      var createRequest = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'events',\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json',\r",
+													"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+													"        },\r",
+													"        body: {\r",
+													"          mode: 'raw',\r",
+													"          raw: JSON.stringify({\r",
+													"            title: 'Test Event',\r",
+													"            name: 'John',\r",
+													"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+													"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+													"            latitude: '123.456',\r",
+													"            longitude: '78.90',\r",
+													"            maxPlace: 10,\r",
+													"            categoriesIds: [category],\r",
+													"            placeSchema: 'NO'\r",
+													"          })\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(createRequest, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"        var eventID = response.json().id;\r",
+													"        // Cancel the event\r",
+													"        var cancelRequest = {\r",
+													"          method: 'DELETE',\r",
+													"          url: baseUrl + 'events/' + eventID,\r",
+													"          header: {\r",
+													"            'Content-Type': 'application/json',\r",
+													"            'Accept': 'application/json',\r",
+													"            'sessionToken': pm.environment.get(\"sessionToken\")\r",
+													"          }\r",
+													"        };\r",
+													"        pm.sendRequest(cancelRequest, function (err, response) {\r",
+													"          pm.expect(response.code).to.equal(204);\r",
+													"          resolve();\r",
+													"        });\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"// Test Case 2: Attempt to cancel non-existing event\r",
+													"function test2() {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 2: Attempt to cancel non-existing event\", function () {\r",
+													"      var request = {\r",
+													"        method: 'DELETE',\r",
+													"        url: baseUrl + 'events/12345', // Non-existing event ID\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json',\r",
+													"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(404); \r",
+													"        resolve();\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"// Test Case 3: Attempt to cancel event with invalid session token\r",
+													"function test3(categoryId1) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 3: Attempt to cancel event with invalid session token\", function () {\r",
+													"      // Create a new event to cancel\r",
+													"      var createRequest = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'events',\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json',\r",
+													"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+													"        },\r",
+													"        body: {\r",
+													"          mode: 'raw',\r",
+													"          raw: JSON.stringify({\r",
+													"            title: 'Test Event',\r",
+													"            name: 'John',\r",
+													"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+													"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+													"            latitude: '123.456',\r",
+													"            longitude: '78.90',\r",
+													"            maxPlace: 10,\r",
+													"            categoriesIds: [categoryId1],\r",
+													"            placeSchema: 'NO'\r",
+													"          })\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(createRequest, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"        var eventId = response.json().id;\r",
+													"        // Try to cancel the event with an invalid session token\r",
+													"        var cancelRequest = {\r",
+													"          method: 'DELETE',\r",
+													"          url: baseUrl + 'events/' + eventId,\r",
+													"          header: {\r",
+													"            'Content-Type': 'application/json',\r",
+													"            'Accept': 'application/json',\r",
+													"            'sessionToken': 'invalidSessionToken'\r",
+													"          }\r",
+													"        };\r",
+													"        pm.sendRequest(cancelRequest, function (err, response) {\r",
+													"          pm.expect(response.code).to.equal(404); // Expected response code is 404 (not found)\r",
+													"          resolve();\r",
+													"        });\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "5227fee0-1971-4212-84e9-44013f5cb89f",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "TODO: PATCH: patch existing event",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "0f500807-86da-419a-85d1-73ea0a6768bf",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "5e392585-9edb-47f4-b336-7756a861345a",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"id": "eff9e80c-811f-4e75-ab72-d8f3ae716840"
+						},
+						{
+							"name": "my",
+							"item": [
+								{
+									"name": "TODO: GET: Return list of events made by organizer, according to session",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "08e2df45-6aa7-47b2-8b98-c17ab2d0b8ef",
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "89db3e1d-bab5-4513-84bd-27b07b631885",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"id": "53965b3c-fdb8-4712-b3b0-93fc8f0d599c"
+						},
+						{
+							"name": "getByCategory",
+							"item": [
+								{
+									"name": "GET: Return list of all events in category",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "1f040d45-26e5-4dc4-86f7-2f1b2d283bc3",
+												"exec": [
+													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+													"\r",
+													"(async function() {\r",
+													"  try {\r",
+													"    console.log(\"---------------------- Tests for GET: Return list of all events in category: BEGIN ----------------------\");\r",
+													"    const categoryId1 = await addCategories('test category'+(new Date()).getTime());\r",
+													"    await CreateEvnetWithCategories(categoryId1);\r",
+													"    console.log(\"test 1\");\r",
+													"    await test1(categoryId1);\r",
+													"    console.log(\"test 2\");\r",
+													"    await test2();\r",
+													"    console.log(\"---------------------- Tests for GET: Return list of all events in category: END ----------------------\");\r",
+													"\r",
+													"  } catch (err) {\r",
+													"    console.error(err);\r",
+													"  }\r",
+													"})();\r",
+													"\r",
+													"function sendRequestAsync(request) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.sendRequest(request, function(err, response) {\r",
+													"      if (err) {\r",
+													"        reject(err);\r",
+													"      } else {\r",
+													"        resolve(response);\r",
+													"      }\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"function addCategories(category) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Create new category\", function () {\r",
+													"      var request = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'categories?categoryName='+category,\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"        pm.expect(response.json()).to.have.property('name', category);\r",
+													"        pm.expect(response.json().id).to.be.a('number');\r",
+													"        resolve(response.json().id);\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"function CreateEvnetWithCategories(categoryId1) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"CreateEvnetWithCategories\", function () {\r",
+													"      var request = {\r",
+													"        method: 'POST',\r",
+													"        url: baseUrl + 'events',\r",
+													"        header: {\r",
+													"          'Content-Type': 'application/json',\r",
+													"          'Accept': 'application/json',\r",
+													"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+													"        },\r",
+													"        body: {\r",
+													"          mode: 'raw',\r",
+													"          raw: JSON.stringify({\r",
+													"            title: 'Test Event',\r",
+													"            name: 'John',\r",
+													"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+													"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+													"            latitude: '123.456',\r",
+													"            longitude: '78.90',\r",
+													"            maxPlace: 10,\r",
+													"            categoriesIds: [categoryId1],\r",
+													"            placeSchema: 'NO'\r",
+													"          })\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(201);\r",
+													"        pm.expect(response.json()).to.have.property('title', 'Test Event');\r",
+													"        pm.expect(response.json()).to.have.property('name', 'John');\r",
+													"        pm.expect(response.json()).to.have.property('startTime', 1649389200);\r",
+													"        pm.expect(response.json()).to.have.property('endTime', 1649392800);\r",
+													"        pm.expect(response.json()).to.have.property('latitude', '123.456');\r",
+													"        pm.expect(response.json()).to.have.property('longitude', '78.90');\r",
+													"        pm.expect(response.json()).to.have.property('maxPlace', 10);\r",
+													"        pm.expect(response.json()).to.have.property('status', 'inFuture');\r",
+													"        var categories = response.json().categories;\r",
+													"            var categoryIds = categories.map(function (category) {\r",
+													"              return category.id;\r",
+													"            });\r",
+													"        pm.expect(categoryIds).to.include.members([categoryId1]);\r",
+													"        pm.expect(response.json()).to.have.property('placeSchema', 'NO');\r",
+													"        resolve();\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"\r",
+													"// Test Case 1: Get events by category with valid categoryId\r",
+													"function test1(categoryId) {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 1: Get events by category with valid categoryId\", function () {\r",
+													"      var request = {\r",
+													"        method: 'GET',\r",
+													"        url: baseUrl + 'events/getByCategory?categoryId=' + categoryId,\r",
+													"        header: {\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(200);\r",
+													"        pm.expect(response.json()).to.be.an('array');\r",
+													"        // Check if all events have category with categoryId\r",
+													"        var events = response.json();\r",
+													"        for (var i = 0; i < events.length; i++) {\r",
+													"          var event = events[i];\r",
+													"          var hasCategory = false;\r",
+													"            var categories = event.categories;\r",
+													"            var categoryIds = categories.map(function (category) {\r",
+													"              return category.id;\r",
+													"            });\r",
+													"              pm.expect(categoryIds).to.include(categoryId)\r",
+													"        }\r",
+													"        resolve();\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													"// Test Case 2: Attempt to get list of events with invalid category ID (eg. string instead of number)\r",
+													"function test2() {\r",
+													"  return new Promise(function(resolve, reject) {\r",
+													"    pm.test(\"Test Case 2: Attempt to get list of events with invalid category ID\", function () {\r",
+													"      var categoryId = 'sdf'; // Replace with a valid category ID\r",
+													"      var request = {\r",
+													"        method: 'GET',\r",
+													"        url: baseUrl + 'events/getByCategory?categoryId=' + categoryId,\r",
+													"        header: {\r",
+													"          'Accept': 'application/json'\r",
+													"        }\r",
+													"      };\r",
+													"      pm.sendRequest(request, function (err, response) {\r",
+													"        pm.expect(response.code).to.equal(400);\r",
+													"        resolve();\r",
+													"      });\r",
+													"    });\r",
+													"  });\r",
+													"}\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"id": "7276707f-ac6d-40bc-b4b7-efe3e41a5645",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/ping",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"ping"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"id": "0b628f1d-ddc7-45ad-9836-3c49f6dace4a"
+						},
+						{
+							"name": "TODO: GET: Return list of all events",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0f82ce0e-8250-4d2a-b8bc-215b428b032d",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "9fa3abcc-7eea-4cb9-8c7b-ba6c1c0c44c6",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST: Add new event (fix test2)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "30aab394-e21a-4f2d-a2c0-f1ae4ed93b9e",
+										"exec": [
+											"var baseUrl  =pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"(async function() {\r",
+											"  try {\r",
+											"    console.log(\"---------------------- Tests for POST: Add new event: BEGIN ----------------------\");\r",
+											"    const categoryId1 = await addCategories('test category'+(new Date()).getTime());\r",
+											"    const categoryId2 = await addCategories('test category'+(new Date()).getTime());\r",
+											"    console.log(\"test 1\");\r",
+											"    await test1(categoryId1, categoryId2);\r",
+											"    console.log(\"test 2 (uncomment)\");\r",
+											"    // await test2(); // return code is 500, but shoudl be 403\r",
+											"    console.log(\"test 3\");\r",
+											"    await test3();\r",
+											"    console.log(\"test 4\");\r",
+											"    await test4();\r",
+											"    console.log(\"---------------------- Tests for POST: Add new event: END ----------------------\");\r",
+											"\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"  }\r",
+											"})();\r",
+											"\r",
+											"function sendRequestAsync(request) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.sendRequest(request, function(err, response) {\r",
+											"      if (err) {\r",
+											"        reject(err);\r",
+											"      } else {\r",
+											"        resolve(response);\r",
+											"      }\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"\r",
+											"function addCategories(category) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Create new category\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('name', category);\r",
+											"        pm.expect(response.json().id).to.be.a('number');\r",
+											"        resolve(response.json().id);\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"\r",
+											"// Test Case 1: Add event with valid parameters\r",
+											"function test1(categoryId1, categoryId2) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 1: Add event with valid parameters\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'events',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+											"        },\r",
+											"        body: {\r",
+											"          mode: 'raw',\r",
+											"          raw: JSON.stringify({\r",
+											"            title: 'Test Event',\r",
+											"            name: 'John',\r",
+											"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+											"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+											"            latitude: '123.456',\r",
+											"            longitude: '78.90',\r",
+											"            maxPlace: 10,\r",
+											"            categoriesIds: [categoryId1, categoryId2],\r",
+											"            placeSchema: 'NO'\r",
+											"          })\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('title', 'Test Event');\r",
+											"        pm.expect(response.json()).to.have.property('name', 'John');\r",
+											"        pm.expect(response.json()).to.have.property('startTime', 1649389200);\r",
+											"        pm.expect(response.json()).to.have.property('endTime', 1649392800);\r",
+											"        pm.expect(response.json()).to.have.property('latitude', '123.456');\r",
+											"        pm.expect(response.json()).to.have.property('longitude', '78.90');\r",
+											"        pm.expect(response.json()).to.have.property('maxPlace', 10);\r",
+											"        pm.expect(response.json()).to.have.property('status', 'inFuture');\r",
+											"        var categories = response.json().categories;\r",
+											"            var categoryIds = categories.map(function (category) {\r",
+											"              return category.id;\r",
+											"            });\r",
+											"        pm.expect(categoryIds).to.include.members([categoryId1,categoryId2]);\r",
+											"        pm.expect(response.json()).to.have.property('placeSchema', 'NO');\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 2: Add event with invalid session token\r",
+											"function test2() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 2: Add event with invalid session token\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'events',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'sessionToken': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpbzJ0ZXN0bWFpbEBnbWFpbC5jb20iLCJpYXQiOjE2ODA4NzY4NDAsImV4cCI6MTY4MDg3ODI4MH0.2Pp5KPrP2Iz2Zsfw4llHjDbxCGK7lxOJHnb5phfgFAI'\r",
+											"        },\r",
+											"        body: {\r",
+											"          mode: 'raw',\r",
+											"          raw: JSON.stringify({\r",
+											"            title: 'Test Event',\r",
+											"            name: 'John',\r",
+											"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+											"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+											"            latitude: '123.456',\r",
+											"            longitude: '78.90',\r",
+											"            maxPlace: 10,\r",
+											"            categoriesIds: [1, 2],\r",
+											"            placeSchema: 'NO'\r",
+											"          })\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(403); \r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 3: Add event with missing parameters\r",
+											"function test3() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 3: Add event with missing parameters\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'events',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+											"        },\r",
+											"        body: {\r",
+											"          mode: 'raw',\r",
+											"          raw: JSON.stringify({\r",
+											"            // title: 'Test Event',\r",
+											"            name: 'John',\r",
+											"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+											"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+											"            latitude: 'invalid_latitude',\r",
+											"            longitude: 'invalid_longitude',\r",
+											"            maxPlace: 0, // Invalid value for maxPlace\r",
+											"            categoriesIds: [], // Empty array of category IDs\r",
+											"            placeSchema: 'invalid_schema'\r",
+											"          })\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(400);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 4: Add event with invalid categories\r",
+											"function test4(categoryId1, categoryId2) {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 4: Add event with invalid categories\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'events',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'sessionToken': pm.environment.get(\"sessionToken\")\r",
+											"        },\r",
+											"        body: {\r",
+											"          mode: 'raw',\r",
+											"          raw: JSON.stringify({\r",
+											"            title: 'Test Event',\r",
+											"            name: 'John',\r",
+											"            startTime: 1649389200, // January 6, 2023 10:00:00 AM GMT\r",
+											"            endTime: 1649392800, // January 6, 2023 11:00:00 AM GMT\r",
+											"            latitude: '123.456',\r",
+											"            longitude: '78.90',\r",
+											"            maxPlace: 10,\r",
+											"            categoriesIds: [-1,1],\r",
+											"            placeSchema: 'NO'\r",
+											"          })\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(400);\r",
+											"    \r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "a71add83-6f6b-4bfc-91e0-e03ec959247f",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"id": "21334b96-3eb2-41b7-aaa1-61eb79de890e"
+				},
+				{
+					"name": "categories",
+					"item": [
+						{
+							"name": "GET: Return list of all categories",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0e4b3cb4-4343-417e-b0ee-8f32097a0447",
+										"exec": [
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"(async function() {\r",
+											"  try {\r",
+											"    console.log(\"---------------------- Tests for GET: Return list of all categories: BEGIN ----------------------\");\r",
+											"    console.log(\"test 1\");\r",
+											"    await test1();\r",
+											"    console.log(\"---------------------- Tests for GET: Return list of all categories: END ----------------------\");\r",
+											"\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"  }\r",
+											"})();\r",
+											"\r",
+											"\r",
+											"// Test Case 1: Add two categories and then get all categories\r",
+											"function test1() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    // Send first request to create a new category\r",
+											"    var category1 = 'category1'+(new Date()).getTime();\r",
+											"    var createRequest1 = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName='+category1,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"\r",
+											"    pm.sendRequest(createRequest1, function (err, createResponse1) {\r",
+											"        pm.expect(createResponse1.code).to.equal(201);\r",
+											"        pm.expect(createResponse1.json()).to.have.property('name', category1);\r",
+											"        pm.expect(createResponse1.json().id).to.be.a('number');\r",
+											"\r",
+											"      // Send second request to create a new category\r",
+											"      var category2 = 'category2'+(new Date()).getTime();\r",
+											"      var createRequest2 = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName='+category2,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"\r",
+											"      pm.sendRequest(createRequest2, function (err, createResponse2) {\r",
+											"        pm.expect(createResponse2.code).to.equal(201);\r",
+											"        pm.expect(createResponse2.json()).to.have.property('name', category2);\r",
+											"        pm.expect(createResponse2.json().id).to.be.a('number');\r",
+											"\r",
+											"        // Send third request to get all categories\r",
+											"        var getAllRequest = {\r",
+											"          method: 'GET',\r",
+											"          url: baseUrl + 'categories',\r",
+											"          header: {\r",
+											"            'Accept': 'application/json',\r",
+											"          },\r",
+											"        };\r",
+											"\r",
+											"        pm.sendRequest(getAllRequest, function (err, getAllResponse) {\r",
+											"          pm.test(\"Test Case: Add two categories and then get all categories\", function () {\r",
+											"            pm.expect(getAllResponse.code).to.equal(200);\r",
+											"            pm.expect(getAllResponse.json()).to.be.an('array').that.has.lengthOf.at.least(2);\r",
+											"            var categories = getAllResponse.json();\r",
+											"            var categoryNames = categories.map(function (category) {\r",
+											"              return category.name;\r",
+											"            });\r",
+											"             pm.expect(categoryNames).to.include.members([category1,category2]);\r",
+											"          });\r",
+											"          resolve();\r",
+											"        });\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "70e68fe5-69bd-46fa-bbed-fb03b62724d5",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST: Create new category",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "23b182be-b89c-468b-a19e-f63ac75cc0e0",
+										"exec": [
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"(async function() {\r",
+											"  try {\r",
+											"    console.log(\"---------------------- Tests for POST: Create new category: BEGIN ----------------------\");\r",
+											"    console.log(\"test 1\");\r",
+											"    await test1();\r",
+											"    console.log(\"test 2\");\r",
+											"    await test2();\r",
+											"    console.log(\"---------------------- Tests for POST: Create new category: END ----------------------\");\r",
+											"\r",
+											"  } catch (err) {\r",
+											"    console.error(err);\r",
+											"  }\r",
+											"})();\r",
+											"\r",
+											"// Test Case 1: Create new category\r",
+											"function test1() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 1: Create new category\", function () {\r",
+											"      var category = 'test category '+(new Date()).getTime();\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('name', category);\r",
+											"        pm.expect(response.json().id).to.be.a('number');\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 2: Attempt to add an existing category\r",
+											"function test2() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Attempt to add an existing category\", function () {\r",
+											"      var categoryName = 'test category'+(new Date()).getTime();\r",
+											"      // First, add the category\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl + 'categories?categoryName=' + categoryName,\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json'\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"\r",
+											"        // Now try to add the same category again\r",
+											"        var request = {\r",
+											"          method: 'POST',\r",
+											"          url: baseUrl + 'categories?categoryName=' + categoryName,\r",
+											"          header: {\r",
+											"            'Content-Type': 'application/json',\r",
+											"            'Accept': 'application/json'\r",
+											"          }\r",
+											"        };\r",
+											"        pm.sendRequest(request, function (err, response) {\r",
+											"          pm.expect(response.code).to.equal(400);\r",
+											"          resolve();\r",
+											"        });\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "68a36432-e810-4197-81b1-e62293cbcdb0",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/ping",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"id": "0d914aec-c422-453f-889d-c9a22f248e9c"
+				},
+				{
+					"name": "get and set session token to env variable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "eb5c7bd0-53c1-48b4-a782-b6170ba7c249",
+								"exec": [
+									"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+									"\r",
+									"// Test Case: Organizer login\r",
+									"function testLogin() {\r",
+									"  return new Promise(function(resolve, reject) {\r",
+									"    var request = {\r",
+									"      method: 'GET',\r",
+									"      url: baseUrl + 'organizer/login',\r",
+									"      header: {\r",
+									"        'Accept': 'application/json',\r",
+									"        'Content-Type': 'application/json',\r",
+									"        'email': 'io2testmail@gmail.com',\r",
+									"        'password': '123'\r",
+									"      }\r",
+									"    };\r",
+									"    pm.sendRequest(request, function (err, response) {\r",
+									"      pm.expect(response.code).to.equal(200);\r",
+									"      pm.expect(response.json().sessionToken).to.be.a('string');\r",
+									"      pm.environment.set('sessionToken', response.json().sessionToken);\r",
+									"      resolve();\r",
+									"    });\r",
+									"  });\r",
+									"}\r",
+									"\r",
+									"pm.test('Organizer login', testLogin);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "6620588a-c3f4-4e49-b0f6-011c5e89ee46",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/ping",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ping"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "655c8b32-a23e-4f89-a43a-ad4f883bd330"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "92789108-1873-4582-98d3-9955ccff54c3",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "042f8722-45e8-45ad-bc99-91769af494d7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "78bc2694-84a1-4a16-9d1b-9b9a42a59092",
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		}
+	]
+}

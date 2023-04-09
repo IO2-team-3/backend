@@ -9,6 +9,7 @@ id = e420ec8a-5423-4825-8ad2-2834f2c5de53
 
 [config.relations.collections]
 rootDirectory = postman/collections
+files[] = {"id":"20887326-ad0ce023-7f37-498f-bb78-ff6f2883a29e","path":"ONLY TESTS.json","metaData":{}}
 files[] = {"id":"20887326-477c650e-3b8e-46e9-a581-46b84e02d36f","path":"System rezerwacji miejsc na eventy.json","metaData":{}}
 
 [config.relations.collections.metaData]
