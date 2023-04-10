@@ -24,8 +24,8 @@ public class ReservationService {
   }
 
   public void deleteReservation(String reservationToken) throws NotFoundException {
-    Reservation reservation = reservationRepository.findByreservationToken(reservationToken);
-    if(reservation == null) {
+    Reservation reservation = reservationRepository.findByReservationToken(reservationToken);
+    if (reservation == null) {
       throw new NotFoundException("No such reservation");
     }
     reservation.setReservationToken(null);
@@ -34,9 +34,17 @@ public class ReservationService {
 
   public Reservation makeReservation(Long eventId, Long placeId)
       throws NotFoundException, NoFreePlaceException {
-    Reservation reservation = reservationRepository.findByEventIdAndPlaceOnSchema(eventId, placeId);
-
-    if(reservation == null) {
+    Reservation reservation = null;
+    if (placeId == null) {
+      reservation = reservationRepository.findFirstByEventIdAndReservationTokenIsNull(eventId);
+      if (reservation == null) {
+        throw new NotFoundException("No free places in event");
+      }
+    }
+    else{
+      reservation = reservationRepository.findByEventIdAndPlaceOnSchema(eventId, placeId);
+    }
+    if (reservation == null) {
       throw new NotFoundException("No such place in event or such event");
     }
     if (reservation.getEvent().getStatus() == EventStatus.DONE

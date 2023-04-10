@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
   Reservation findById(long id);
-  Reservation findByreservationToken(String reservationToken);
+  Reservation findByReservationToken(String reservationToken);
   Reservation findByEventIdAndPlaceOnSchema(long eventId, long placeId);
+  Reservation findFirstByEventIdAndReservationTokenIsNull(Long eventId);
 }
