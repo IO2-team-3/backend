@@ -1,14 +1,13 @@
 {
 	"info": {
-		"_postman_id": "ad0ce023-7f37-498f-bb78-ff6f2883a29e",
-		"name": "ONLY TESTS",
-		"description": "Niniejsza dokumentacja stanowi opis REST API implemtowanego przez serwer centralny. Endpointy \n\nContact Support:\n Email: XXX@pw.edu.pl",
+		"_postman_id": "14d80096-f1e0-45cd-bc4b-1aa2f684244e",
+		"name": "tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_uid": "20887326-ad0ce023-7f37-498f-bb78-ff6f2883a29e"
+		"_uid": "20887326-14d80096-f1e0-45cd-bc4b-1aa2f684244e"
 	},
 	"item": [
 		{
-			"name": "tests",
+			"name": "tests Copy",
 			"item": [
 				{
 					"name": "reservation",
@@ -19,7 +18,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "23dee6ad-9290-46fd-9cea-6536846cda3b",
+										"id": "a90e93ad-5d3e-49ce-aa78-27a839421181",
 										"exec": [
 											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
@@ -41,6 +40,10 @@
 											"    await test5();\r",
 											"    console.log(\"test 6\");\r",
 											"    await test6();\r",
+											"    console.log(\"test 7\");\r",
+											"    await test7();\r",
+											"    console.log(\"test 8\");\r",
+											"    await test8();\r",
 											"    console.log(\"---------------------- Tests for POST: Create new reservation: END ----------------------\");\r",
 											"\r",
 											"  } catch (err) {\r",
@@ -65,7 +68,7 @@
 											"    pm.test(\"Create new category\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        url: baseUrl + '/categories?categoryName='+category,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -83,7 +86,7 @@
 											"\r",
 											"async function createEvent(category) {\r",
 											"  var request = {\r",
-											"    url: baseUrl+'events',\r",
+											"    url: baseUrl+'/events',\r",
 											"    method: 'POST',\r",
 											"    header: {\r",
 											"        'sessionToken': pm.environment.get(\"sessionToken\"),\r",
@@ -99,7 +102,7 @@
 											"            endTime: 222,\r",
 											"            latitude: 'sadf3',\r",
 											"            longitude: '34efs',\r",
-											"            maxPlace: 5,\r",
+											"            maxPlace: 2,\r",
 											"            categoriesIds: [category],\r",
 											"            placeSchema: 'NO'\r",
 											"        })\r",
@@ -127,7 +130,7 @@
 											"    pm.test(\"Test Case 1: Make reservation with valid event ID and place ID\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl+'reservation',\r",
+											"        url: baseUrl+'/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -153,7 +156,7 @@
 											"        pm.test(\"Test Case 2: Make reservation with invalid event ID\", function () {\r",
 											"            var request = {\r",
 											"                method: 'POST',\r",
-											"                url: baseUrl+ 'reservation',\r",
+											"                url: baseUrl+ '/reservation',\r",
 											"                header: {\r",
 											"                    'Content-Type': 'application/json',\r",
 											"                    'Accept': 'application/json',\r",
@@ -180,7 +183,7 @@
 											"    pm.test(\"Test Case 3: Make reservation with no free place\", function() {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'reservation',\r",
+											"        url: baseUrl + '/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -202,7 +205,7 @@
 											"    pm.test(\"Test Case 4: Make reservation with missing event ID header\", function() {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'reservation',\r",
+											"        url: baseUrl + '/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -223,7 +226,7 @@
 											"    pm.test(\"Test Case 5: Make reservation with invalid place ID\", function() {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'reservation',\r",
+											"        url: baseUrl + '/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'eventId': eventId.toString(),\r",
@@ -245,7 +248,7 @@
 											"    pm.test(\"Test Case 6: Make reservation with missing headers\", function () {\r",
 											"      var request = {\r",
 											"          method: 'POST',\r",
-											"          url: baseUrl + 'reservation',\r",
+											"          url: baseUrl + '/reservation',\r",
 											"          header: {\r",
 											"              'Content-Type': 'application/json'\r",
 											"          }\r",
@@ -257,13 +260,60 @@
 											"    });\r",
 											"  });\r",
 											"}\r",
+											"\r",
+											"// Test Case 7: Make reservation without specifed placeId\r",
+											"function test7(){\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\"Test Case 7: Make reservation without specifed placeId\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl+'/reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'eventId': eventId.toString()\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        // console.log(response)\r",
+											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.json()).to.have.property('reservationToken');\r",
+											"        pm.expect(response.json()).to.have.property('placeId');\r",
+											"        pm.expect(response.json()).to.have.property('eventId', eventId);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"// Test Case 8: Make reservation without specifed placeId, but now there are no more free palces (all are already reserved)\r",
+											"function test8(){\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    pm.test(\" Test Case 8: Make reservation without specifed placeId, but now there are no more free palces (all are already reserved)\", function () {\r",
+											"      var request = {\r",
+											"        method: 'POST',\r",
+											"        url: baseUrl+'/reservation',\r",
+											"        header: {\r",
+											"          'Content-Type': 'application/json',\r",
+											"          'Accept': 'application/json',\r",
+											"          'eventId': eventId.toString()\r",
+											"        }\r",
+											"      };\r",
+											"      pm.sendRequest(request, function (err, response) {\r",
+											"        // console.log(response)\r",
+											"        pm.expect(response.code).to.equal(404);\r",
+											"        resolve();\r",
+											"      });\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
 											""
 										],
 										"type": "text/javascript"
 									}
 								}
 							],
-							"id": "22f656e0-3de7-4138-a804-6852396c0796",
+							"id": "ad62ce30-6b68-4203-8dc2-c687a0525b18",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -271,12 +321,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -290,7 +338,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "d81e5e0b-5d83-4ca4-816b-2cff409a7564",
+										"id": "43bbdca2-bd55-4c98-95f3-2f5b70b7aa50",
 										"exec": [
 											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
@@ -319,7 +367,7 @@
 											"    pm.test(\"Create new category\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        url: baseUrl + '/categories?categoryName='+category,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -349,7 +397,7 @@
 											"\r",
 											"async function createEvent(categoryId1) {\r",
 											"  var request = {\r",
-											"    url: baseUrl+'events',\r",
+											"    url: baseUrl+'/events',\r",
 											"    method: 'POST',\r",
 											"    header: {\r",
 											"        'sessionToken': pm.environment.get(\"sessionToken\"),\r",
@@ -389,7 +437,7 @@
 											"async function createReservation(eventId, placeId) {\r",
 											"  var request = {\r",
 											"    method: 'POST',\r",
-											"    url: baseUrl + 'reservation',\r",
+											"    url: baseUrl + '/reservation',\r",
 											"    header: {\r",
 											"      'Content-Type': 'application/json',\r",
 											"      'Accept': 'application/json',\r",
@@ -436,7 +484,7 @@
 											"    pm.test(\"Test Case 1: Delete reservation with valid reservation token\", function () {\r",
 											"      var request = {\r",
 											"        method: 'DELETE',\r",
-											"        url: baseUrl + 'reservation',\r",
+											"        url: baseUrl + '/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -457,7 +505,7 @@
 											"    pm.test(\"Test Case 2: Delete reservation with invalid reservation token\", function () {\r",
 											"      var request = {\r",
 											"        method: 'DELETE',\r",
-											"        url: baseUrl + 'reservation',\r",
+											"        url: baseUrl + '/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -478,7 +526,7 @@
 											"    pm.test(\"Test Case 3: Delete reservation with missing reservationToken header\", function () {\r",
 											"      var request = {\r",
 											"        method: 'DELETE',\r",
-											"        url: baseUrl + 'reservation',\r",
+											"        url: baseUrl + '/reservation',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -497,7 +545,7 @@
 									}
 								}
 							],
-							"id": "b564aaa4-f724-4de4-9754-6685ec7485a4",
+							"id": "e37779bc-c340-4d47-a83b-22f491e7613b",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -505,12 +553,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -519,7 +565,7 @@
 							"response": []
 						}
 					],
-					"id": "f5ca09bd-b847-4e87-a592-9a057c897310"
+					"id": "c501514a-5915-4390-ba23-184c67ac77bd"
 				},
 				{
 					"name": "oganizer",
@@ -533,7 +579,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "15708c5d-f858-44cc-bc3f-c76bd2dadd41",
+												"id": "52a33861-1e41-4af5-b5d2-abbb9edc40ae",
 												"exec": [
 													""
 												],
@@ -541,7 +587,7 @@
 											}
 										}
 									],
-									"id": "7a6df0e0-f453-4ab1-9183-d1d97f74759d",
+									"id": "38eadf3f-388d-497c-91f7-fda4d70ab223",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -549,12 +595,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -568,7 +612,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "fddf0c60-aae2-40bf-a68d-4276d2b4d666",
+												"id": "2bb4b482-e2dc-4f69-8a51-f3648f4da5c3",
 												"exec": [
 													""
 												],
@@ -576,7 +620,7 @@
 											}
 										}
 									],
-									"id": "bb308606-08a6-4426-ad3f-c47eda170c7b",
+									"id": "49084bc7-c3e5-4f36-bf4e-d23c68e863b6",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -584,12 +628,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -603,7 +645,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "6c88c646-06f8-4c49-ab44-7e4e07c0faf8",
+												"id": "15e76d3f-d643-4a20-a4a3-f665b3f076c2",
 												"exec": [
 													""
 												],
@@ -611,7 +653,7 @@
 											}
 										}
 									],
-									"id": "e48f2382-00eb-4abb-a1c3-96fae7e3db6b",
+									"id": "33448658-32a9-413a-bee0-c53c6e0398da",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -619,12 +661,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -633,7 +673,7 @@
 									"response": []
 								}
 							],
-							"id": "aa76668b-90a1-46d2-b993-35e617208c42"
+							"id": "862e878a-895b-4dc4-9622-74dc7c615869"
 						},
 						{
 							"name": "login",
@@ -644,7 +684,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "dd50ed17-db27-464a-a029-946632dadc1e",
+												"id": "a723732a-d1e4-434f-b81c-be617385e32a",
 												"exec": [
 													""
 												],
@@ -652,7 +692,7 @@
 											}
 										}
 									],
-									"id": "b3bf5280-f822-4177-849e-915e503f8f2c",
+									"id": "00364bb1-d415-4f6f-b3c0-bac2d4e31655",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -660,12 +700,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -674,7 +712,7 @@
 									"response": []
 								}
 							],
-							"id": "6148c107-1b71-477a-9c17-2dc9bb82627b"
+							"id": "8b23c7da-98db-4976-ac13-3e77bed9ff6a"
 						},
 						{
 							"name": "TODO: POST: Create orginizer account",
@@ -682,7 +720,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "633ba9ff-dd32-4a65-a3a7-d0ea24eb39b9",
+										"id": "863c2183-42bf-42a3-8797-f833076662f3",
 										"exec": [
 											""
 										],
@@ -690,7 +728,7 @@
 									}
 								}
 							],
-							"id": "73c14d81-f909-447d-9bee-0a839325122b",
+							"id": "eb9da05a-8ef9-4801-8129-e6e41fb5ee1a",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -698,12 +736,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -717,7 +753,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "8cdf4d02-adb2-4cb2-bced-4ed378b7e156",
+										"id": "d2d438df-59a5-472d-b911-e7b18127b21a",
 										"exec": [
 											""
 										],
@@ -725,7 +761,7 @@
 									}
 								}
 							],
-							"id": "d10c3256-0a3e-49d5-b426-a2c3db25cf0f",
+							"id": "3485bbed-c262-4032-b902-cf6ab6baa44e",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -733,12 +769,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -747,7 +781,7 @@
 							"response": []
 						}
 					],
-					"id": "cabc53b5-e656-41fd-9151-52f57ae9b38a"
+					"id": "d33202bc-ea2e-49d5-9562-15c568078f8c"
 				},
 				{
 					"name": "event",
@@ -761,7 +795,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "1dabecde-e38f-4a20-b944-009e7b40a0cf",
+												"id": "b8c812d3-f721-4436-8463-35b5fb21fa68",
 												"exec": [
 													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 													"\r",
@@ -799,7 +833,7 @@
 													"    pm.test(\"Create new category\", function () {\r",
 													"      var request = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'categories?categoryName='+category,\r",
+													"        url: baseUrl + '/categories?categoryName='+category,\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json'\r",
@@ -821,7 +855,7 @@
 													"      // Create a new event to get by ID\r",
 													"      var createRequest = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'events',\r",
+													"        url: baseUrl + '/events',\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json',\r",
@@ -849,7 +883,7 @@
 													"        // Get the event by ID\r",
 													"        var getRequest = {\r",
 													"          method: 'GET',\r",
-													"          url: baseUrl + 'events/' + eventId,\r",
+													"          url: baseUrl + '/events/' + eventId,\r",
 													"          header: {\r",
 													"            'Accept': 'application/json'\r",
 													"          }\r",
@@ -881,7 +915,7 @@
 													"    pm.test(\"Test Case 2: Attempt to get event by invalid ID\", function () {\r",
 													"      var request = {\r",
 													"        method: 'GET',\r",
-													"        url: baseUrl + 'events/' + 'invalid_id',\r",
+													"        url: baseUrl + '/events/' + 'invalid_id',\r",
 													"        header: {\r",
 													"          'Accept': 'application/json'\r",
 													"        }\r",
@@ -900,7 +934,7 @@
 													"    pm.test(\"Test Case 3: Attempt to get non-existent event\", function () {\r",
 													"      var request = {\r",
 													"        method: 'GET',\r",
-													"        url: baseUrl + 'events/-1', // Use a non-existent event ID\r",
+													"        url: baseUrl + '/events/-1', // Use a non-existent event ID\r",
 													"        header: {\r",
 													"          'Accept': 'application/json'\r",
 													"        }\r",
@@ -918,7 +952,7 @@
 											}
 										}
 									],
-									"id": "a7dc4430-0a3d-450c-8f9f-caa3f669a3f7",
+									"id": "ab0462c4-fcff-496e-9ca7-bba54ab2a4d4",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -926,12 +960,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -945,7 +977,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "75101def-db90-42a0-832a-7868d5a4096a",
+												"id": "3c90363e-1c58-4e91-9e71-f43e19ff219e",
 												"exec": [
 													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 													"\r",
@@ -983,7 +1015,7 @@
 													"    pm.test(\"Create new category\", function () {\r",
 													"      var request = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'categories?categoryName='+category,\r",
+													"        url: baseUrl + '/categories?categoryName='+category,\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json'\r",
@@ -1006,7 +1038,7 @@
 													"      // Create a new event to cancel\r",
 													"      var createRequest = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'events',\r",
+													"        url: baseUrl + '/events',\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json',\r",
@@ -1033,7 +1065,7 @@
 													"        // Cancel the event\r",
 													"        var cancelRequest = {\r",
 													"          method: 'DELETE',\r",
-													"          url: baseUrl + 'events/' + eventID,\r",
+													"          url: baseUrl + '/events/' + eventID,\r",
 													"          header: {\r",
 													"            'Content-Type': 'application/json',\r",
 													"            'Accept': 'application/json',\r",
@@ -1055,7 +1087,7 @@
 													"    pm.test(\"Test Case 2: Attempt to cancel non-existing event\", function () {\r",
 													"      var request = {\r",
 													"        method: 'DELETE',\r",
-													"        url: baseUrl + 'events/12345', // Non-existing event ID\r",
+													"        url: baseUrl + '/events/12345', // Non-existing event ID\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json',\r",
@@ -1077,7 +1109,7 @@
 													"      // Create a new event to cancel\r",
 													"      var createRequest = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'events',\r",
+													"        url: baseUrl + '/events',\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json',\r",
@@ -1104,7 +1136,7 @@
 													"        // Try to cancel the event with an invalid session token\r",
 													"        var cancelRequest = {\r",
 													"          method: 'DELETE',\r",
-													"          url: baseUrl + 'events/' + eventId,\r",
+													"          url: baseUrl + '/events/' + eventId,\r",
 													"          header: {\r",
 													"            'Content-Type': 'application/json',\r",
 													"            'Accept': 'application/json',\r",
@@ -1125,7 +1157,7 @@
 											}
 										}
 									],
-									"id": "5227fee0-1971-4212-84e9-44013f5cb89f",
+									"id": "f5b8f52d-2e14-47c9-b645-895d8ae3c04a",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -1133,12 +1165,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -1152,7 +1182,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "0f500807-86da-419a-85d1-73ea0a6768bf",
+												"id": "b5cc3f34-0b04-4963-be37-ac9d2ad12925",
 												"exec": [
 													""
 												],
@@ -1160,7 +1190,7 @@
 											}
 										}
 									],
-									"id": "5e392585-9edb-47f4-b336-7756a861345a",
+									"id": "6db348d8-52e1-4c0a-b04a-9d460e08edfe",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -1168,12 +1198,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -1182,7 +1210,7 @@
 									"response": []
 								}
 							],
-							"id": "eff9e80c-811f-4e75-ab72-d8f3ae716840"
+							"id": "1b540f05-fa71-4ee9-afa9-d05040f65f0f"
 						},
 						{
 							"name": "my",
@@ -1193,7 +1221,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "08e2df45-6aa7-47b2-8b98-c17ab2d0b8ef",
+												"id": "f55b3373-75f7-4624-8a32-72db405488b0",
 												"exec": [
 													""
 												],
@@ -1201,7 +1229,7 @@
 											}
 										}
 									],
-									"id": "89db3e1d-bab5-4513-84bd-27b07b631885",
+									"id": "5073f437-d900-4331-804a-da4ce9ed39a8",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -1209,12 +1237,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -1223,7 +1249,7 @@
 									"response": []
 								}
 							],
-							"id": "53965b3c-fdb8-4712-b3b0-93fc8f0d599c"
+							"id": "1da02869-e818-4a05-bfc5-d09fa35f7bb1"
 						},
 						{
 							"name": "getByCategory",
@@ -1234,7 +1260,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "1f040d45-26e5-4dc4-86f7-2f1b2d283bc3",
+												"id": "4c5f627a-c8ed-4eb9-93e2-99575063a369",
 												"exec": [
 													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 													"\r",
@@ -1271,7 +1297,7 @@
 													"    pm.test(\"Create new category\", function () {\r",
 													"      var request = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'categories?categoryName='+category,\r",
+													"        url: baseUrl + '/categories?categoryName='+category,\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json'\r",
@@ -1292,7 +1318,7 @@
 													"    pm.test(\"CreateEvnetWithCategories\", function () {\r",
 													"      var request = {\r",
 													"        method: 'POST',\r",
-													"        url: baseUrl + 'events',\r",
+													"        url: baseUrl + '/events',\r",
 													"        header: {\r",
 													"          'Content-Type': 'application/json',\r",
 													"          'Accept': 'application/json',\r",
@@ -1342,7 +1368,7 @@
 													"    pm.test(\"Test Case 1: Get events by category with valid categoryId\", function () {\r",
 													"      var request = {\r",
 													"        method: 'GET',\r",
-													"        url: baseUrl + 'events/getByCategory?categoryId=' + categoryId,\r",
+													"        url: baseUrl + '/events/getByCategory?categoryId=' + categoryId,\r",
 													"        header: {\r",
 													"          'Accept': 'application/json'\r",
 													"        }\r",
@@ -1374,7 +1400,7 @@
 													"      var categoryId = 'sdf'; // Replace with a valid category ID\r",
 													"      var request = {\r",
 													"        method: 'GET',\r",
-													"        url: baseUrl + 'events/getByCategory?categoryId=' + categoryId,\r",
+													"        url: baseUrl + '/events/getByCategory?categoryId=' + categoryId,\r",
 													"        header: {\r",
 													"          'Accept': 'application/json'\r",
 													"        }\r",
@@ -1393,7 +1419,7 @@
 											}
 										}
 									],
-									"id": "7276707f-ac6d-40bc-b4b7-efe3e41a5645",
+									"id": "08ef5530-b3f9-4572-9e14-6694aa7b64a4",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -1401,12 +1427,10 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "http://localhost:8080/ping",
-											"protocol": "http",
+											"raw": "{{baseUrl}}/ping",
 											"host": [
-												"localhost"
+												"{{baseUrl}}"
 											],
-											"port": "8080",
 											"path": [
 												"ping"
 											]
@@ -1415,7 +1439,7 @@
 									"response": []
 								}
 							],
-							"id": "0b628f1d-ddc7-45ad-9836-3c49f6dace4a"
+							"id": "98d0f368-8b35-427a-bf45-9278097cee1b"
 						},
 						{
 							"name": "TODO: GET: Return list of all events",
@@ -1423,7 +1447,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "0f82ce0e-8250-4d2a-b8bc-215b428b032d",
+										"id": "07745e1a-b02f-4643-b7b5-5da8948dd901",
 										"exec": [
 											""
 										],
@@ -1431,7 +1455,7 @@
 									}
 								}
 							],
-							"id": "9fa3abcc-7eea-4cb9-8c7b-ba6c1c0c44c6",
+							"id": "ce312a02-6fb3-449d-b195-ef69d69fc7b7",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -1439,12 +1463,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -1458,9 +1480,9 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "30aab394-e21a-4f2d-a2c0-f1ae4ed93b9e",
+										"id": "6a928333-d22a-4f8c-a143-85982f6c610a",
 										"exec": [
-											"var baseUrl  =pm.environment.get(\"baseUrl\");\r",
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
 											"(async function() {\r",
 											"  try {\r",
@@ -1500,7 +1522,7 @@
 											"    pm.test(\"Create new category\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        url: baseUrl + '/categories?categoryName='+category,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -1523,7 +1545,7 @@
 											"    pm.test(\"Test Case 1: Add event with valid parameters\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'events',\r",
+											"        url: baseUrl + '/events',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -1572,7 +1594,7 @@
 											"    pm.test(\"Test Case 2: Add event with invalid session token\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'events',\r",
+											"        url: baseUrl + '/events',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -1607,7 +1629,7 @@
 											"    pm.test(\"Test Case 3: Add event with missing parameters\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'events',\r",
+											"        url: baseUrl + '/events',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -1642,7 +1664,7 @@
 											"    pm.test(\"Test Case 4: Add event with invalid categories\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'events',\r",
+											"        url: baseUrl + '/events',\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json',\r",
@@ -1677,7 +1699,7 @@
 									}
 								}
 							],
-							"id": "a71add83-6f6b-4bfc-91e0-e03ec959247f",
+							"id": "47d3f659-a41a-4ecc-8acf-f8a6ed3046e4",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -1685,12 +1707,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -1699,7 +1719,7 @@
 							"response": []
 						}
 					],
-					"id": "21334b96-3eb2-41b7-aaa1-61eb79de890e"
+					"id": "98ec4017-222a-497f-8f19-0f4ddde579e6"
 				},
 				{
 					"name": "categories",
@@ -1710,7 +1730,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "0e4b3cb4-4343-417e-b0ee-8f32097a0447",
+										"id": "c2f67f54-91d6-453f-b7af-373c6f2d7aec",
 										"exec": [
 											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
@@ -1734,7 +1754,7 @@
 											"    var category1 = 'category1'+(new Date()).getTime();\r",
 											"    var createRequest1 = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName='+category1,\r",
+											"        url: baseUrl + '/categories?categoryName='+category1,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -1750,7 +1770,7 @@
 											"      var category2 = 'category2'+(new Date()).getTime();\r",
 											"      var createRequest2 = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName='+category2,\r",
+											"        url: baseUrl + '/categories?categoryName='+category2,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -1765,7 +1785,7 @@
 											"        // Send third request to get all categories\r",
 											"        var getAllRequest = {\r",
 											"          method: 'GET',\r",
-											"          url: baseUrl + 'categories',\r",
+											"          url: baseUrl + '/categories',\r",
 											"          header: {\r",
 											"            'Accept': 'application/json',\r",
 											"          },\r",
@@ -1793,7 +1813,7 @@
 									}
 								}
 							],
-							"id": "70e68fe5-69bd-46fa-bbed-fb03b62724d5",
+							"id": "5288e7db-c620-44fa-b12a-47ef77cf5870",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -1801,12 +1821,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -1820,7 +1838,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "23b182be-b89c-468b-a19e-f63ac75cc0e0",
+										"id": "c137476f-88eb-450c-b495-f4bf919404b9",
 										"exec": [
 											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
@@ -1845,7 +1863,7 @@
 											"      var category = 'test category '+(new Date()).getTime();\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName='+category,\r",
+											"        url: baseUrl + '/categories?categoryName='+category,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -1869,7 +1887,7 @@
 											"      // First, add the category\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
-											"        url: baseUrl + 'categories?categoryName=' + categoryName,\r",
+											"        url: baseUrl + '/categories?categoryName=' + categoryName,\r",
 											"        header: {\r",
 											"          'Content-Type': 'application/json',\r",
 											"          'Accept': 'application/json'\r",
@@ -1881,7 +1899,7 @@
 											"        // Now try to add the same category again\r",
 											"        var request = {\r",
 											"          method: 'POST',\r",
-											"          url: baseUrl + 'categories?categoryName=' + categoryName,\r",
+											"          url: baseUrl + '/categories?categoryName=' + categoryName,\r",
 											"          header: {\r",
 											"            'Content-Type': 'application/json',\r",
 											"            'Accept': 'application/json'\r",
@@ -1902,7 +1920,7 @@
 									}
 								}
 							],
-							"id": "68a36432-e810-4197-81b1-e62293cbcdb0",
+							"id": "21eed11f-9bbe-4bce-81f0-f1e50bd21001",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -1910,12 +1928,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8080/ping",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/ping",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "8080",
 									"path": [
 										"ping"
 									]
@@ -1924,7 +1940,7 @@
 							"response": []
 						}
 					],
-					"id": "0d914aec-c422-453f-889d-c9a22f248e9c"
+					"id": "394bd7b1-5f3a-4ae7-b991-7a8831172572"
 				},
 				{
 					"name": "get and set session token to env variable",
@@ -1932,7 +1948,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "eb5c7bd0-53c1-48b4-a782-b6170ba7c249",
+								"id": "6a898661-5ed2-4185-a63c-7e9e9cbcbf93",
 								"exec": [
 									"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 									"\r",
@@ -1941,7 +1957,7 @@
 									"  return new Promise(function(resolve, reject) {\r",
 									"    var request = {\r",
 									"      method: 'GET',\r",
-									"      url: baseUrl + 'organizer/login',\r",
+									"      url: baseUrl + '/organizer/login',\r",
 									"      header: {\r",
 									"        'Accept': 'application/json',\r",
 									"        'Content-Type': 'application/json',\r",
@@ -1965,7 +1981,7 @@
 							}
 						}
 					],
-					"id": "6620588a-c3f4-4e49-b0f6-011c5e89ee46",
+					"id": "e2a060e9-389c-40a4-bf4a-7353f9030087",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1973,12 +1989,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/ping",
-							"protocol": "http",
+							"raw": "{{baseUrl}}/ping",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "8080",
 							"path": [
 								"ping"
 							]
@@ -1987,36 +2001,7 @@
 					"response": []
 				}
 			],
-			"id": "655c8b32-a23e-4f89-a43a-ad4f883bd330"
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"id": "92789108-1873-4582-98d3-9955ccff54c3",
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"id": "042f8722-45e8-45ad-bc99-91769af494d7",
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"id": "78bc2694-84a1-4a16-9d1b-9b9a42a59092",
-			"key": "baseUrl",
-			"value": "http://localhost:8080"
+			"id": "534db2fb-017b-4495-b1a0-29b1d6b47929"
 		}
 	]
 }
