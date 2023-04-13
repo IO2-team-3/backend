@@ -95,13 +95,9 @@ public class EventService {
     if (categoryId == null || categoryId < 0) {
       throw new IllegalArgumentException("Category id cannot be null or negative");
     }
-    return eventRepository.findAll()
+    Category category = categoryRepository.findById(categoryId).get();
+    return eventRepository.findByCategories(category)
         .stream()
-        .filter(event -> event.getCategories()
-            .stream()
-            .map(Category::getId)
-            .collect(Collectors.toList())
-            .contains(categoryId))
         .map(eventMapper::convertToModel)
         .collect(Collectors.toList());
   }
