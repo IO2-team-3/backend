@@ -220,7 +220,8 @@ class EventServiceTest {
         .endTime(endTime)
         .startTime(startTime)
         .build();
-    when(eventRepository.findAll()).thenReturn(List.of(event));
+    when(categoryRepository.findById(1L)).thenReturn(category);
+    when(eventRepository.findByCategories(category)).thenReturn(List.of(event));
 
     // when
     List<com.team3.central.openapi.model.Event> res = eventService.getEventsByCategory(1L);
