@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -98,7 +99,7 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<List<Event>> getByCategory(
-      @NotNull @ApiParam(value = "ID of category", required = true) @Valid @RequestParam(value = "categoryId", required = true) Long categoryId) {
+      @ApiParam(value = "ID of category", required = true) @RequestHeader(value = "categoryId", required = true) Long categoryId) {
     try {
       return new ResponseEntity<>(
           eventService.getEventsByCategory(categoryId), HttpStatus.OK);
