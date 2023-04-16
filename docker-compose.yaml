@@ -1,0 +1,40 @@
+version: "3.5"
+services:
+  backend:
+    container_name: backend
+    image: backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+        - DB_NAME=${DB_NAME}
+        - DB_PASSWORD=${DB_PASSWORD}
+        - DB_PORT=${DB_PORT}
+        - DB_URL=${DB_URL}
+        - DB_USERNAME=${DB_USERNAME}
+        - MAIL_HOST=${MAIL_HOST}
+        - MAIL_PASSWORD=${MAIL_PASSWORD}
+        - MAIL_USERNAME=${MAIL_USERNAME}
+    depends_on:
+      - postgres-db
+    networks:
+      - db
+  postgres-db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - db
+    volumes:
+      - /var/io2_backend/postgres/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+networks:
+  db:
+    name: db
+    driver: bridge
