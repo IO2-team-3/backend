@@ -10,6 +10,70 @@
 			"name": "tests Copy",
 			"item": [
 				{
+					"name": "setup-login",
+					"item": [
+						{
+							"name": "get and set session token to env variable",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6a898661-5ed2-4185-a63c-7e9e9cbcbf93",
+										"exec": [
+											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+											"\r",
+											"// Test Case: Organizer login\r",
+											"function testLogin() {\r",
+											"  return new Promise(function(resolve, reject) {\r",
+											"    var request = {\r",
+											"      method: 'GET',\r",
+											"      url: baseUrl + '/organizer/login',\r",
+											"      header: {\r",
+											"        'Accept': 'application/json',\r",
+											"        'Content-Type': 'application/json',\r",
+											"        'email': 'io2testmail@gmail.com',\r",
+											"        'password': '123'\r",
+											"      }\r",
+											"    };\r",
+											"    pm.sendRequest(request, function (err, response) {\r",
+											"      pm.expect(response.code).to.equal(200);\r",
+											"      pm.expect(response.json().sessionToken).to.be.a('string');\r",
+											"      pm.environment.set('sessionToken', response.json().sessionToken);\r",
+											"      resolve();\r",
+											"    });\r",
+											"  });\r",
+											"}\r",
+											"\r",
+											"pm.test('Organizer login', testLogin);\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "e2a060e9-389c-40a4-bf4a-7353f9030087",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/ping",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ping"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"id": "0c994c7b-b956-4f53-a627-dede49bc2640"
+				},
+				{
 					"name": "reservation",
 					"item": [
 						{
@@ -18,7 +82,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "a90e93ad-5d3e-49ce-aa78-27a839421181",
+										"id": "8dbb4418-75e6-4916-931a-0b9b9132defe",
 										"exec": [
 											"var baseUrl = pm.environment.get(\"baseUrl\");\r",
 											"\r",
@@ -289,7 +353,7 @@
 											"// Test Case 8: Make reservation without specifed placeId, but now there are no more free palces (all are already reserved)\r",
 											"function test8(){\r",
 											"  return new Promise(function(resolve, reject) {\r",
-											"    pm.test(\" Test Case 8: Make reservation without specifed placeId, but now there are no more free palces (all are already reserved)\", function () {\r",
+											"    pm.test(\"Test Case 8: Make reservation without specifed placeId, but now there are no more free palces (all are already reserved)\", function () {\r",
 											"      var request = {\r",
 											"        method: 'POST',\r",
 											"        url: baseUrl+'/reservation',\r",
@@ -1941,64 +2005,6 @@
 						}
 					],
 					"id": "394bd7b1-5f3a-4ae7-b991-7a8831172572"
-				},
-				{
-					"name": "get and set session token to env variable",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "6a898661-5ed2-4185-a63c-7e9e9cbcbf93",
-								"exec": [
-									"var baseUrl = pm.environment.get(\"baseUrl\");\r",
-									"\r",
-									"// Test Case: Organizer login\r",
-									"function testLogin() {\r",
-									"  return new Promise(function(resolve, reject) {\r",
-									"    var request = {\r",
-									"      method: 'GET',\r",
-									"      url: baseUrl + '/organizer/login',\r",
-									"      header: {\r",
-									"        'Accept': 'application/json',\r",
-									"        'Content-Type': 'application/json',\r",
-									"        'email': 'io2testmail@gmail.com',\r",
-									"        'password': '123'\r",
-									"      }\r",
-									"    };\r",
-									"    pm.sendRequest(request, function (err, response) {\r",
-									"      pm.expect(response.code).to.equal(200);\r",
-									"      pm.expect(response.json().sessionToken).to.be.a('string');\r",
-									"      pm.environment.set('sessionToken', response.json().sessionToken);\r",
-									"      resolve();\r",
-									"    });\r",
-									"  });\r",
-									"}\r",
-									"\r",
-									"pm.test('Organizer login', testLogin);\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"id": "e2a060e9-389c-40a4-bf4a-7353f9030087",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/ping",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"ping"
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"id": "534db2fb-017b-4495-b1a0-29b1d6b47929"
