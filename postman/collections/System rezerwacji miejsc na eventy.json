@@ -498,7 +498,7 @@
 									{
 										"description": "(Required) code from email",
 										"key": "code",
-										"value": "<string>"
+										"value": "c412eca0-b35a-441d-8b27-177a7df181b3"
 									}
 								],
 								"url": {
@@ -513,7 +513,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "<string>"
+											"value": "1"
 										}
 									]
 								}
@@ -1307,7 +1307,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"janw\",\n  \"email\": \"io2testmail@gmail.com\",\n  \"password\": \"123\"\n}",
+							"raw": "{\n  \"name\": \"jan\",\n  \"email\": \"io2testmail@gmail.com\",\n  \"password\": \"123\"\n}",
 							"options": {
 								"raw": {
 									"headerFamily": "json",
@@ -2152,7 +2152,7 @@
 									"apikey": [
 										{
 											"key": "value",
-											"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpbzJ0ZXN0bWFpbEBnbWFpbC5jb20iLCJpYXQiOjE2ODA3MDk4MDgsImV4cCI6MTY4MDcxMTI0OH0.-n3rJB5UzUv0ESjPDFpesLFCe0P06ESg3jQPCCEGzmU",
+											"value": "{{sessionToken}}",
 											"type": "string"
 										},
 										{
