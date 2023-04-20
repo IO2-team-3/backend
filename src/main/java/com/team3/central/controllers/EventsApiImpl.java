@@ -9,6 +9,8 @@ import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.CategoryService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
+import com.team3.central.services.exceptions.EventNotChangedException;
+import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
@@ -73,6 +75,7 @@ public class EventsApiImpl implements EventsApi {
    *
    * @param id id of Event (required)
    * @return deleted (status code 204)
+   *         or invalid session (status code 403)
    *         or id not found (status code 404)
    */
   @Override
@@ -145,6 +148,7 @@ public class EventsApiImpl implements EventsApi {
    * GET /events/my : Return list of events made by organizer, according to session
    *
    * @return successful operation (status code 200)
+   *         or invalid session (status code 403)
    */
   @Override
   public ResponseEntity<List<Event>> getMyEvents() {
@@ -153,6 +157,17 @@ public class EventsApiImpl implements EventsApi {
     return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()), HttpStatus.OK);
   }
 
+  /**
+   * PATCH /events/{id} : patch existing event
+   *
+   * @param id id of Event (required)
+   * @param eventPatch Update an existent user in the store (optional)
+   * @return nothing to do, no field to patch (status code 200)
+   *         or patched (status code 202)
+   *         or invalid id or fields in body (status code 400)
+   *         or invalid session (status code 403)
+   *         or id not found (status code 404)
+   */
   @Override
   public ResponseEntity<Void> patchEvent(
       @ApiParam(value = "id of Event", required = true) @PathVariable("id") String id,
@@ -163,10 +178,16 @@ public class EventsApiImpl implements EventsApi {
     }
     try {
       eventService.patchEvent(Long.valueOf(id), userDetails.getUsername(), eventPatch);
-    } catch (NotFoundException e) {
+    } catch (NoCategoryException e) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    catch (NotFoundException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    return new ResponseEntity<>(HttpStatus.OK);
+    catch (EventNotChangedException e) {
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   private UserDetails getUserDetails() {
