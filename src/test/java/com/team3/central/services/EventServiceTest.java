@@ -18,6 +18,8 @@ import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.Reservation;
 import com.team3.central.repositories.entities.enums.EventStatus;
+import com.team3.central.services.exceptions.EventNotChangedException;
+import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -363,7 +365,8 @@ class EventServiceTest {
   }
 
   @Test
-  public void patchEventValid() throws NotFoundException {
+  public void patchEventValid()
+      throws NotFoundException, NoCategoryException, EventNotChangedException {
     // given
     Long eventId = 1L;
     String organizerEmail = "organizer@example.com";
