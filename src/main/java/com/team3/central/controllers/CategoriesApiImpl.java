@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,10 +26,11 @@ public class CategoriesApiImpl implements CategoriesApi {
      *
      * @param categoryName name of category (required)
      * @return created (status code 201)
-     * or category already exist (status code 400)
+     *         or category already exist (status code 400)
+     *         or invalid session (status code 403)
      */
     @Override
-    public ResponseEntity<Category> addCategories(@NotNull @ApiParam(value = "name of category", required = true) @Valid @RequestParam(value = "categoryName", required = true) String categoryName) {
+    public ResponseEntity<Category> addCategories(String categoryName) {
         if(categoriesService.existsByName(categoryName))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 

@@ -27,8 +27,7 @@ public class ReservationApiImpl implements ReservationApi {
    * @return deleted (status code 204) or token not found (status code 404)
    */
   @Override
-  public ResponseEntity<Void> deleteReservation(
-      @RequestHeader(value = "reservationToken", required = true) String reservationToken) {
+  public ResponseEntity<Void> deleteReservation(String reservationToken) {
     try {
       reservationService.deleteReservation(reservationToken);
     } catch (Exception e) {
@@ -46,9 +45,7 @@ public class ReservationApiImpl implements ReservationApi {
    * not exist or done (status code 404)
    */
   @Override
-  public ResponseEntity<ReservationDTO> makeReservation(
-      @RequestHeader(value = "eventId", required = true) Long eventId,
-      @RequestHeader(value = "placeID", required = false) Long placeID) {
+  public ResponseEntity<ReservationDTO> makeReservation(Long eventId, Long placeID) {
 
     try {
       Reservation reservation = reservationService.makeReservation(eventId, placeID);
