@@ -11,6 +11,8 @@ import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.Reservation;
 import com.team3.central.repositories.entities.enums.EventStatus;
+import com.team3.central.services.exceptions.EventNotChangedException;
+import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -126,7 +128,8 @@ public class EventService {
     return true;
   }
 
-  public void patchEvent(Long id, String email, EventPatch eventPatch) throws NotFoundException {
+  public void patchEvent(Long id, String email, EventPatch eventPatch)
+      throws NotFoundException, NoCategoryException, EventNotChangedException {
     var event = eventRepository.findById(id);
     if (event.isEmpty()) {
       throw new NotFoundException("Event does not exist");
@@ -137,7 +140,7 @@ public class EventService {
     if (event.get().getStatus() != EventStatus.INFUTURE) {
       throw new NotFoundException("Event is not in future");
     }
-
+    boolean eventChanged = false;
     // If we change maxPlace (available place in event), then we delete all reservations and create
     // new one. Old reservations are not valid anymore
     if (eventPatch.getMaxPlace() != null) {
@@ -157,31 +160,40 @@ public class EventService {
     }
     if (eventPatch.getStartTime() != null) {
       event.get().setStartTime(eventPatch.getStartTime());
+      eventChanged = true;
     }
     if (eventPatch.getTitle() != null) {
       event.get().setTitle(eventPatch.getTitle());
+      eventChanged = true;
     }
     if (eventPatch.getName() != null) {
       event.get().setName(eventPatch.getName());
+      eventChanged = true;
     }
     if (eventPatch.getEndTime() != null) {
       event.get().setEndTime(eventPatch.getEndTime());
+      eventChanged = true;
     }
     if (eventPatch.getPlaceSchema() != null) {
       event.get().setPlaceSchema(eventPatch.getPlaceSchema());
+      eventChanged = true;
     }
     if (eventPatch.getCategoriesIds() != null) {
       Set<Category> set = new HashSet<>();
       for (Integer integer : eventPatch.getCategoriesIds()) {
         Category category = categoryRepository.findById(integer.longValue());
         if (category == null) {
-          throw new NotFoundException("Category does not exist");
+          throw new NoCategoryException("Category does not exist");
         }
         set.add(category);
       }
       event.get().setCategories(set);
+      eventChanged = true;
     }
     eventRepository.save(event.get());
+    if(!eventChanged) {
+      throw new EventNotChangedException("Event was not changed");
+    }
   }
 
 }
