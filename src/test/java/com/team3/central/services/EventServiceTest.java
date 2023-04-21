@@ -87,9 +87,9 @@ class EventServiceTest {
     );
     // then
     assertThat(result).extracting("title", "name", "freePlace", "startTime", "endTime", "latitude",
-            "longitude", "categories", "placeSchema")
+            "longitude", "categories")
         .containsExactly(title, name, freePlace, startTime,
-            endTime, latitude, longitude, List.of(), placeSchema);
+            endTime, latitude, longitude, List.of());
   }
 
   @SneakyThrows
@@ -345,7 +345,7 @@ class EventServiceTest {
   }
 
   @Test
-  public void deleteEventInvlalidId() {
+  public void deleteEventInvalidId() {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = -1L;
