@@ -164,9 +164,7 @@ public class OrganizerApiImpl implements OrganizerApi {
    * found (status code 404)
    */
   @Override
-  public ResponseEntity<Void> patchOrganizer(
-      @ApiParam(value = "id of Organizer", required = true) @PathVariable("id") String id,
-      @ApiParam("Update an existent user in the store") @RequestBody(required = false) @Valid OrganizerPatch organizerPatch) {
+  public ResponseEntity<Void> patchOrganizer(String id, OrganizerPatch organizerPatch) {
 
     HttpStatus status = HttpStatus.ACCEPTED;
     try {

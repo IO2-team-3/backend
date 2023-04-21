@@ -475,9 +475,6 @@ components:
           type: integer
           format: int64
           example: 100
-        placeSchema:
-          type: string
-          example: Seralized place schema
 
     EventWithPlaces:
       required:

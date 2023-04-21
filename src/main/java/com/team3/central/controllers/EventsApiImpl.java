@@ -9,12 +9,13 @@ import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.services.CategoryService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
+import com.team3.central.services.exceptions.EventNotChangedException;
+import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -47,8 +47,7 @@ public class EventsApiImpl implements EventsApi {
    *         or invalid session (status code 403)
    */
   @Override
-  public ResponseEntity<Event> addEvent(
-      @ApiParam(value = "Add event") @Valid @RequestBody(required = false) EventForm eventForm) {
+  public ResponseEntity<Event> addEvent(EventForm eventForm) {
     UserDetails userDetails = getUserDetails();
     OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
         .get();
@@ -73,11 +72,11 @@ public class EventsApiImpl implements EventsApi {
    *
    * @param id id of Event (required)
    * @return deleted (status code 204)
+   *         or invalid session (status code 403)
    *         or id not found (status code 404)
    */
   @Override
-  public ResponseEntity<Void> cancelEvent(
-      @ApiParam(value = "id of Event", required = true) @PathVariable("id") String id) {
+  public ResponseEntity<Void> cancelEvent(String id) {
     UserDetails userDetails = getUserDetails();
     if (userDetails == null) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -98,8 +97,7 @@ public class EventsApiImpl implements EventsApi {
    * 400)
    */
   @Override
-  public ResponseEntity<List<Event>> getByCategory(
-      @ApiParam(value = "ID of category", required = true) @RequestHeader(value = "categoryId", required = true) Long categoryId) {
+  public ResponseEntity<List<Event>> getByCategory(Long categoryId) {
     try {
       return new ResponseEntity<>(
           eventService.getEventsByCategory(categoryId), HttpStatus.OK);
@@ -118,8 +116,7 @@ public class EventsApiImpl implements EventsApi {
    *         or Event not found (status code 404)
    */
   @Override
-  public ResponseEntity<EventWithPlaces> getEventById(
-      @ApiParam(value = "ID of event to return", required = true) @PathVariable("id") Long id) {
+  public ResponseEntity<EventWithPlaces> getEventById(Long id) {
     try {
       Optional<EventWithPlaces> event = eventService.getById(id);
       return new ResponseEntity<>(event.get(),HttpStatus.OK);
@@ -145,6 +142,7 @@ public class EventsApiImpl implements EventsApi {
    * GET /events/my : Return list of events made by organizer, according to session
    *
    * @return successful operation (status code 200)
+   *         or invalid session (status code 403)
    */
   @Override
   public ResponseEntity<List<Event>> getMyEvents() {
@@ -153,20 +151,35 @@ public class EventsApiImpl implements EventsApi {
     return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()), HttpStatus.OK);
   }
 
+  /**
+   * PATCH /events/{id} : patch existing event
+   *
+   * @param id id of Event (required)
+   * @param eventPatch Update an existent user in the store (optional)
+   * @return nothing to do, no field to patch (status code 200)
+   *         or patched (status code 202)
+   *         or invalid id or fields in body (status code 400)
+   *         or invalid session (status code 403)
+   *         or id not found (status code 404)
+   */
   @Override
-  public ResponseEntity<Void> patchEvent(
-      @ApiParam(value = "id of Event", required = true) @PathVariable("id") String id,
-      @ApiParam(value = "Update an existent user in the store") @Valid @RequestBody(required = false) EventPatch eventPatch) {
+  public ResponseEntity<Void> patchEvent(String id, EventPatch eventPatch) {
     UserDetails userDetails = getUserDetails();
     if (userDetails == null) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     try {
       eventService.patchEvent(Long.valueOf(id), userDetails.getUsername(), eventPatch);
-    } catch (NotFoundException e) {
+    } catch (NoCategoryException e) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    catch (NotFoundException e) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    return new ResponseEntity<>(HttpStatus.OK);
+    catch (EventNotChangedException e) {
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
+    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
   private UserDetails getUserDetails() {

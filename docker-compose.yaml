@@ -31,10 +31,13 @@ services:
     networks:
       - db
     volumes:
-      - /var/io2_backend/postgres/data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 networks:
   db:
     name: db
     driver: bridge
+
+volumes:
+  pgdata:

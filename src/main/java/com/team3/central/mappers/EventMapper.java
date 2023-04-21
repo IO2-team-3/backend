@@ -31,7 +31,6 @@ public class EventMapper {
     eventModel.setMaxPlace(event.getMaxPlace());
     eventModel.setFreePlace(event.getFreePlace());
     eventModel.setName(event.getName());
-    eventModel.setPlaceSchema(event.getPlaceSchema());
     eventModel.setStatus(eventStatusMapper.convertToModel(event.getStatus()));
     eventModel.setTitle(event.getTitle());
     return eventModel;
