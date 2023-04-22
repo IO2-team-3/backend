@@ -9,14 +9,13 @@ import com.team3.central.repositories.entities.enums.OrganizerStatus;
 import com.team3.central.services.exceptions.AlreadyExistsException;
 import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.services.exceptions.UnAuthorizedException;
 import com.team3.central.services.exceptions.WrongTokenException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,16 +47,16 @@ public class OrganizerService {
   // If organizer doesn't exist -> create organizer, send email with token -> code = 201
   // If organizer exists and hasn't been authorized -> send email with new token -> code = 400
   // If organizer exists and has been authorized -> do nothing -> code = 400
-  public ResponseEntity<OrganizerEntity> signUp(String name, String email,
-      String password) {
+  public OrganizerEntity signUp(String name, String email,
+      String password) throws AlreadyExistsException {
     boolean organizerExists = organizerRepository.findByEmail(email).isPresent();
 
     if (organizerExists) {
       var organizer = organizerRepository.findByEmail(email).get();
-      if (!organizer.isAuthorized()) { // can confirmation token expire? Nothing about it in docs
+      if (!organizer.isAuthorized()) {
         sendEmailWithConfirmationToken(organizer);
       }
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      throw new AlreadyExistsException("Organizer already exists");
     }
 
     String encodedPassword = bCryptPasswordEncoder.encode(password);
@@ -65,7 +64,7 @@ public class OrganizerService {
     organizerRepository.save(organizerEntity);
     sendEmailWithConfirmationToken(organizerEntity);
 
-    return new ResponseEntity<>(organizerEntity, HttpStatus.CREATED);
+    return organizerEntity;
   }
 
   // If organizer exists and hasn't been authorized and token is valid -> authorize organizer -> code = 202
@@ -99,20 +98,19 @@ public class OrganizerService {
     }
   }
 
-  // If email and password matches to existing Organizer account, then return sessionToken valid for 3 days, code -> 200
-  // Otherwise return code -> 400
-  public ResponseEntity<String> login(String email, String passowrd) {
+  public String login(String email, String passowrd)
+      throws NotFoundException, UnAuthorizedException, BadIdentificationException {
     var organizer = organizerRepository.findByEmail(email);
     if (organizer.isEmpty() ) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      throw new NotFoundException("no organizer found");
     }
-    else if (!organizer.get().isAuthorized())  return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    else if (!organizer.get().isAuthorized())
+      throw new UnAuthorizedException("organizer not authorized");
     if (!bCryptPasswordEncoder.matches(passowrd, organizer.get().getPassword())) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      throw new BadIdentificationException("email or password mismatch");
     }
 
-    final String jwt = jwtService.generateToken(organizer.get());
-    return new ResponseEntity<String>(jwt, HttpStatus.OK);
+    return jwtService.generateToken(organizer.get());
   }
 
 

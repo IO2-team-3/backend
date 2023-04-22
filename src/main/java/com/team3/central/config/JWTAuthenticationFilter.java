@@ -1,6 +1,7 @@
 package com.team3.central.config;
 
 import com.team3.central.services.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -35,7 +36,17 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
         return;
       }
-      userEmail = jwtService.extractUserEmail(jwt);
+      try{
+        userEmail = jwtService.extractUserEmail(jwt);
+      } catch (Exception e) {
+        if(e instanceof ExpiredJwtException) {
+          response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        }
+        else {
+          response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+        }
+        return;
+      }
       if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
         if(jwtService.isTokenValid(jwt, userDetails)) {
@@ -48,9 +59,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
               new WebAuthenticationDetailsSource().buildDetails(request)
           );
           SecurityContextHolder.getContext().setAuthentication(authToken);
-        } else {
-          response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-          return;
         }
       }
     filterChain.doFilter(request,response);
