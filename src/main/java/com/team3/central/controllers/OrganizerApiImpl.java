@@ -13,6 +13,7 @@ import com.team3.central.services.OrganizerService;
 import com.team3.central.services.exceptions.AlreadyExistsException;
 import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.services.exceptions.UnAuthorizedException;
 import com.team3.central.services.exceptions.WrongTokenException;
 import io.swagger.annotations.ApiParam;
 import java.util.Objects;
@@ -98,13 +99,15 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<InlineResponse200> loginOrganizer(String email, String password) {
-    var res = organizerService.login(email, password);
-    if (res.hasBody()) {
+    try {
+      String token = organizerService.login(email,password);
       InlineResponse200 inlineResponse200 = new InlineResponse200();
-      inlineResponse200.sessionToken(Objects.requireNonNull(res.getBody()));
-      return new ResponseEntity<InlineResponse200>(inlineResponse200, res.getStatusCode());
-    } else {
-      return new ResponseEntity<InlineResponse200>(res.getStatusCode());
+      inlineResponse200.sessionToken(token);
+      return new ResponseEntity<>(inlineResponse200, HttpStatus.OK);
+    } catch (Exception e) {
+      if(e instanceof NotFoundException || e instanceof BadIdentificationException)
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      else return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -118,16 +121,14 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Organizer> signUp(OrganizerForm organizerForm) {
-    var organizerEntityResponseEntity = organizerService.signUp(organizerForm.getName(),
-        organizerForm.getEmail(), organizerForm.getPassword());
-    if (!organizerEntityResponseEntity.hasBody()) {
-      return new ResponseEntity<Organizer>(organizerEntityResponseEntity.getStatusCode());
+    try {
+      OrganizerEntity entity = organizerService.signUp(organizerForm.getName(),
+          organizerForm.getEmail(), organizerForm.getPassword());
+      OrganizerMapper mapper = new OrganizerMapper();
+      return new ResponseEntity<>(mapper.convertToModel(entity), HttpStatus.CREATED);
+    } catch (AlreadyExistsException e) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-    OrganizerMapper mapper = new OrganizerMapper();
-    var organizerDto = mapper.convertToModel(
-        Objects.requireNonNull(organizerEntityResponseEntity.getBody()));
-
-    return new ResponseEntity<>(organizerDto, organizerEntityResponseEntity.getStatusCode());
   }
 
   /**

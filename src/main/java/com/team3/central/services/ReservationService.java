@@ -30,6 +30,9 @@ public class ReservationService {
     }
     reservation.setReservationToken(null);
     reservationRepository.save(reservation);
+
+    eventRepository.updateEventById(reservation.getEvent().getId(),
+        reservation.getEvent().getFreePlace() + 1);
   }
 
   public Reservation makeReservation(Long eventId, Long placeId)
@@ -40,8 +43,7 @@ public class ReservationService {
       if (reservation == null) {
         throw new NotFoundException("No free places in event");
       }
-    }
-    else{
+    } else {
       reservation = reservationRepository.findByEventIdAndPlaceOnSchema(eventId, placeId);
     }
     if (reservation == null) {
@@ -57,6 +59,8 @@ public class ReservationService {
 
     reservation.setReservationToken(UUID.randomUUID().toString());
     reservationRepository.save(reservation);
+    eventRepository.updateEventById(reservation.getEvent().getId(),
+        reservation.getEvent().getFreePlace() - 1);
     return reservation;
   }
 

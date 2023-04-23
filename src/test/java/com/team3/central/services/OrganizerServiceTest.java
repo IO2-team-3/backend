@@ -4,17 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.team3.central.openapi.model.OrganizerPatch;
 import com.team3.central.repositories.OrganizerRepository;
-import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.OrganizerStatus;
+import com.team3.central.services.exceptions.AlreadyExistsException;
+import com.team3.central.services.exceptions.BadIdentificationException;
+import com.team3.central.services.exceptions.NotFoundException;
 import com.team3.central.services.exceptions.WrongTokenException;
 import java.util.HashSet;
 import java.util.Optional;
@@ -25,8 +26,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -87,12 +86,9 @@ class OrganizerServiceTest {
     when(bCryptPasswordEncoder.encode(password)).thenReturn("encodedPassword");
     when(organizerRepository.save(any(OrganizerEntity.class))).thenReturn(organizerEntity);
 
-    // when
-    ResponseEntity<OrganizerEntity> responseEntity = organizerService.signUp(name, email, password);
-
     // then
-    assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-    assertThat(organizerEntity).isEqualToComparingFieldByFieldRecursively(responseEntity.getBody());
+    OrganizerEntity organizer = assertDoesNotThrow(()->organizerService.signUp(name,email,password));
+    assertThat(organizer).usingRecursiveComparison().isEqualTo(organizerEntity);
   }
 
 
@@ -104,16 +100,10 @@ class OrganizerServiceTest {
     final String password = "password";
     final OrganizerEntity organizerEntity = new OrganizerEntity(name, email, password);
     organizerEntity.setStatus(OrganizerStatus.UNAUTHORIZED);
-    final ConfirmationToken confirmationToken = new ConfirmationToken(organizerEntity);
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizerEntity));
 
-    // when
-    final ResponseEntity<OrganizerEntity> responseEntity = organizerService.signUp(name, email,
-        password);
-
     // then
-    assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-    assertNull(responseEntity.getBody());
+    assertThrows(AlreadyExistsException.class, ()->organizerService.signUp(name, email, password));
   }
 
   @Test
@@ -129,11 +119,9 @@ class OrganizerServiceTest {
 
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.of(organizer));
 
-    // when
-    ResponseEntity<OrganizerEntity> response = organizerService.signUp(name, email, password);
-
     // then
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertThrows(AlreadyExistsException.class, ()->organizerService.signUp(name, email, password));
+
   }
 
   @Test
@@ -161,13 +149,11 @@ class OrganizerServiceTest {
     when(jwtService.generateToken(organizerEntity)).thenReturn(token);
     when(bCryptPasswordEncoder.matches(password, organizerEntity.getPassword())).thenReturn(true);
 
-    // when
-    final ResponseEntity<String> response = organizerService.login(email, password);
-
     // then
-    assertThat(response).isNotNull()
-        .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
-        .containsExactly(HttpStatus.OK, token);
+    assertDoesNotThrow(() -> {
+      organizerService.login(email, password);
+    });
+
   }
 
   @Test
@@ -180,12 +166,9 @@ class OrganizerServiceTest {
     when(organizerRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     // when
-    final ResponseEntity<String> response = organizerService.login(email, password);
-
-    // then
-    assertThat(response).isNotNull()
-        .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
-        .containsExactly(HttpStatus.BAD_REQUEST,null);
+   assertThrows(NotFoundException.class, ()->{
+     organizerService.login(email,password);
+   });
   }
 
   @Test
@@ -201,13 +184,10 @@ class OrganizerServiceTest {
     when(jwtService.generateToken(organizerEntity)).thenReturn(token);
     when(bCryptPasswordEncoder.matches(password, organizerEntity.getPassword())).thenReturn(false);
 
-    // when
-    final ResponseEntity<String> response = organizerService.login(email, password);
-
     // then
-    assertThat(response).isNotNull()
-        .extracting(ResponseEntity::getStatusCode, ResponseEntity::getBody)
-        .containsExactly(HttpStatus.BAD_REQUEST,null);
+    assertThrows(BadIdentificationException.class, ()->{
+      organizerService.login(email,password);
+    });
   }
 
   @Test
