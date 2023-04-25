@@ -3,6 +3,7 @@ package com.team3.central.services;
 import com.team3.central.mappers.CategoryMapper;
 import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.entities.Category;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +39,13 @@ public class CategoriesService {
         return categoryRepository.findAll()
                 .stream()
                 .anyMatch(c -> c.getName().equals(name));
+    }
+    public Set<Category> getCategoriesFromIds(List<Integer> categoriesIds)
+        throws IllegalArgumentException {
+        Set<Category> categories = categoryRepository.findAllByIdIn(categoriesIds.stream().map(Long::valueOf).collect(Collectors.toSet()));
+        if(categories.size() != categoriesIds.size()) {
+            throw new IllegalArgumentException("Invalid categories");
+        }
+        return categories;
     }
 }

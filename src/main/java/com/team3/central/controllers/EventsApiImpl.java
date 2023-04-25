@@ -6,7 +6,7 @@ import com.team3.central.openapi.model.EventForm;
 import com.team3.central.openapi.model.EventPatch;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.repositories.entities.OrganizerEntity;
-import com.team3.central.services.CategoryService;
+import com.team3.central.services.CategoriesService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
 import com.team3.central.services.exceptions.EventNotChangedException;
@@ -33,7 +33,7 @@ public class EventsApiImpl implements EventsApi {
 
   private final EventService eventService;
   private final OrganizerService organizerService;
-  private final CategoryService categoryService;
+  private final CategoriesService categoryService;
 
   /**
    *
