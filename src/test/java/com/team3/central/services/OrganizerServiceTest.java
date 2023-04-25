@@ -41,8 +41,6 @@ class OrganizerServiceTest {
   @Mock
   private OrganizerRepository organizerRepository;
   @Mock
-  private ConfirmationTokenRepository confirmationTokenRepository;
-  @Mock
   private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Mock
   private ConfirmationTokenService confirmationTokenService;

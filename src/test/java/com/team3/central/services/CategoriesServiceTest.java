@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.entities.Category;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,14 +21,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CategoriesServiceTest {
   private static CategoryRepository categoryRepository;
   private static CategoriesService categoriesService;
-  private static List<Category> categories;
+
+  private static Set<Category> getCategories() {
+    Set<Category> categories = new HashSet<>() {
+    };
+    categories.add(new Category("TestCategory1"));
+    categories.add(new Category("TestCategory2"));
+    return categories;
+  }
+
   @BeforeAll
   static void setUp() {
     categoryRepository = Mockito.mock(CategoryRepository.class);
     categoriesService = new CategoriesService(categoryRepository);
-    categories = new ArrayList<>();
-    categories.add(new Category("Category1"));
-    categories.add(new Category("Category2"));
   }
 
   @Test
@@ -95,12 +101,10 @@ public class CategoriesServiceTest {
     assertThat(result).isFalse();
   }
 
-
-
   @Test
   public void shouldReturnCategoriesWithValidIds() {
     List<Integer> categoriesIds = List.of(1, 2);
-    Set<Category> expectedCategories = Set.copyOf(categories);
+    Set<Category> expectedCategories = Set.copyOf(getCategories());
     when(categoryRepository.findAllByIdIn(Set.of(1L, 2L))).thenReturn(expectedCategories);
 
     Set<Category> actualCategories = categoriesService.getCategoriesFromIds(categoriesIds);
@@ -111,7 +115,7 @@ public class CategoriesServiceTest {
   @Test
   public void shouldThrowIllegalArgumentExceptionWithInvalidIds() {
     List<Integer> categoriesIds = List.of(1, 2, 3);
-    Set<Category> existingCategories = Set.copyOf(categories);
+    Set<Category> existingCategories = Set.copyOf(getCategories());
     when(categoryRepository.findAllByIdIn(Set.of(1L, 2L))).thenReturn(existingCategories);
     assertThrows(IllegalArgumentException.class, () -> categoriesService.getCategoriesFromIds(categoriesIds));
   }
