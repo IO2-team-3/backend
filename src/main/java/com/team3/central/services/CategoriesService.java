@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 
 @Service
-@AllArgsConstructor
 public class CategoriesService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
