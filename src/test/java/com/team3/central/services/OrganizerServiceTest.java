@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.team3.central.openapi.model.OrganizerPatch;
+import com.team3.central.repositories.ConfirmationTokenRepository;
 import com.team3.central.repositories.OrganizerRepository;
+import com.team3.central.repositories.entities.ConfirmationToken;
 import com.team3.central.repositories.entities.Event;
 import com.team3.central.repositories.entities.OrganizerEntity;
 import com.team3.central.repositories.entities.enums.OrganizerStatus;
@@ -17,6 +20,7 @@ import com.team3.central.services.exceptions.AlreadyExistsException;
 import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.NotFoundException;
 import com.team3.central.services.exceptions.WrongTokenException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -31,10 +35,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @TestInstance(Lifecycle.PER_CLASS)
 class OrganizerServiceTest {
 
+  private static OrganizerEntity organizer;
+  private static Set<Event> events;
   private OrganizerService organizerService;
   @Mock
   private OrganizerRepository organizerRepository;
-
+  @Mock
+  private ConfirmationTokenRepository confirmationTokenRepository;
   @Mock
   private BCryptPasswordEncoder bCryptPasswordEncoder;
   @Mock
@@ -43,9 +50,6 @@ class OrganizerServiceTest {
   private JwtService jwtService;
   @Mock
   private EmailService emailService;
-
-  private static OrganizerEntity organizer;
-  private static Set<Event> events;
 
   @BeforeAll
   void setUp() {
@@ -134,6 +138,98 @@ class OrganizerServiceTest {
 
     // when
     assertThrows(WrongTokenException.class, () -> organizerService.confirm(id, token));
+  }
+
+  @Test
+  public void confirmIdIsInWrongFormat() {
+    assertThrows(BadIdentificationException.class, () -> {
+      organizerService.confirm("not_an_id", "token");
+    });
+  }
+
+  @Test
+  public void confirmOrganizerAlreadyConfirmed() {
+    // given
+    long organizerId = 1L;
+    String token = "token";
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setId(organizerId);
+    organizer.setStatus(OrganizerStatus.AUTHORIZED);
+    when(organizerRepository.findById(anyLong())).thenReturn(Optional.of(organizer));
+    ConfirmationToken confirmationToken = new ConfirmationToken();
+    confirmationToken.setConfirmedAt(LocalDateTime.now());
+    confirmationToken.setOrganizerEntity(organizer);
+    when(confirmationTokenService.getToken(token)).thenReturn(Optional.of(confirmationToken));
+    // then & when
+    assertThrows(AlreadyExistsException.class, () -> {
+      organizerService.confirm(String.valueOf(organizerId), token);
+    });
+  }
+
+  @Test
+  public void confirmOrganizerIdDontMatchIdInConfirmationToken() {
+    // given
+    long organizerId = 1L;
+    String token = "token";
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setId(organizerId);
+    organizer.setStatus(OrganizerStatus.UNAUTHORIZED);
+    ConfirmationToken confirmationToken = new ConfirmationToken();
+    confirmationToken.setOrganizerEntity(new OrganizerEntity());
+  confirmationToken.getOrganizerEntity().setId(2L);
+    when(organizerRepository.findById(organizerId)).thenReturn(Optional.of(organizer));
+    when(confirmationTokenService.getToken(token)).thenReturn(Optional.of(confirmationToken));
+    // then & when
+    assertThrows(WrongTokenException.class, () -> {
+      organizerService.confirm(String.valueOf(organizerId), token);
+    });
+  }
+
+  @Test
+  public void confirmTokenIsExpired() {
+    // given
+    long organizerId = 1L;
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setId(organizerId);
+    organizer.setStatus(OrganizerStatus.UNAUTHORIZED);
+    ConfirmationToken confirmationToken = new ConfirmationToken();
+    confirmationToken.setConfirmedAt(LocalDateTime.now().minusDays(1));
+    confirmationToken.setOrganizerEntity(new OrganizerEntity());
+    confirmationToken.setOrganizerEntity(organizer);
+    when(organizerRepository.findById(organizerId)).thenReturn(Optional.of(organizer));
+
+    when(confirmationTokenService.getToken(any())).thenReturn(Optional.of(confirmationToken));
+    when(confirmationTokenService.isTokenExpired(confirmationToken)).thenReturn(true);
+    // then & when
+    assertThrows(WrongTokenException.class, () -> {
+      organizerService.confirm(String.valueOf(organizerId), "token");
+    });
+  }
+
+  @Test
+  public void confirmSuccess() {
+    // given
+    long organizerId = 1L;
+    OrganizerEntity organizer = new OrganizerEntity();
+    organizer.setId(organizerId);
+    organizer.setStatus(OrganizerStatus.UNAUTHORIZED);
+    ConfirmationToken confirmationToken = new ConfirmationToken();
+    confirmationToken.setExpiresAt(LocalDateTime.now().plusDays(1));
+    confirmationToken.setOrganizerEntity(new OrganizerEntity());
+    confirmationToken.setOrganizerEntity(organizer);
+
+    // when
+    when(organizerRepository.findById(organizerId)).thenReturn(Optional.of(organizer));
+    when(confirmationTokenService.getToken(any())).thenReturn(Optional.of(confirmationToken));
+    when(confirmationTokenService.isTokenExpired(confirmationToken)).thenReturn(false);
+
+    try {
+      organizerService.confirm(String.valueOf(organizerId), "token");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    // then
+    assertThat(organizer.getStatus()).isEqualTo(OrganizerStatus.AUTHORIZED);
   }
 
   @Test
