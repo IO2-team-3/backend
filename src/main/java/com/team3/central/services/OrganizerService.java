@@ -75,25 +75,26 @@ public class OrganizerService {
 
       var confirmationToken = confirmationTokenService.getToken(token);
 
-      if (confirmationToken.isEmpty() ||
-          (confirmationToken.get().getOrganizerEntity().getId() != organizerId) ||
-          confirmationTokenService.isTokenExpired(confirmationToken.get())) {
-        throw new WrongTokenException("Confirmation token doesn't exist or is expired or organizerId doesn't match");
+      if (confirmationToken.isEmpty()) {
+        throw new WrongTokenException("Confirmation token doesn't exist");
+      }
+      if (confirmationToken.get().getOrganizerEntity().getId() != organizerId) {
+        throw new WrongTokenException("organizerId doesn't match the token");
       }
 
-      var organizer = organizerRepository.findById(organizerId);
-      if (organizer.isEmpty()) {
-        throw new NotFoundException("Organizer for id was not found");
-      } else if (organizer.get().isAuthorized()) {
+      var organizer = confirmationToken.get().getOrganizerEntity();
+      if (organizer.isAuthorized()) {
         throw new AlreadyExistsException("Organizer is already confirmed");
       }
+      if (confirmationTokenService.isTokenExpired(confirmationToken.get())) {
+        throw new WrongTokenException("Token is expired");
+      }
 
-      organizer.get().setStatus(OrganizerStatus.AUTHORIZED);
+      organizer.setStatus(OrganizerStatus.AUTHORIZED);
       confirmationToken.get().setConfirmedAt(LocalDateTime.now());
-      organizerRepository.saveAndFlush(organizer.get());
+      organizerRepository.saveAndFlush(organizer);
       confirmationTokenService.saveConfirmationToken(confirmationToken.get());
-    }
-    catch (NumberFormatException numberFormatException) {
+    } catch (NumberFormatException numberFormatException) {
       throw new BadIdentificationException("Id in wrong format");
     }
   }
