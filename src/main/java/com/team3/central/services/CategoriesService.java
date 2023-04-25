@@ -42,11 +42,7 @@ public class CategoriesService {
     }
     public Set<Category> getCategoriesFromIds(List<Integer> categoriesIds)
         throws IllegalArgumentException {
-
-        Set<Category> categories = categoryRepository.findAll()
-            .stream()
-            .filter(category -> categoriesIds.contains(category.getId().intValue()))
-            .collect(Collectors.toSet());
+        Set<Category> categories = categoryRepository.findAllByIdIn(categoriesIds.stream().map(Long::valueOf).collect(Collectors.toSet()));
         if(categories.size() != categoriesIds.size()) {
             throw new IllegalArgumentException("Invalid categories");
         }
