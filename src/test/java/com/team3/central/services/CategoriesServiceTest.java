@@ -23,8 +23,7 @@ public class CategoriesServiceTest {
   private static CategoriesService categoriesService;
 
   private static Set<Category> getCategories() {
-    Set<Category> categories = Set.of(new Category("TestCategory1"), new Category("TestCategory2"));
-    return categories;
+    return Set.of(new Category("TestCategory1"), new Category("TestCategory2"));
   }
 
   @BeforeAll
