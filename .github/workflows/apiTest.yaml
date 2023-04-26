@@ -16,11 +16,6 @@ jobs:
     - name: Build and run Docker Compose
       run: |
         docker-compose up -d
-  
-    - name: Get backend container IP
-      id: backend_ip
-      run: |
-        echo "::set-output name=ip::$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' backend)"
         
     - name: Install Postman CLI
       run: |
@@ -32,10 +27,14 @@ jobs:
     - name: Wait for backend service
       run: sleep 30
 
+    - name: Get backend container IP
+      id: backend_ip
+      run: |
+        echo "::set-output name=ip::$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' backend)"
+
     - name: Run API tests
       run: |
-        echo '{"values":[{"key":"baseUrl","value":"http://host.docker.internal:5000","enabled":true}]}' > postman_environment_override.json
-        postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --environment postman_environment_override.json --integration-id "138020-${{ github.run_id }}"
+        postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}" --env-var "baseUrl=http://${{ steps.backend_ip.outputs.ip }}:5000"
 
     - name: Stop and remove Docker Compose services
       run: |
