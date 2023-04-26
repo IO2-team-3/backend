@@ -10,6 +10,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Set environment variables
+      run: |
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+        echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+        echo "DB_URL=${{ secrets.DB_URL }}" >> $GITHUB_ENV
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+        echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> $GITHUB_ENV
+        echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> $GITHUB_ENV
+        echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> $GITHUB_ENV
+        
     - name: Setup Docker
       uses: docker/setup-buildx-action@v1
 
@@ -29,10 +40,7 @@ jobs:
       
     - name: Run logs
       run: docker-compose logs backend
-  #  - name: Get backend container IP
-   #   id: backend_ip
-     # run: |
-      #  echo "::set-output name=ip::$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' backend)"
+      
     - name: Wait for REST API to become available
       run: |
         timeout 60 sh -c 'until nc -zv localhost 5000; do sleep 1; done'
@@ -41,12 +49,8 @@ jobs:
       run: |
         curl -X GET http://localhost:5000/ping
     - name: Run API tests
-#       run: |
-      #  cp "${{ github.workspace }}/postman/environments/postman_environment.json" "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
-     #   sed -i 's|"value": ""|"value": "http://'${{ steps.backend_ip.outputs.ip }}':5000"|' "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
       run: |
           postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}"
-      #  rm "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
 
    
     - name: Stop and remove Docker Compose services
