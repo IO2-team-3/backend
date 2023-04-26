@@ -30,6 +30,13 @@ jobs:
    #   id: backend_ip
      # run: |
       #  echo "::set-output name=ip::$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' backend)"
+    - name: Wait for REST API to become available
+      run: |
+        timeout 60 sh -c 'until nc -zv localhost 5000; do sleep 1; done'
+        
+    - name: Make REST request
+      run: |
+        curl -X GET http://localhost:5000/ping
     - name: Run API tests
 #       run: |
       #  cp "${{ github.workspace }}/postman/environments/postman_environment.json" "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
