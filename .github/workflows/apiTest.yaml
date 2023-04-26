@@ -15,7 +15,7 @@ jobs:
         echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
         echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
-        echo "DB_URL=${{ secrets.DB_URL }}" >> $GITHUB_ENV
+        echo "DB_URL=localhost" >> $GITHUB_ENV
         echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
         echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> $GITHUB_ENV
         echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> $GITHUB_ENV
@@ -50,7 +50,7 @@ jobs:
         curl -X GET http://localhost:5000/ping
     - name: Run API tests
       run: |
-          postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}"
+          postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}" --bail
 
    
     - name: Stop and remove Docker Compose services
