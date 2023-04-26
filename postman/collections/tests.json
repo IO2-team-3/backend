@@ -880,6 +880,7 @@
 													"\r",
 													"  } catch (err) {\r",
 													"    console.error(err);\r",
+													"    throw new Error('Tests failed');\r",
 													"  }\r",
 													"})();\r",
 													"\r",
