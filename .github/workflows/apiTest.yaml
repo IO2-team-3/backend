@@ -25,7 +25,8 @@ jobs:
       run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
       
     - name: Wait for backend service
-      run: sleep 30'
+      run: sleep 30
+      
     - name: Run logs
       run: docker-compose logs backend
   #  - name: Get backend container IP
