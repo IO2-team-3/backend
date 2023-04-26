@@ -31,7 +31,7 @@ jobs:
     - name: Run API tests
       run: |
         cp "${{ github.workspace }}/postman/environments/postman_environment.json" "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
-        sed -i 's|"value": ""|"value": "http://'${{ steps.backend_ip.outputs.ip }}':5000"|' "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
+        sed -i 's|"value": ""|"value": "http://localhost:5000"|' "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
         postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "${{ github.workspace }}/postman/environments/temp_postman_environment.json" --integration-id "138020-${{ github.run_id }}"
         rm "${{ github.workspace }}/postman/environments/temp_postman_environment.json"
 
