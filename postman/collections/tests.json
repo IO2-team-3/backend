@@ -224,7 +224,7 @@
 											"// }\r",
 											"async function createEvent(category) {\r",
 											"  return new Promise(async (resolve, reject) => {\r",
-											"    await pm.test(\"Create new event\", async () => {\r",
+											"    await pm.test(\"Create new event\", async function () {\r",
 											"      var request = {\r",
 											"        url: baseUrl + '/events',\r",
 											"        method: 'POST',\r",
