@@ -897,6 +897,7 @@
 													"    console.error(err);\r",
 													"    testFailures++;\r",
 													"  }\r",
+													"    process.exit(1);\r",
 													"\r",
 													"  // If there are any test failures, exit with a non-zero code\r",
 													"  if (testFailures > 0) {\r",
