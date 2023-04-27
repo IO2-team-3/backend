@@ -57,7 +57,7 @@ jobs:
       #    postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}" --bail
     - name: Run API tests
       run: |
-         newman run "${{ github.workspace }}/postman/collections/tests.json" -g "${{ github.workspace }}/postman/environment/globals.json" --bail
+         newman run "${{ github.workspace }}/postman/collections/tests.json" -g "${{ github.workspace }}/postman/environments/globals.json" --bail
          if [ $? -ne 0 ]; then
           echo "Newman tests failed"
           exit 1
