@@ -123,6 +123,7 @@
 											"\r",
 											"  } catch (err) {\r",
 											"    console.error(err);\r",
+											"    throw new Error(err);\r",
 											"  }\r",
 											"})();\r",
 											"\r",
