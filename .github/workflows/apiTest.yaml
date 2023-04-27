@@ -50,6 +50,11 @@ jobs:
     - name: Install Newman
       run: npm install -g newman
 
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        
     #- name: Run API tests
      # run: |
       #    postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}" --bail
@@ -61,7 +66,11 @@ jobs:
           echo "Newman tests failed"
           exit 1
          fi
-    
+
+    - name: Make created organizer authenticated
+      run: |
+        PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h postgres -p ${{ secrets.DB_PORT }} -U${{ secrets.DB_USERNAME }} -d ${{ secrets.DB_NAME }} -c "UPDATE organizer SET status = 'AUTHORIZED' where email = 'io2testmail@gmail.com';"
+  
     - name: Run API tests
       run: |
          newman run "${{ github.workspace }}/postman/collections/tests.json" -g "${{ github.workspace }}/postman/environments/globals.json" --bail
@@ -69,7 +78,6 @@ jobs:
           echo "Newman tests failed"
           exit 1
          fi
-
    
     - name: Stop and remove Docker Compose services
       run: |
