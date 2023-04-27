@@ -865,6 +865,7 @@
 												"id": "b8c812d3-f721-4436-8463-35b5fb21fa68",
 												"exec": [
 													"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+													"     process.exit(1);\r",
 													"\r",
 													"(async function() {\r",
 													"  try {\r",
@@ -877,7 +878,6 @@
 													"    console.log(\"test 3\");\r",
 													"    await test3();\r",
 													"    console.log(\"---------------------- Tests for GET: Find event by ID: END ----------------------\");\r",
-													"     process.exit(1);\r",
 													"\r",
 													"  } catch (err) {\r",
 													"    console.error(err);\r",
