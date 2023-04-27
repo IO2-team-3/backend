@@ -69,7 +69,7 @@ jobs:
 
     - name: Make created organizer authenticated
       run: |
-        PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h localhost -p ${{ secrets.DB_PORT }} -U${{ secrets.DB_USERNAME }} -d ${{ secrets.DB_NAME }} -c "UPDATE organizer SET status = 'AUTHORIZED' where email = 'io2testmail@gmail.com';"
+        PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h localhost -p ${{ secrets.DB_PORT }} -U${{ secrets.DB_USERNAME }} -d ${{ secrets.DB_NAME }} -c ${{ secrets.UPDATE_ORGANIZER_SQL_COMMAND }}
   
     - name: Run API tests
       run: |
