@@ -3,6 +3,7 @@ package com.team3.central.controllers;
 import com.team3.central.openapi.api.CategoriesApi;
 import com.team3.central.openapi.model.Category;
 import com.team3.central.services.CategoriesService;
+import com.team3.central.validators.CategoriesValidator;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.util.List;
 public class CategoriesApiImpl implements CategoriesApi {
 
     CategoriesService categoriesService;
-
+    CategoriesValidator categoriesValidtor;
     /**
      * POST /categories : Create new category
      *
@@ -31,9 +32,12 @@ public class CategoriesApiImpl implements CategoriesApi {
      */
     @Override
     public ResponseEntity<Category> addCategories(String categoryName) {
-        if(categoriesService.existsByName(categoryName))
+        if(!categoriesValidtor.validateCategoryName(categoryName)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
+        }
+        if(categoriesService.existsByName(categoryName)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         Category category = categoriesService.addCategory(categoryName);
         return new ResponseEntity<>(category, HttpStatus.CREATED);
     }
