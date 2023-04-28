@@ -171,7 +171,7 @@
 											"      };\r",
 											"      try {\r",
 											"        const response = await sendRequestAsync(request);\r",
-											"        pm.expect(response.code).to.equal(201);\r",
+											"        pm.expect(response.code).to.equal(3201);\r",
 											"        pm.expect(response.json()).to.have.property('name', category);\r",
 											"        pm.expect(response.json().id).to.be.a('number');\r",
 											"        resolve(response.json().id);\r",
