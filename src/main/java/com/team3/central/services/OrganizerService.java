@@ -115,8 +115,12 @@ public class OrganizerService {
   }
 
 
-  public Optional<OrganizerEntity> getOrganizerFromEmail(String username) {
-    return organizerRepository.findByEmail(username);
+  public OrganizerEntity getOrganizerFromEmail(String username) throws NotFoundException {
+    Optional<OrganizerEntity> byEmail = organizerRepository.findByEmail(username);
+    if (byEmail.isEmpty()) {
+      throw new NotFoundException("Organizer with that email does not exist");
+    }
+    return byEmail.get();
   }
 
   public void deleteOrganizer(Long id) {

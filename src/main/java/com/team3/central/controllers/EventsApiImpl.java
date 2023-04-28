@@ -54,14 +54,14 @@ public class EventsApiImpl implements EventsApi {
   public ResponseEntity<Event> addEvent(EventForm eventForm) {
     try {
       UserDetails userDetails = getUserDetails();
-      OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
-          .get();
+      OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername());
       eventValidator.validateEventForm(eventForm);
       Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(),
           eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(),
           eventForm.getLatitude(), eventForm.getLongitude(),
           categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()),
           eventForm.getPlaceSchema(), organizer);
+
       return new ResponseEntity<>(event, HttpStatus.CREATED);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
@@ -91,6 +91,7 @@ public class EventsApiImpl implements EventsApi {
       eventValidator.validateEventId(Long.parseLong(id));
       UserDetails userDetails = getUserDetails();
       eventService.deleteEvent(Long.parseLong(id), userDetails.getUsername());
+
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
@@ -116,6 +117,7 @@ public class EventsApiImpl implements EventsApi {
   public ResponseEntity<List<Event>> getByCategory(Long categoryId) {
     try {
       categoryValidator.validateCategoryId(categoryId);
+
       return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
@@ -140,6 +142,7 @@ public class EventsApiImpl implements EventsApi {
     try {
       eventValidator.validateEventId(id);
       Optional<EventWithPlaces> event = eventService.getById(id);
+
       return new ResponseEntity<>(event.get(), HttpStatus.OK);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
@@ -178,6 +181,7 @@ public class EventsApiImpl implements EventsApi {
     UserDetails userDetails = null;
     try {
       userDetails = getUserDetails();
+
       return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()),
           HttpStatus.OK);
     } catch (BadIdentificationException e) {
@@ -203,6 +207,7 @@ public class EventsApiImpl implements EventsApi {
       eventValidator.validateEventId(Long.valueOf(id));
       eventValidator.validateEventPatch(eventPatch);
       eventService.patchEvent(Long.valueOf(id), userDetails.getUsername(), eventPatch);
+
       return new ResponseEntity<>(HttpStatus.ACCEPTED);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {

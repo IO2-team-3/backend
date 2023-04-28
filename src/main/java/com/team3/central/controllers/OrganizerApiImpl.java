@@ -13,21 +13,15 @@ import com.team3.central.services.OrganizerService;
 import com.team3.central.services.exceptions.AlreadyExistsException;
 import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.NotFoundException;
-import com.team3.central.services.exceptions.UnAuthorizedException;
+import com.team3.central.services.exceptions.OrganizerStillHasActiveEventsException;
 import com.team3.central.services.exceptions.WrongTokenException;
 import com.team3.central.validators.OrganizerValidator;
-import io.swagger.annotations.ApiParam;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -49,19 +43,27 @@ public class OrganizerApiImpl implements OrganizerApi {
   @Override
   public ResponseEntity<Void> confirm(String id, String code) {
     HttpStatus status = HttpStatus.ACCEPTED;
-    try{
+    try {
       organizerValidator.validateId(id);
       organizerValidator.validateCode(code);
-      organizerService.confirm(id,code);
+      organizerService.confirm(id, code);
+
+      return new ResponseEntity<>(HttpStatus.ACCEPTED);
     } catch (Exception exception) {
-     if(exception instanceof BadIdentificationException) status = HttpStatus.BAD_REQUEST;
-     else if(exception instanceof WrongTokenException) status = HttpStatus.BAD_REQUEST;
-     else if(exception instanceof AlreadyExistsException) status = HttpStatus.OK;
-     else if(exception instanceof NotFoundException) status = HttpStatus.NOT_FOUND;
-     else if(exception instanceof IllegalArgumentException) status = HttpStatus.BAD_REQUEST;
-     else status = HttpStatus.INTERNAL_SERVER_ERROR;
+      if (exception instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (exception instanceof WrongTokenException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (exception instanceof AlreadyExistsException) {
+        return new ResponseEntity<>(HttpStatus.OK);
+      } else if (exception instanceof NotFoundException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (exception instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
-    return new ResponseEntity<>(status);
   }
 
   /**
@@ -72,32 +74,28 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Void> deleteOrganizer(String id) {
-    //todo refactor
     try {
       organizerValidator.validateId(id);
-    }
-    catch (IllegalArgumentException exception) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-    Set<Event> eventsOfOrganizer;
-    try {
-      eventsOfOrganizer = organizerService.getEventsOfOrganizer(Long.parseLong(id));
-    } catch(IndexOutOfBoundsException e) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    boolean hasUncompletedEvents = eventsOfOrganizer.stream()
-        .anyMatch(e -> e.getStatus() != EventStatus.DONE && e.getStatus() != EventStatus.CANCELLED);
-    if(hasUncompletedEvents) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    try {
+      Set<Event> eventsOfOrganizer = organizerService.getEventsOfOrganizer(Long.parseLong(id));
+      boolean hasUncompletedEvents = eventsOfOrganizer.stream().anyMatch(
+          e -> e.getStatus() != EventStatus.DONE && e.getStatus() != EventStatus.CANCELLED);
+      if (hasUncompletedEvents) {
+        throw new OrganizerStillHasActiveEventsException("Organizer still has active events");
+      }
       organizerService.deleteOrganizer(Long.parseLong(id));
-    } catch(IndexOutOfBoundsException e) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+      if (e instanceof IndexOutOfBoundsException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof OrganizerStillHasActiveEventsException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -112,14 +110,17 @@ public class OrganizerApiImpl implements OrganizerApi {
   public ResponseEntity<InlineResponse200> loginOrganizer(String email, String password) {
     try {
       organizerValidator.validateEmailAndPassword(email, password);
-      String token = organizerService.login(email,password);
+      String token = organizerService.login(email, password);
       InlineResponse200 inlineResponse200 = new InlineResponse200();
       inlineResponse200.sessionToken(token);
       return new ResponseEntity<>(inlineResponse200, HttpStatus.OK);
     } catch (Exception e) {
-      if(e instanceof NotFoundException || e instanceof BadIdentificationException || e instanceof IllegalArgumentException)
+      if (e instanceof NotFoundException || e instanceof BadIdentificationException
+          || e instanceof IllegalArgumentException) {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-      else return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 
@@ -139,10 +140,14 @@ public class OrganizerApiImpl implements OrganizerApi {
           organizerForm.getEmail(), organizerForm.getPassword());
       OrganizerMapper mapper = new OrganizerMapper();
       return new ResponseEntity<>(mapper.convertToModel(entity), HttpStatus.CREATED);
-    } catch (AlreadyExistsException e) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    } catch (Exception IllegalArgumentException) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    } catch (Exception e) {
+      if (e instanceof AlreadyExistsException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 
@@ -153,21 +158,21 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Organizer> getOrganizer() {
-    UserDetails userDetails = getUserDetails();
-    if(userDetails == null) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-    Optional<OrganizerEntity> user = organizerService.getOrganizerFromEmail(userDetails.getUsername());
-    if(user.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    try {
+      UserDetails userDetails = getUserDetails();
+      OrganizerEntity user = organizerService.getOrganizerFromEmail(userDetails.getUsername());
+      OrganizerMapper mapper = new OrganizerMapper();
 
-    OrganizerMapper mapper = new OrganizerMapper();
-    return new ResponseEntity<>(mapper.convertToModel(user.get()), HttpStatus.OK);
-  }
-
-  private UserDetails getUserDetails() {
-    return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+      return new ResponseEntity<>(mapper.convertToModel(user), HttpStatus.OK);
+    } catch (Exception e) {
+      if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof NotFoundException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 
   /**
@@ -181,8 +186,6 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Void> patchOrganizer(String id, OrganizerPatch organizerPatch) {
-
-    HttpStatus status = HttpStatus.ACCEPTED;
     try {
       organizerValidator.validateId(id);
       organizerValidator.validateOrganizerPatch(organizerPatch);
@@ -190,36 +193,39 @@ public class OrganizerApiImpl implements OrganizerApi {
       if (organizerEntity.getId() != Long.parseLong(id)) {
         throw new NotFoundException("Wrong id");
       }
-
       organizerService.patchOrganizer(Long.parseLong(id), organizerPatch);
+
+      return new ResponseEntity<>(HttpStatus.ACCEPTED);
     } catch (Exception exception) {
       if (exception instanceof NotFoundException) {
-        status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else if (exception instanceof IndexOutOfBoundsException) {
-        status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else if (exception instanceof BadIdentificationException) {
-        status = HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
       } else if (exception instanceof IllegalArgumentException) {
-        status = HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
       } else {
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
-    return new ResponseEntity<>(status);
   }
 
   private OrganizerEntity getOrganizerEntity()
       throws NotFoundException, BadIdentificationException {
     UserDetails userDetails = getUserDetails();
+
+    return organizerService.getOrganizerFromEmail(userDetails.getUsername());
+  }
+
+  private UserDetails getUserDetails() throws BadIdentificationException {
+
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     if (userDetails == null) {
       throw new BadIdentificationException("User not found");
     }
-    Optional<OrganizerEntity> organizer = organizerService.getOrganizerFromEmail(
-        userDetails.getUsername());
-    if (organizer.isEmpty()) {
-      throw new NotFoundException("User with given mail not found");
-    }
-    return organizer.get();
+    return userDetails;
   }
 
 }
