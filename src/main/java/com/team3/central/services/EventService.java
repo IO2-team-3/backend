@@ -92,11 +92,7 @@ public class EventService {
         .collect(Collectors.toList());
   }
 
-  public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId)
-      throws IllegalArgumentException {
-    if (categoryId == null || categoryId < 0) {
-      throw new IllegalArgumentException("Category id cannot be null or negative");
-    }
+  public List<com.team3.central.openapi.model.Event> getEventsByCategory(Long categoryId) {
     Category category = categoryRepository.findById(categoryId.longValue());
     return eventRepository.findByCategories(category)
         .stream()
@@ -112,20 +108,19 @@ public class EventService {
         .collect(Collectors.toList());
   }
 
-  public boolean deleteEvent(Long id, String email) {
+  public void deleteEvent(Long id, String email) throws NotFoundException {
     Event event = eventRepository.findById(id).orElse(null);
     if (event == null) {
-      return false;
+      throw new NotFoundException("Event does not exist");
     }
     if (!event.getOrganizer().getEmail().equals(email)) {
-      return false;
+      throw new NotFoundException("You are not organizer of this event");
     }
     if (event.getStatus() != EventStatus.INFUTURE) {
-      return false;
+      throw new NotFoundException("Event is not in future");
     }
     event.setStatus(EventStatus.CANCELLED);
     eventRepository.save(event);
-    return true;
   }
 
   public void patchEvent(Long id, String email, EventPatch eventPatch)
