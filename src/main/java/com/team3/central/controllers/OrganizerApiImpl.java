@@ -72,6 +72,7 @@ public class OrganizerApiImpl implements OrganizerApi {
    */
   @Override
   public ResponseEntity<Void> deleteOrganizer(String id) {
+    //todo refactor
     try {
       organizerValidator.validateId(id);
     }
@@ -140,6 +141,8 @@ public class OrganizerApiImpl implements OrganizerApi {
       return new ResponseEntity<>(mapper.convertToModel(entity), HttpStatus.CREATED);
     } catch (AlreadyExistsException e) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    } catch (Exception IllegalArgumentException) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -195,6 +198,8 @@ public class OrganizerApiImpl implements OrganizerApi {
       } else if (exception instanceof IndexOutOfBoundsException) {
         status = HttpStatus.NOT_FOUND;
       } else if (exception instanceof BadIdentificationException) {
+        status = HttpStatus.BAD_REQUEST;
+      } else if (exception instanceof IllegalArgumentException) {
         status = HttpStatus.BAD_REQUEST;
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;

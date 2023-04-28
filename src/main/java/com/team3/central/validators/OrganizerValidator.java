@@ -54,7 +54,8 @@ public class OrganizerValidator {
     }
   }
 
-  public void validateOrganizerPatch(OrganizerPatch organizerPatch) {
+  public void validateOrganizerPatch(OrganizerPatch organizerPatch)
+      throws IllegalArgumentException {
     if (organizerPatch == null) {
       throw new IllegalArgumentException("OrganizerPatch is null");
     }

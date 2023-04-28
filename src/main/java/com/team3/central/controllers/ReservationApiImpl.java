@@ -7,6 +7,8 @@ import com.team3.central.repositories.entities.Reservation;
 import com.team3.central.services.ReservationService;
 import com.team3.central.services.exceptions.NoFreePlaceException;
 import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.validators.EventValidator;
+import com.team3.central.validators.ReservationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReservationApiImpl implements ReservationApi {
 
   private final ReservationService reservationService;
+  private final ReservationValidator reservationValidator;
+  private final EventValidator eventValidator;
 
   /**
    * DELETE /reservation : Delete reservation Delete reservation
@@ -29,11 +33,18 @@ public class ReservationApiImpl implements ReservationApi {
   @Override
   public ResponseEntity<Void> deleteReservation(String reservationToken) {
     try {
+      reservationValidator.validateReservationToken(reservationToken);
       reservationService.deleteReservation(reservationToken);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } catch (Exception e) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      if (e instanceof NotFoundException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -48,6 +59,8 @@ public class ReservationApiImpl implements ReservationApi {
   public ResponseEntity<ReservationDTO> makeReservation(Long eventId, Long placeID) {
 
     try {
+      eventValidator.validateEventId(eventId);
+      reservationValidator.validatePlaceId(placeID);
       Reservation reservation = reservationService.makeReservation(eventId, placeID);
       ReservationMapper reservationMappper = new ReservationMapper();
       return new ResponseEntity<>(reservationMappper.convertToModel(reservation),
@@ -57,10 +70,11 @@ public class ReservationApiImpl implements ReservationApi {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else if (e instanceof NoFreePlaceException) {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
       } else {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
-
 }
