@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.entities.Category;
+import com.team3.central.services.exceptions.CategoryExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,11 +34,11 @@ public class CategoriesServiceTest {
   }
 
   @Test
-  void addCategory() {
+  void addCategory() throws CategoryExistsException {
     // given
     Category category = new Category("TestCategory");
     when(categoryRepository.save(any(Category.class))).thenReturn(category);
-
+    when(categoryRepository.findAll()).thenReturn(List.of());
     // when
     com.team3.central.openapi.model.Category result = categoriesService.addCategory("TestCategory");
 

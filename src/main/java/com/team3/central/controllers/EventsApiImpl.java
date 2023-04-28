@@ -12,6 +12,8 @@ import com.team3.central.services.OrganizerService;
 import com.team3.central.services.exceptions.EventNotChangedException;
 import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.validators.CategoryValidator;
+import com.team3.central.validators.EventValidator;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +36,8 @@ public class EventsApiImpl implements EventsApi {
   private final EventService eventService;
   private final OrganizerService organizerService;
   private final CategoriesService categoryService;
-
+  private final EventValidator eventValidator;
+  private final CategoryValidator categoryValidator;
   /**
    *
    * User needs to be authenticated
@@ -51,8 +54,8 @@ public class EventsApiImpl implements EventsApi {
     UserDetails userDetails = getUserDetails();
     OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
         .get();
-
     try {
+      eventValidator.validateEventForm(eventForm);
       Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(),
           eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(),
           eventForm.getLatitude(), eventForm.getLongitude(),
@@ -77,6 +80,12 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<Void> cancelEvent(String id) {
+
+    try { // todo: recator this
+      eventValidator.validateEventId(Long.parseLong(id));
+    } catch (IllegalArgumentException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
     UserDetails userDetails = getUserDetails();
     if (userDetails == null) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -99,8 +108,8 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<List<Event>> getByCategory(Long categoryId) {
     try {
-      return new ResponseEntity<>(
-          eventService.getEventsByCategory(categoryId), HttpStatus.OK);
+      categoryValidator.validateCategoryId(categoryId);
+      return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
     } catch (IllegalArgumentException exception) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -118,10 +127,14 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<EventWithPlaces> getEventById(Long id) {
     try {
+      eventValidator.validateEventId(id);
       Optional<EventWithPlaces> event = eventService.getById(id);
       return new ResponseEntity<>(event.get(),HttpStatus.OK);
     } catch (NotFoundException exception) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    catch (IllegalArgumentException exception) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -169,6 +182,8 @@ public class EventsApiImpl implements EventsApi {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     try {
+      eventValidator.validateEventId(Long.valueOf(id));
+      eventValidator.validateEventPatch(eventPatch);
       eventService.patchEvent(Long.valueOf(id), userDetails.getUsername(), eventPatch);
     } catch (NoCategoryException e) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -178,6 +193,9 @@ public class EventsApiImpl implements EventsApi {
     }
     catch (EventNotChangedException e) {
       return new ResponseEntity<>(HttpStatus.OK);
+    }
+    catch (IllegalArgumentException e) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
