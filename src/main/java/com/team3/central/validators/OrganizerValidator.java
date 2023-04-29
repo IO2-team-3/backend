@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 public class OrganizerValidator {
 
   public void validateId(String id) throws IllegalArgumentException {
-    if (id == null || id.isEmpty()) {
+    if (id == null || id.isBlank()) {
       throw new IllegalArgumentException("Id is null or empty");
     }
   }
 
   public void validateCode(String code) throws IllegalArgumentException {
-    if (code == null || code.isEmpty()) {
+    if (code == null || code.isBlank()) {
       throw new IllegalArgumentException("Confirmation code is null or empty");
     }
   }
@@ -27,7 +27,7 @@ public class OrganizerValidator {
     if (email == null || !isValidEmail(email)) {
       throw new IllegalArgumentException("Email is null or invalid");
     }
-    if (password == null || password.isEmpty()) {
+    if (password == null || password.isBlank()) {
       throw new IllegalArgumentException("Password is null or empty");
     }
   }
@@ -43,13 +43,14 @@ public class OrganizerValidator {
     if (organizerForm == null) {
       throw new IllegalArgumentException("OrganizerForm is null");
     }
-    if (organizerForm.getEmail() == null || !isValidEmail(organizerForm.getEmail())) {
+    if (organizerForm.getEmail() == null || organizerForm.getEmail().isBlank() || !isValidEmail(
+        organizerForm.getEmail())) {
       throw new IllegalArgumentException("Email is null or invalid");
     }
-    if (organizerForm.getPassword() == null || organizerForm.getPassword().length() < 1) {
+    if (organizerForm.getPassword() == null || organizerForm.getPassword().isBlank()) {
       throw new IllegalArgumentException("Password is null or empty");
     }
-    if (organizerForm.getName() == null || organizerForm.getName().length() < 1) {
+    if (organizerForm.getName() == null || organizerForm.getName().isBlank()) {
       throw new IllegalArgumentException("Name is null or empty");
     }
   }
@@ -59,10 +60,10 @@ public class OrganizerValidator {
     if (organizerPatch == null) {
       throw new IllegalArgumentException("OrganizerPatch is null");
     }
-    if (organizerPatch.getName() != null && organizerPatch.getName().length() < 1) {
+    if (organizerPatch.getName() != null && organizerPatch.getName().isBlank()) {
       throw new IllegalArgumentException("Name is null or empty");
     }
-    if (organizerPatch.getPassword() != null && organizerPatch.getPassword().length() < 1) {
+    if (organizerPatch.getPassword() != null && organizerPatch.getPassword().isBlank()) {
       throw new IllegalArgumentException("Password is null or empty");
     }
   }

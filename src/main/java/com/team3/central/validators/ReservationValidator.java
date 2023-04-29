@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class ReservationValidator {
 
   public void validateReservationToken(String token) throws IllegalArgumentException {
-    if (token == null || token.isEmpty()) {
+    if (token == null || token.isBlank()) {
       throw new IllegalArgumentException("Token is empty");
     }
   }

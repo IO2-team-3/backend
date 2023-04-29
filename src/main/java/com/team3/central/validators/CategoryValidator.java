@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class CategoryValidator {
 
   public void validateCategoryName(String categoryName) throws IllegalArgumentException {
-    if (categoryName == null || categoryName.length() < 1) {
+    if (categoryName == null || categoryName.isBlank()) {
       throw new IllegalArgumentException("Category name cannot be null or empty");
     }
   }
