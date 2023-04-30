@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -276,13 +277,9 @@ class EventServiceTest {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = 1L;
+    // then & when
     when(eventRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-    // when
-    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
-
-    // then
-    assertFalse(result);
+    assertThrows(NotFoundException.class, () -> eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL));
   }
 
   @Test
@@ -296,11 +293,8 @@ class EventServiceTest {
     event.setOrganizer(organizer);
     when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
 
-    // when
-    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
-
-    // then
-    assertFalse(result);
+    // when & then
+    assertThrows(NotFoundException.class, () -> eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL));
   }
 
   @ParameterizedTest
@@ -316,15 +310,12 @@ class EventServiceTest {
     event.setOrganizer(organizer);
     when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
 
-    // when
-    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
-
-    // then
-    assertFalse(result);
+    // when & then
+    assertThrows(NotFoundException.class, () -> eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL));
   }
 
   @Test
-  public void deleteEventValidRequest() {
+  public void deleteEventValidRequest() throws NotFoundException {
     // given
     final String ORGANIZER_EMAIL = "organizer@example.com";
     final Long EVENT_ID = 1L;
@@ -337,10 +328,9 @@ class EventServiceTest {
     when(eventRepository.save(any(Event.class))).thenReturn(event);
 
     // when
-    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
+    eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
 
     // then
-    assertTrue(result);
     assertEquals(EventStatus.CANCELLED, event.getStatus());
   }
 
@@ -357,11 +347,8 @@ class EventServiceTest {
     when(eventRepository.findById(anyLong())).thenReturn(Optional.empty());
     when(eventRepository.save(any(Event.class))).thenReturn(event);
 
-    // when
-    boolean result = eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL);
-
-    // then
-    assertFalse(result);
+    // when & then
+    assertThrows(NotFoundException.class, () -> eventService.deleteEvent(EVENT_ID, ORGANIZER_EMAIL));
   }
 
   @Test

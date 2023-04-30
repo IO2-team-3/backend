@@ -3,6 +3,7 @@ package com.team3.central.services;
 import com.team3.central.mappers.CategoryMapper;
 import com.team3.central.repositories.CategoryRepository;
 import com.team3.central.repositories.entities.Category;
+import com.team3.central.services.exceptions.CategoryExistsException;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,13 @@ public class CategoriesService {
         this.categoryMapper = new CategoryMapper();
     }
 
-    public com.team3.central.openapi.model.Category addCategory(String name) {
-        Category category = new Category(name);
+    public com.team3.central.openapi.model.Category addCategory(String name)
+        throws CategoryExistsException {
+        if (existsByName(name)) {
+            throw new CategoryExistsException("Category with name " + name + " already exists");
+        }
 
+        Category category = new Category(name);
         categoryRepository.save(category);
         return categoryMapper.convertToModel(category);
     }
