@@ -1,6 +1,7 @@
 package com.team3.central.mappers;
 
 import com.team3.central.openapi.model.EventStatus;
+import com.team3.central.repositories.entities.Event;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -14,12 +15,10 @@ public class EventStatusMapper {
     return com.team3.central.repositories.entities.enums.EventStatus.CANCELLED;
   }
 
-  public EventStatus convertToModel(com.team3.central.repositories.entities.enums.EventStatus eventStatus) {
-    switch (eventStatus) {
-      case DONE: return EventStatus.DONE;
-      case INFUTURE: return EventStatus.INFUTURE;
-      case PENDING: return EventStatus.PENDING;
-    }
-    return EventStatus.CANCELLED;
+  public EventStatus convertToModel(Event event, Long currentTime) {
+    if (event.getStatus() == com.team3.central.repositories.entities.enums.EventStatus.CANCELLED) return EventStatus.CANCELLED;
+    if ( currentTime >= event.getStartTime() && currentTime <= event.getEndTime()) return EventStatus.PENDING;
+    if (currentTime > event.getEndTime()) return EventStatus.DONE;
+    return EventStatus.INFUTURE;
   }
 }
