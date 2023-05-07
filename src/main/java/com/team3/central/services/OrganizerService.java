@@ -93,7 +93,8 @@ public class OrganizerService {
       organizer.setStatus(OrganizerStatus.AUTHORIZED);
       confirmationToken.get().setConfirmedAt(LocalDateTime.now());
       organizerRepository.saveAndFlush(organizer);
-      confirmationTokenService.saveConfirmationToken(confirmationToken.get());
+      // delete token from DB as we don't need it anymore
+      confirmationTokenService.deleteToken(confirmationToken.get());
     } catch (NumberFormatException numberFormatException) {
       throw new BadIdentificationException("Id in wrong format");
     }

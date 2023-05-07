@@ -25,4 +25,8 @@ public class ConfirmationTokenService {
   public boolean isTokenExpired(ConfirmationToken token) {
     return LocalDateTime.now().isAfter(token.getExpiresAt());
   }
+
+  public void deleteToken(ConfirmationToken token) {
+    confirmationTokenRepository.delete(token);
+  }
 }
