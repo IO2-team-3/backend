@@ -16,9 +16,15 @@ public class EventStatusMapper {
   }
 
   public EventStatus convertToModel(Event event, Long currentTime) {
-    if (event.getStatus() == com.team3.central.repositories.entities.enums.EventStatus.CANCELLED) return EventStatus.CANCELLED;
-    if ( currentTime >= event.getStartTime() && currentTime <= event.getEndTime()) return EventStatus.PENDING;
-    if (currentTime > event.getEndTime()) return EventStatus.DONE;
+    if (event.getStatus() == com.team3.central.repositories.entities.enums.EventStatus.CANCELLED) {
+      return EventStatus.CANCELLED;
+    }
+    if (currentTime >= event.getStartTime() && currentTime <= event.getEndTime()) {
+      return EventStatus.PENDING;
+    }
+    if (currentTime > event.getEndTime()) {
+      return EventStatus.DONE;
+    }
     return EventStatus.INFUTURE;
   }
 }
