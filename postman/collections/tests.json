@@ -249,7 +249,7 @@
 											"            reject(err);\r",
 											"        } else {\r",
 											"            console.log(response)\r",
-											"            pm.expect(response.code).to.equal(2021);\r",
+											"            pm.expect(response.code).to.equal(201);\r",
 											"            pm.expect(response.json()).to.have.property('reservationToken');\r",
 											"            pm.expect(response.json()).to.have.property('placeId', 0);\r",
 											"            pm.expect(response.json()).to.have.property('eventId', eventId);\r",
