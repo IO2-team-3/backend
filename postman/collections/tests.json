@@ -150,7 +150,7 @@
 											"    console.log(\"test 8\");\r",
 											"    await test8(eventId);\r",
 											"    console.log(\"---------------------- Tests for POST: Create new reservation: END ----------------------\");\r",
-											"    pm.expect(1).to.equal(2);\r",
+											"    process.exit(1)\r",
 											"\r",
 											"  } catch (err) {\r",
 											"    console.error(err);\r",
