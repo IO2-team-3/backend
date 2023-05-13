@@ -6,12 +6,15 @@ import com.team3.central.openapi.model.EventForm;
 import com.team3.central.openapi.model.EventPatch;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.repositories.entities.OrganizerEntity;
-import com.team3.central.services.CategoryService;
+import com.team3.central.services.CategoriesService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
+import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.EventNotChangedException;
 import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.validators.CategoryValidator;
+import com.team3.central.validators.EventValidator;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +36,9 @@ public class EventsApiImpl implements EventsApi {
 
   private final EventService eventService;
   private final OrganizerService organizerService;
-  private final CategoryService categoryService;
-
+  private final CategoriesService categoryService;
+  private final EventValidator eventValidator;
+  private final CategoryValidator categoryValidator;
   /**
    *
    * User needs to be authenticated
@@ -48,19 +52,25 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<Event> addEvent(EventForm eventForm) {
-    UserDetails userDetails = getUserDetails();
-    OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername())
-        .get();
-
     try {
+      UserDetails userDetails = getUserDetails();
+      OrganizerEntity organizer = organizerService.getOrganizerFromEmail(userDetails.getUsername());
+      eventValidator.validateEventForm(eventForm);
       Event event = eventService.addEvent(eventForm.getTitle(), eventForm.getName(),
           eventForm.getMaxPlace(), eventForm.getStartTime(), eventForm.getEndTime(),
           eventForm.getLatitude(), eventForm.getLongitude(),
           categoryService.getCategoriesFromIds(eventForm.getCategoriesIds()),
           eventForm.getPlaceSchema(), organizer);
+
       return new ResponseEntity<>(event, HttpStatus.CREATED);
-    } catch (IllegalArgumentException exception) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 
@@ -77,15 +87,22 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<Void> cancelEvent(String id) {
-    UserDetails userDetails = getUserDetails();
-    if (userDetails == null) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-    boolean result = eventService.deleteEvent(Long.parseLong(id), userDetails.getUsername());
-    if (result) {
+    try {
+      eventValidator.validateEventId(Long.parseLong(id));
+      UserDetails userDetails = getUserDetails();
+      eventService.deleteEvent(Long.parseLong(id), userDetails.getUsername());
+
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } else {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof NotFoundException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 
@@ -99,10 +116,15 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<List<Event>> getByCategory(Long categoryId) {
     try {
-      return new ResponseEntity<>(
-          eventService.getEventsByCategory(categoryId), HttpStatus.OK);
-    } catch (IllegalArgumentException exception) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      categoryValidator.validateCategoryId(categoryId);
+
+      return new ResponseEntity<>(eventService.getEventsByCategory(categoryId), HttpStatus.OK);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 
@@ -118,10 +140,20 @@ public class EventsApiImpl implements EventsApi {
   @Override
   public ResponseEntity<EventWithPlaces> getEventById(Long id) {
     try {
+      eventValidator.validateEventId(id);
       Optional<EventWithPlaces> event = eventService.getById(id);
-      return new ResponseEntity<>(event.get(),HttpStatus.OK);
-    } catch (NotFoundException exception) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+      return new ResponseEntity<>(event.get(), HttpStatus.OK);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof NotFoundException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 
@@ -132,7 +164,7 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<List<Event>> getEvents() {
-    return new ResponseEntity<>(eventService.getAllEvents(),HttpStatus.OK);
+    return new ResponseEntity<>(eventService.getAllEvents(), HttpStatus.OK);
   }
 
   /**
@@ -146,9 +178,15 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<List<Event>> getMyEvents() {
-    UserDetails userDetails = getUserDetails();
-    if(userDetails == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()), HttpStatus.OK);
+    UserDetails userDetails = null;
+    try {
+      userDetails = getUserDetails();
+
+      return new ResponseEntity<>(eventService.getForUser(userDetails.getUsername()),
+          HttpStatus.OK);
+    } catch (BadIdentificationException e) {
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
   }
 
   /**
@@ -164,25 +202,37 @@ public class EventsApiImpl implements EventsApi {
    */
   @Override
   public ResponseEntity<Void> patchEvent(String id, EventPatch eventPatch) {
-    UserDetails userDetails = getUserDetails();
-    if (userDetails == null) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
     try {
+      UserDetails userDetails = getUserDetails();
+      eventValidator.validateEventId(Long.valueOf(id));
+      eventValidator.validateEventPatch(eventPatch);
       eventService.patchEvent(Long.valueOf(id), userDetails.getUsername(), eventPatch);
-    } catch (NoCategoryException e) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+      return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof NotFoundException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof EventNotChangedException) {
+        return new ResponseEntity<>(HttpStatus.OK);
+      } else if (e instanceof NoCategoryException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
-    catch (NotFoundException e) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-    catch (EventNotChangedException e) {
-      return new ResponseEntity<>(HttpStatus.OK);
-    }
-    return new ResponseEntity<>(HttpStatus.ACCEPTED);
   }
 
-  private UserDetails getUserDetails() {
-    return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  private UserDetails getUserDetails() throws BadIdentificationException {
+
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    if (userDetails == null) {
+      throw new BadIdentificationException("User not found");
+    }
+    return userDetails;
   }
 }

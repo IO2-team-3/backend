@@ -75,25 +75,27 @@ public class OrganizerService {
 
       var confirmationToken = confirmationTokenService.getToken(token);
 
-      if (confirmationToken.isEmpty() ||
-          (confirmationToken.get().getOrganizerEntity().getId() != organizerId) ||
-          confirmationTokenService.isTokenExpired(confirmationToken.get())) {
-        throw new WrongTokenException("Confirmation token doesn't exist or is expired or organizerId doesn't match");
+      if (confirmationToken.isEmpty()) {
+        throw new WrongTokenException("Confirmation token doesn't exist");
+      }
+      if (confirmationToken.get().getOrganizerEntity().getId() != organizerId) {
+        throw new WrongTokenException("organizerId doesn't match the token");
       }
 
-      var organizer = organizerRepository.findById(organizerId);
-      if (organizer.isEmpty()) {
-        throw new NotFoundException("Organizer for id was not found");
-      } else if (organizer.get().isAuthorized()) {
+      var organizer = confirmationToken.get().getOrganizerEntity();
+      if (organizer.isAuthorized()) {
         throw new AlreadyExistsException("Organizer is already confirmed");
       }
+      if (confirmationTokenService.isTokenExpired(confirmationToken.get())) {
+        throw new WrongTokenException("Token is expired");
+      }
 
-      organizer.get().setStatus(OrganizerStatus.AUTHORIZED);
+      organizer.setStatus(OrganizerStatus.AUTHORIZED);
       confirmationToken.get().setConfirmedAt(LocalDateTime.now());
-      organizerRepository.saveAndFlush(organizer.get());
-      confirmationTokenService.saveConfirmationToken(confirmationToken.get());
-    }
-    catch (NumberFormatException numberFormatException) {
+      organizerRepository.saveAndFlush(organizer);
+      // delete token from DB as we don't need it anymore
+      confirmationTokenService.deleteToken(confirmationToken.get());
+    } catch (NumberFormatException numberFormatException) {
       throw new BadIdentificationException("Id in wrong format");
     }
   }
@@ -114,8 +116,12 @@ public class OrganizerService {
   }
 
 
-  public Optional<OrganizerEntity> getOrganizerFromEmail(String username) {
-    return organizerRepository.findByEmail(username);
+  public OrganizerEntity getOrganizerFromEmail(String username) throws NotFoundException {
+    Optional<OrganizerEntity> byEmail = organizerRepository.findByEmail(username);
+    if (byEmail.isEmpty()) {
+      throw new NotFoundException("Organizer with that email does not exist");
+    }
+    return byEmail.get();
   }
 
   public void deleteOrganizer(Long id) {

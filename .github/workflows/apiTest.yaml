@@ -1,0 +1,93 @@
+name: Automated API tests using Postman CLI
+
+on: push
+
+jobs:
+  automated-api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set environment variables
+      run: |
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+        echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+        echo "DB_URL=${{ secrets.DB_URL_DOCKER_POSTGRES }}" >> $GITHUB_ENV
+        echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+        echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> $GITHUB_ENV
+        echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> $GITHUB_ENV
+        echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> $GITHUB_ENV
+        
+    - name: Setup Docker
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and run Docker Compose
+      run: |
+        docker-compose up -d
+        
+    - name: Install Postman CLI
+      run: |
+        curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+        
+    - name: Login to Postman CLI
+      run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+      
+    - name: Wait for backend service
+      run: sleep 10
+      
+    - name: Run logs 1
+      run: docker-compose logs backend
+      
+    - name: Wait for REST API to become available
+      run: |
+        timeout 60 sh -c 'until nc -zv localhost 5000; do sleep 1; done'
+    - name: Run logs 2
+      run: docker-compose logs backend   
+      
+    - name: Install Newman
+      run: npm install -g newman
+
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        
+    #- name: Run API tests
+     # run: |
+      #    postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e" --integration-id "138020-${{ github.run_id }}" --bail
+    
+    - name: Setup tests add new organizer
+      run: |
+         newman run "${{ github.workspace }}/postman/collections/Create New Organizer For Tests.json" -g "${{ github.workspace }}/postman/environments/globals.json" --bail
+         if [ $? -ne 0 ]; then
+          echo "Newman tests failed"
+          exit 1
+         fi
+
+    - name: Authenticate organizer
+      run: |
+        PGPASSWORD=${{ secrets.DB_PASSWORD }} psql -h localhost -p ${{ secrets.DB_PORT }} -U${{ secrets.DB_USERNAME }} -d ${{ secrets.DB_NAME }} -c ${{ secrets.UPDATE_ORGANIZER_SQL_COMMAND }}
+  
+#     - name: Run API tests
+#       run: |
+#          newman run "${{ github.workspace }}/postman/collections/tests.json" -g "${{ github.workspace }}/postman/environments/globals.json" --bail
+#          if [ $? -ne 0 ]; then
+#           echo "Newman tests failed"
+#           exit 1
+#          fi
+#     - name: Run API tests
+#       run: |
+#           newman run "${{ github.workspace }}/postman/collections/tests.json" -g "${{ github.workspace }}/postman/environments/globals.json" --bail || exit 1
+
+    - name: Run API tests
+      run: |
+          postman collection run "${{ github.workspace }}/postman/collections/tests.json" -e "20887326-37b84bc2-f993-415e-b8b0-c72f2e85e26e"
+
+   
+    - name: Stop and remove Docker Compose services
+      run: |
+        docker-compose down
+

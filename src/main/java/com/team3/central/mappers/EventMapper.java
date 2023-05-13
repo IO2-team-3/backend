@@ -4,6 +4,7 @@ import com.team3.central.openapi.model.Event;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.openapi.model.Place;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ public class EventMapper {
   }
 
   public Event convertToModel(com.team3.central.repositories.entities.Event event) {
+    Long currentTime = new Date().getTime();
     Event eventModel = new Event();
     eventModel.setId(event.getId());
     eventModel.setCategories(event.getCategories()
@@ -31,7 +33,7 @@ public class EventMapper {
     eventModel.setMaxPlace(event.getMaxPlace());
     eventModel.setFreePlace(event.getFreePlace());
     eventModel.setName(event.getName());
-    eventModel.setStatus(eventStatusMapper.convertToModel(event.getStatus()));
+    eventModel.setStatus(eventStatusMapper.convertToModel(event, currentTime));
     eventModel.setTitle(event.getTitle());
     return eventModel;
   }
@@ -39,6 +41,7 @@ public class EventMapper {
 
   public EventWithPlaces convertToEventWithPlaces(
       com.team3.central.repositories.entities.Event event) {
+    Long currentTime = new Date().getTime();
     EventWithPlaces eventModel = new EventWithPlaces();
     eventModel.setId(event.getId());
     eventModel.setFreePlace(event.getFreePlace());
@@ -50,7 +53,7 @@ public class EventMapper {
     eventModel.setLatitude(event.getLatitude());
     eventModel.setName(event.getName());
     eventModel.setPlaceSchema(event.getPlaceSchema());
-    eventModel.setStatus(eventStatusMapper.convertToModel(event.getStatus()));
+    eventModel.setStatus(eventStatusMapper.convertToModel(event, currentTime));
     eventModel.setCategories(event.getCategories()
         .stream()
         .map(categoryMapper::convertToModel)

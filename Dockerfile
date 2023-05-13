@@ -14,7 +14,7 @@ RUN mvn package -DskipTests
 #RUN mvn clean package -Dmaven.test.skip
 
 ########run stage########
-FROM openjdk:11-jre-slim
+FROM openjdk:17-jdk-slim
 WORKDIR /app
 EXPOSE 5000
 ENV JAVA_OPTS ""

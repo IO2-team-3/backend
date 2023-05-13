@@ -1,0 +1,75 @@
+{
+	"info": {
+		"_postman_id": "714908d9-3d7c-41fb-a90e-be074d596af2",
+		"name": "Create New Organizer For Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "20887326-714908d9-3d7c-41fb-a90e-be074d596af2"
+	},
+	"item": [
+		{
+			"name": "Create Organizer For Tests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b4d68ad4-1473-4a44-b4f7-aa5296c3d096",
+						"exec": [
+							"pm.environment.set('baseUrl', 'http://localhost:5000');\r",
+							"var baseUrl = pm.environment.get(\"baseUrl\");\r",
+							"\r",
+							"const requestBody = {\r",
+							"  \"name\": \"jan\",\r",
+							"  \"email\": \"io2testmail@gmail.com\",\r",
+							"  \"password\": \"123\"\r",
+							"};\r",
+							"\r",
+							"pm.sendRequest({\r",
+							"    url: baseUrl + '/organizer',\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"        'Content-Type': 'application/json',\r",
+							"        'Accept': 'application/json'\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: 'raw',\r",
+							"        raw: JSON.stringify(requestBody)\r",
+							"    }\r",
+							"}, (err, response) => {\r",
+							"    if (err) {\r",
+							"        console.error(err);\r",
+							"    } else {\r",
+							"        console.log(response);\r",
+							"        pm.test('Status code is 201', () => {\r",
+							"            pm.expect(response.code).to.equal(201);\r",
+							"            pm.expect(response.json().name).to.be.equal('jan');\r",
+							"            pm.expect(response.json().email).to.be.equal('io2testmail@gmail.com');\r",
+							"        });\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"id": "3e987c9d-c536-421a-a4a8-f319e4412c5b",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/ping",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
