@@ -173,6 +173,14 @@ public class EventService {
       event.get().setPlaceSchema(eventPatch.getPlaceSchema());
       eventChanged = true;
     }
+    if (eventPatch.getLatitude() != null) {
+      event.get().setLatitude(eventPatch.getLatitude());
+      eventChanged = true;
+    }
+    if (eventPatch.getLongitude() != null) {
+      event.get().setLongitude(eventPatch.getLongitude());
+      eventChanged = true;
+    }
     if (eventPatch.getCategoriesIds() != null) {
       Set<Category> set = new HashSet<>();
       for (Integer integer : eventPatch.getCategoriesIds()) {
