@@ -4,7 +4,6 @@ import com.team3.central.openapi.model.Event;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.openapi.model.Place;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -19,7 +18,7 @@ public class EventMapper {
   }
 
   public Event convertToModel(com.team3.central.repositories.entities.Event event) {
-    Long currentTime = new Date().getTime();
+    Long currentTime = System.currentTimeMillis() / 1000L;
     Event eventModel = new Event();
     eventModel.setId(event.getId());
     eventModel.setCategories(event.getCategories()
@@ -41,7 +40,7 @@ public class EventMapper {
 
   public EventWithPlaces convertToEventWithPlaces(
       com.team3.central.repositories.entities.Event event) {
-    Long currentTime = new Date().getTime();
+    Long currentTime = System.currentTimeMillis() / 1000L;
     EventWithPlaces eventModel = new EventWithPlaces();
     eventModel.setId(event.getId());
     eventModel.setFreePlace(event.getFreePlace());
