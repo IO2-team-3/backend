@@ -19,7 +19,7 @@ public class EventMapper {
   }
 
   public Event convertToModel(com.team3.central.repositories.entities.Event event) {
-    Long currentTime = new Date().getTime();
+    Long currentTime = System.currentTimeMillis() / 1000L;
     Event eventModel = new Event();
     eventModel.setId(event.getId());
     eventModel.setCategories(event.getCategories()
@@ -41,7 +41,7 @@ public class EventMapper {
 
   public EventWithPlaces convertToEventWithPlaces(
       com.team3.central.repositories.entities.Event event) {
-    Long currentTime = new Date().getTime();
+    Long currentTime = System.currentTimeMillis() / 1000L;
     EventWithPlaces eventModel = new EventWithPlaces();
     eventModel.setId(event.getId());
     eventModel.setFreePlace(event.getFreePlace());
