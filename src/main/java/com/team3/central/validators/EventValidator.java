@@ -34,9 +34,6 @@ public class EventValidator {
     if (eventForm.getTitle() == null || eventForm.getTitle().isBlank()) {
       throw new IllegalArgumentException("Event title cannot be null or empty");
     }
-    if (eventForm.getPlaceSchema() == null || eventForm.getPlaceSchema().isBlank()) {
-      throw new IllegalArgumentException("Event placeSchema cannot be null or empty");
-    }
     if (eventForm.getLatitude() == null || eventForm.getLatitude().isBlank()
         || eventForm.getLongitude() == null || eventForm.getLongitude().isBlank()) {
       throw new IllegalArgumentException("Event latitude and longitude cannot be null or empty");
