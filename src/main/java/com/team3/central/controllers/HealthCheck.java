@@ -2,6 +2,8 @@ package com.team3.central.controllers;
 
 import com.amazonaws.HttpMethod;
 import com.team3.central.services.AwsS3Service;
+import java.util.List;
+import javax.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,16 +22,9 @@ public class HealthCheck {
     return "pong";
   }
 
-  @GetMapping("/url")
-  String getUrlToS3() {
-    // we allow for methods : GET, PUT and DELETE
-    // fila path should be like "/some/place/filename.type" eg "/events/1/photo.png"
-    return awsS3Service.generatePreSignedUrl("example/test.png","io2-central-photos", HttpMethod.PUT);
+  @GetMapping("/url/{id}")
+  List<String> getUrlToS3(@PathParam("id") String id) {
+    // names event/{id}/photo1.png
+    return awsS3Service.getBucketNames(id);
   }
-
-  @GetMapping("/url/delete")
-  public void deleteTest() {
-    awsS3Service.deleteById("example/test.png");
-  }
-
 }
