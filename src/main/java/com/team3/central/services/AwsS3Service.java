@@ -2,6 +2,7 @@ package com.team3.central.services;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import java.util.Calendar;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +21,9 @@ public class AwsS3Service {
     calendar.setTime(new Date());
     calendar.add(Calendar.MINUTE, 10); //validity of 10 minutes
     return amazonS3.generatePresignedUrl(bucketName, filePath, calendar.getTime(), httpMethod).toString();
+  }
+
+  public void deleteById(String Id) {
+    amazonS3.deleteObject(new DeleteObjectRequest("io2-central-photos",Id));
   }
 }

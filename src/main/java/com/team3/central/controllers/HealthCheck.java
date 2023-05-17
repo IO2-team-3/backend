@@ -24,7 +24,12 @@ public class HealthCheck {
   String getUrlToS3() {
     // we allow for methods : GET, PUT and DELETE
     // fila path should be like "/some/place/filename.type" eg "/events/1/photo.png"
-    return awsS3Service.generatePreSignedUrl("test.png","io2-central-photos", HttpMethod.DELETE);
+    return awsS3Service.generatePreSignedUrl("example/test.png","io2-central-photos", HttpMethod.PUT);
+  }
+
+  @GetMapping("/url/delete")
+  public void deleteTest() {
+    awsS3Service.deleteById("example/test.png");
   }
 
 }
