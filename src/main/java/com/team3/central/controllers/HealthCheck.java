@@ -6,6 +6,7 @@ import java.util.List;
 import javax.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +24,7 @@ public class HealthCheck {
   }
 
   @GetMapping("/url/{id}")
-  List<String> getUrlToS3(@PathParam("id") String id) {
+  List<String> getUrlToS3(@PathParam("id") String id) throws NotFoundException {
     // names event/{id}/photo1.png
     return awsS3Service.getBucketNames(id);
   }
