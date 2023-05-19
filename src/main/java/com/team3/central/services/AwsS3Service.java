@@ -8,9 +8,9 @@ import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.PhotoExist;
 import com.team3.central.services.exceptions.PhotoNotExist;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,8 +26,8 @@ public class AwsS3Service {
     this.eventRepository = eventRepository;
   }
 
-  public List<String> getBucketNames(String eventId) throws NotFoundException {
-    eventRepository.findById(Long.valueOf(eventId)).orElseThrow(NotFoundException::new);
+  public List<String> getBucketNames(String eventId) throws NoSuchElementException {
+    eventRepository.findById(Long.valueOf(eventId)).orElseThrow();
 
     ListObjectsRequest request = new ListObjectsRequest();
     request.setBucketName(bucketName);
@@ -40,8 +40,8 @@ public class AwsS3Service {
   }
 
   public void addPhoto(String eventId, String email, String path)
-      throws NotFoundException, BadIdentificationException, PhotoExist {
-    var event = eventRepository.findById(Long.valueOf(eventId)).orElseThrow(NotFoundException::new);
+      throws NoSuchElementException, BadIdentificationException, PhotoExist {
+    var event = eventRepository.findById(Long.valueOf(eventId)).orElseThrow();
     if (event.getOrganizer().getEmail() != email) {
       throw new BadIdentificationException("You are not the organizer of this event");
     }
@@ -53,9 +53,9 @@ public class AwsS3Service {
   }
 
   public void deletePhoto(String eventId, String email, String path)
-      throws NotFoundException, BadIdentificationException, PhotoNotExist {
+      throws NoSuchElementException, BadIdentificationException, PhotoNotExist {
     String key = "event/" + eventId + "/" + path;
-    var event = eventRepository.findById(Long.valueOf(eventId)).orElseThrow(NotFoundException::new);
+    var event = eventRepository.findById(Long.valueOf(eventId)).orElseThrow();
     if (event.getOrganizer().getEmail() != email) {
       throw new BadIdentificationException("You are not the organizer of this event");
     }

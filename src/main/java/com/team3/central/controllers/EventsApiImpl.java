@@ -19,6 +19,7 @@ import com.team3.central.services.exceptions.PhotoNotExist;
 import com.team3.central.validators.CategoryValidator;
 import com.team3.central.validators.EventValidator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -247,7 +248,7 @@ public class EventsApiImpl implements EventsApi {
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-      } else if (e instanceof NotFoundException) {
+      } else if (e instanceof NoSuchElementException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else if (e instanceof BadIdentificationException) {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -269,13 +270,13 @@ public class EventsApiImpl implements EventsApi {
   public ResponseEntity<List<String>> getPhoto(Long id) {
     // DISCLAIMER for phtotos: there is unwerriiten convention that photos are stored as "event/{eventId}/{photoName}"
     try {
-      eventValidator.validateEventId(Long.valueOf(id));
+      eventValidator.validateEventId(id);
       List<String> photos = awsS3Service.getBucketNames(id.toString());
       return new ResponseEntity<>(photos, HttpStatus.OK);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-      } else if (e instanceof NotFoundException) {
+      } else if (e instanceof NoSuchElementException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -303,7 +304,7 @@ public class EventsApiImpl implements EventsApi {
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-      } else if (e instanceof NotFoundException) {
+      } else if (e instanceof NoSuchElementException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else if (e instanceof PhotoNotExist) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
