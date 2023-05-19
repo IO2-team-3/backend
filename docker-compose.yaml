@@ -17,6 +17,9 @@ services:
         - MAIL_HOST=${MAIL_HOST}
         - MAIL_PASSWORD=${MAIL_PASSWORD}
         - MAIL_USERNAME=${MAIL_USERNAME}
+        - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+        - AWS_REGION=${AWS_REGION}
+        - AWS_SECRET_KEY=${AWS_SECRET_KEY}
     depends_on:
       - postgres-db
     networks:
