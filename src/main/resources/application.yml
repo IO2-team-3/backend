@@ -1,9 +1,9 @@
-# Hikari Config
-logging:
-  level:
-    com.zaxxer.hikari.HikariConfig: DEBUG
-    org.springframework.jdbc: DEBUG
-
+# AWS S3
+amazon:
+  aws:
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+    region: ${AWS_REGION}
 
 # PostgresSQL
 spring:

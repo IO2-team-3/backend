@@ -6,6 +6,7 @@ import com.team3.central.openapi.model.EventForm;
 import com.team3.central.openapi.model.EventPatch;
 import com.team3.central.openapi.model.EventWithPlaces;
 import com.team3.central.repositories.entities.OrganizerEntity;
+import com.team3.central.services.AwsS3Service;
 import com.team3.central.services.CategoriesService;
 import com.team3.central.services.EventService;
 import com.team3.central.services.OrganizerService;
@@ -13,21 +14,19 @@ import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.EventNotChangedException;
 import com.team3.central.services.exceptions.NoCategoryException;
 import com.team3.central.services.exceptions.NotFoundException;
+import com.team3.central.services.exceptions.PhotoExist;
+import com.team3.central.services.exceptions.PhotoNotExist;
 import com.team3.central.validators.CategoryValidator;
 import com.team3.central.validators.EventValidator;
-import io.swagger.annotations.ApiParam;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
-import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,8 +36,10 @@ public class EventsApiImpl implements EventsApi {
   private final EventService eventService;
   private final OrganizerService organizerService;
   private final CategoriesService categoryService;
+  private final AwsS3Service awsS3Service;
   private final EventValidator eventValidator;
   private final CategoryValidator categoryValidator;
+
   /**
    *
    * User needs to be authenticated
@@ -218,6 +219,96 @@ public class EventsApiImpl implements EventsApi {
         return new ResponseEntity<>(HttpStatus.OK);
       } else if (e instanceof NoCategoryException) {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+  }
+
+  /**
+   * POST /events/{id}/photos : patch existing event
+   *
+   * @param id   id of Event (required)
+   * @param path path of photo (required)
+   * @return path added (status code 200) or path already exist (status code 400) or invalid session
+   * (status code 403) or id not found (status code 404)
+   */
+  @Override
+  public ResponseEntity<String> putPhoto(String id, String path) {
+    // DISCLAIMER: this method does NOT upload the photo to the server, it only checks if the such path exists or not
+    // DISCLAIMER: after validating that path is unique for event url with allowed PUT method for 10 minutes is returned
+    // DISCLAIMER for phtotos: there is unwerriiten convention that photos are stored as "event/{eventId}/{photoName}"
+    try {
+      UserDetails userDetails = getUserDetails();
+      eventValidator.validateEventId(Long.valueOf(id));
+      String url = awsS3Service.addPhoto(id, userDetails.getUsername(), path);
+
+      return new ResponseEntity<>(url, HttpStatus.OK);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof NoSuchElementException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof BadIdentificationException) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      } else if (e instanceof PhotoExist) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+  }
+
+  /**
+   * GET /events/{id}/photos : Get list of photo of event Returns a list of photo paths
+   *
+   * @param id ID of event to return (required)
+   * @return successful operation (status code 200) or Invalid ID supplied (status code 400) or
+   * Event not found (status code 404)
+   */
+  public ResponseEntity<List<String>> getPhoto(Long id) {
+    // DISCLAIMER for phtotos: there is unwerriiten convention that photos are stored as "event/{eventId}/{photoName}"
+    try {
+      eventValidator.validateEventId(id);
+      List<String> photos = awsS3Service.getBucketNames(id.toString());
+      return new ResponseEntity<>(photos, HttpStatus.OK);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      } else if (e instanceof NoSuchElementException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+  }
+
+  /**
+   * DELETE /events/{id}/photos : Cancel event
+   *
+   * @param id   id of Event (required)
+   * @param path path of photo (required)
+   * @return deleted (status code 204) or invalid session (status code 403) or id or path not found
+   * (status code 404)
+   */
+  public ResponseEntity<Void> deletePhoto(String id, String path) {
+    // DISCLAIMER: this method does NOT delete the photo from the server, it only checks if the such path exists or not
+    // DISCLAIMER for phtotos: there is unwerriiten convention that photos are stored as "event/{eventId}/{photoName}"
+    try {
+      UserDetails userDetails = getUserDetails();
+      eventValidator.validateEventId(Long.valueOf(id));
+      awsS3Service.deletePhoto(id, userDetails.getUsername(), path);
+
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+      if (e instanceof IllegalArgumentException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof NoSuchElementException) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      } else if (e instanceof PhotoNotExist) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       } else if (e instanceof BadIdentificationException) {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
       } else {

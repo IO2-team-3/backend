@@ -154,6 +154,96 @@ paths:
           description: id not found
       security:
         - token: []
+  /events/{id}/photos:
+    get:
+      tags:
+        - Event
+      summary: Get list of photo of event
+      description: Returns a list of photo paths
+      operationId: getPhoto
+      parameters:
+        - name: id
+          in: path
+          description: ID of event to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: [ 'path_to_photo1', 'path_to_photo2', 'path_to_photo3' ]
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Event not found
+    delete:
+      tags:
+        - Event
+      summary: Delete photo
+      operationId: deletePhoto
+      parameters:
+        - name: id
+          in: path
+          description: id of Event
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: header
+          description: path of photo
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: invalid session
+        '404':
+          description: id or path not found
+      security:
+        - token: [ ]
+    post:
+      tags:
+        - Event
+      summary: Put Photo
+      operationId: putPhoto
+      parameters:
+        - name: id
+          in: path
+          description: id of Event
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: header
+          description: path of photo
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: path added
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: url
+        '400':
+          description: path already exist
+        '403':
+          description: invalid session
+        '404':
+          description: id not found
+      security:
+        - token: [ ]
   /events/getByCategory:
     get:
       tags:
