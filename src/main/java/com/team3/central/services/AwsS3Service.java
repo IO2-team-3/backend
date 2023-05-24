@@ -1,5 +1,6 @@
 package com.team3.central.services;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -7,8 +8,11 @@ import com.team3.central.repositories.EventRepository;
 import com.team3.central.services.exceptions.BadIdentificationException;
 import com.team3.central.services.exceptions.PhotoExist;
 import com.team3.central.services.exceptions.PhotoNotExist;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,10 +43,10 @@ public class AwsS3Service {
         .collect(Collectors.toList());
   }
 
-  public void addPhoto(String eventId, String email, String path)
+  public String addPhoto(String eventId, String email, String path)
       throws NoSuchElementException, BadIdentificationException, PhotoExist {
     var event = eventRepository.findById(Long.valueOf(eventId)).orElseThrow();
-    if (event.getOrganizer().getEmail() != email) {
+    if (!Objects.equals(event.getOrganizer().getEmail(), email)) {
       throw new BadIdentificationException("You are not the organizer of this event");
     }
     String key = "event/" + eventId + "/" + path;
@@ -50,7 +54,13 @@ public class AwsS3Service {
     if (amazonS3.doesObjectExist(bucketName, key)) {
       throw new PhotoExist("Photo already exists");
     }
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(new Date());
+    calendar.add(Calendar.MINUTE, 10); //validity of 10 minutes
+    return amazonS3.generatePresignedUrl(bucketName, key, calendar.getTime(), HttpMethod.PUT).toString();
   }
+
 
   public void deletePhoto(String eventId, String email, String path)
       throws NoSuchElementException, BadIdentificationException, PhotoNotExist {

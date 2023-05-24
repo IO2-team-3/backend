@@ -236,15 +236,16 @@ public class EventsApiImpl implements EventsApi {
    * (status code 403) or id not found (status code 404)
    */
   @Override
-  public ResponseEntity<Void> putPhoto(String id, String path) {
+  public ResponseEntity<String> putPhoto(String id, String path) {
     // DISCLAIMER: this method does NOT upload the photo to the server, it only checks if the such path exists or not
+    // DISCLAIMER: after validating that path is unique for event url with allowed PUT method for 10 minutes is returned
     // DISCLAIMER for phtotos: there is unwerriiten convention that photos are stored as "event/{eventId}/{photoName}"
     try {
       UserDetails userDetails = getUserDetails();
       eventValidator.validateEventId(Long.valueOf(id));
-      awsS3Service.addPhoto(id, userDetails.getUsername(), path);
+      String url = awsS3Service.addPhoto(id, userDetails.getUsername(), path);
 
-      return new ResponseEntity<>(HttpStatus.OK);
+      return new ResponseEntity<>(url, HttpStatus.OK);
     } catch (Exception e) {
       if (e instanceof IllegalArgumentException) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

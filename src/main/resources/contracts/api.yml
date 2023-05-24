@@ -186,7 +186,7 @@ paths:
     delete:
       tags:
         - Event
-      summary: Cancel event
+      summary: Delete photo
       operationId: deletePhoto
       parameters:
         - name: id
@@ -213,7 +213,7 @@ paths:
     post:
       tags:
         - Event
-      summary: patch existing event
+      summary: Put Photo
       operationId: putPhoto
       parameters:
         - name: id
@@ -231,6 +231,11 @@ paths:
       responses:
         '200':
           description: path added
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: url
         '400':
           description: path already exist
         '403':
