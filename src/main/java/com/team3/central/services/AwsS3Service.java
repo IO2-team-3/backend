@@ -2,6 +2,7 @@ package com.team3.central.services;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.team3.central.repositories.EventRepository;
@@ -66,13 +67,14 @@ public class AwsS3Service {
       throws NoSuchElementException, BadIdentificationException, PhotoNotExist {
     String key = "event/" + eventId + "/" + path;
     var event = eventRepository.findById(Long.valueOf(eventId)).orElseThrow();
-    if (event.getOrganizer().getEmail() != email) {
+    if (!Objects.equals(event.getOrganizer().getEmail(), email)) {
       throw new BadIdentificationException("You are not the organizer of this event");
     }
     // Check if the photo exists
     if (!amazonS3.doesObjectExist(bucketName, key)) {
       throw new PhotoNotExist("Photo does not exist");
     }
+    amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
   }
 
 }
