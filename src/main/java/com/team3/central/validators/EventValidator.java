@@ -68,9 +68,9 @@ public class EventValidator {
     if (eventPatch.getTitle() != null && eventPatch.getTitle().isBlank()) {
       throw new IllegalArgumentException("Event title cannot be null or empty");
     }
-    if (eventPatch.getPlaceSchema() != null && eventPatch.getPlaceSchema().isBlank()) {
-      throw new IllegalArgumentException("Event placeSchema cannot be null or empty");
-    }
+//    if (eventPatch.getPlaceSchema() != null && eventPatch.getPlaceSchema().isBlank()) {
+//      throw new IllegalArgumentException("Event placeSchema cannot be null or empty");
+//    }
     if (eventPatch.getLatitude() != null && eventPatch.getLatitude().isBlank()) {
       throw new IllegalArgumentException("Event latitude cannot be null or empty");
     }
